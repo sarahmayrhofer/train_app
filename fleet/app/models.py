@@ -24,5 +24,12 @@ class Train(db.Model):
         else:
             self.wagon_ids += f",{wagon_id}"
 
+    def get_locomotive(self):
+        wagon_ids = self.get_wagon_ids()
+        if wagon_ids:
+            return wagon_ids[0]
+        else:
+            return None
+
     def __repr__(self):
         return f"Train(id={self.id}, name={self.name})"
