@@ -1,6 +1,9 @@
 import os
 
-from fleet.run import app
-
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'fleet.db')
+
+
+# used for database handling of the fleet database
+class Config:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'fleet.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
