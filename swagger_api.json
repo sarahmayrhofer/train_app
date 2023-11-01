@@ -1,0 +1,1264 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PR DKE API",
+    "description": "Application Interface definitions of the 4 subsystems for route, fleet, timetable and ticket",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Github Repo",
+    "url": "https://github.com/SchwapTobi/PR-DKE"
+  },
+  "paths": {
+    "/route/stations": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Get all stations",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Station"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/route/stations/{id}": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Get a station by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the station to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Station"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Create a new station",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the station to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Station created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Update a station by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the station to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Station updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Delete a station by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the station to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Station deleted successfully"
+          }
+        }
+      }
+    },
+    "/route/sections": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Get all sections",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Section"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/route/sections/{id}": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Get a section by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the section to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Section"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Create a new section",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the section to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Section created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Update a section by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the section to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Section updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Delete a section by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the section to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Section deleted successfully"
+          }
+        }
+      }
+    },
+    "/route/lines": {
+      "post": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Create a new line",
+        "responses": {
+          "201": {
+            "description": "Line created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Update a line by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the line to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Line updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Delete a line by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the line to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Line deleted successfully"
+          }
+        }
+      }
+    },
+    "/route/events": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Get all events",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/route/events/{id}": {
+      "get": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Get an event by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the event to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Create a new event",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the event to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Update a event by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the event to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Event updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Route"
+        ],
+        "summary": "Delete a event by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the event to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Event deleted successfully"
+          }
+        }
+      }
+    },
+    "/fleet/trains": {
+      "get": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Get a list of trains (Public)",
+        "responses": {
+          "200": {
+            "description": "A list of trains",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Train"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fleet/trains/{train_id}": {
+      "get": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Get a train by ID (Public)",
+        "parameters": [
+          {
+            "name": "train_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the train to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single train",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Train"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Create a new train (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "train_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the train to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Train created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Update a train by ID (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "train_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the train to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Train updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Delete a train by ID (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "train_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the train to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Train deleted successfully"
+          }
+        }
+      }
+    },
+    "/fleet/wagons": {
+      "get": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Get a list of wagons (Public)",
+        "responses": {
+          "200": {
+            "description": "A list of wagons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/Locomotive"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NormalWagon"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fleet/wagons/{wagon_id}": {
+      "post": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Create a new wagon (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "wagon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the wagon to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Wagon created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Update a wagon by ID (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "wagon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the wagon to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Wagon updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Delete a wagon by ID (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "wagon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the wagon to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Wagon deleted successfully"
+          }
+        }
+      }
+    },
+    "/maintenances": {
+      "get": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Get a list of maintenance tasks (Public)",
+        "responses": {
+          "200": {
+            "description": "A list of maintenance tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Maintenance"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/maintenances/{maintenance_id}": {
+      "get": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Get a maintenance task by ID (Public)",
+        "parameters": [
+          {
+            "name": "maintenance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the maintenance task to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single maintenance task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Maintenance"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Create a new maintenance task (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "maintenance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the maintenance task to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Maintenance task created successfully"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Update a maintenance task by ID (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "maintenance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the maintenance task to update"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Maintenance task updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Fleet"
+        ],
+        "summary": "Delete a maintenance task by ID (Admin)",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admin API key required for authorization"
+          },
+          {
+            "name": "maintenance_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the maintenance task to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Maintenance task deleted successfully"
+          }
+        }
+      }
+    },
+    "/timetable": {
+      "get": {
+        "tags": [
+          "Timetable"
+        ],
+        "summary": "Get all rides (Public)",
+        "responses": {
+          "200": {
+            "description": "List of rides"
+          }
+        }
+      }
+    },
+    "/timetable/{id}": {
+      "get": {
+        "tags": [
+          "Timetable"
+        ],
+        "summary": "Get a specific ride by ID (Public)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride found"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Timetable"
+        ],
+        "summary": "Create a new ride (Admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Ride created"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Timetable"
+        ],
+        "summary": "Update a specific ride by ID (Admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride updated"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Timetable"
+        ],
+        "summary": "Delete a specific ride by ID (Admin)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Ride deleted"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Station": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nameOfStation": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "string"
+          }
+        }
+      },
+      "Section": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "startStationId": {
+            "type": "integer"
+          },
+          "endStationId": {
+            "type": "integer"
+          },
+          "fee": {
+            "type": "number",
+            "format": "double"
+          },
+          "distance": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxSpeed": {
+            "type": "integer"
+          },
+          "trackWidth": {
+            "type": "integer"
+          }
+        }
+      },
+      "Line": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nameOfLine": {
+            "type": "string"
+          },
+          "startStationId": {
+            "type": "integer"
+          },
+          "endStationId": {
+            "type": "integer"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Section"
+            }
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "sectionId": {
+            "type": "integer"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "officialText": {
+            "type": "string"
+          },
+          "internalText": {
+            "type": "string"
+          }
+        }
+      },
+      "Train": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The unique identifier for the train"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the train, e.g RJX2"
+          },
+          "wagon_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "List of wagon IDs. First ID is the locomotive"
+          },
+          "position": {
+            "type": "string",
+            "description": "The last known position (train station) of the train (optional)"
+          }
+        }
+      },
+      "Maintenance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The unique identifier for the maintenance task"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the maintenance task"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The start date of the maintenance task (ISO 8601 date format)"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "The end date of the maintenance task (ISO 8601 date format)"
+          },
+          "assigned_employees": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "An array of employee IDs assigned to the maintenance task"
+          }
+        }
+      },
+      "Wagon": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The unique identifier for the wagon"
+          },
+          "track_width": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The track width of the wagon"
+          }
+        },
+        "discriminator": {
+          "propertyName": "wagon_type",
+          "mapping": {
+            "locomotive": "#/components/schemas/Locomotive",
+            "normal_wagon": "#/components/schemas/NormalWagon"
+          }
+        }
+      },
+      "Locomotive": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Wagon"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "wagon_type": {
+            "type": "string",
+            "enum": [
+              "locomotive"
+            ]
+          },
+          "max_traction": {
+            "type": "number",
+            "description": "The maximum traction of the locomotive"
+          }
+        }
+      },
+      "NormalWagon": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Wagon"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "wagon_type": {
+            "type": "string",
+            "enum": [
+              "normal_wagon"
+            ]
+          },
+          "max_weight": {
+            "type": "number",
+            "description": "The maximum weight the normal wagon can carry"
+          },
+          "number_of_seats": {
+            "type": "integer",
+            "description": "The number of seats in the normal wagon"
+          }
+        }
+      },
+      "Timetable": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ID"
+        ]
+      },
+      "Ride": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "price_increment": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "ID",
+          "date",
+          "start",
+          "end",
+          "price_increment"
+        ]
+      },
+      "Stop": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "station": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "ID",
+          "station",
+          "time",
+          "price"
+        ]
+      },
+      "Train_tt": {
+        "type": "object",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "track_width": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ID",
+          "name",
+          "track_width",
+          "position"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    }
+  }
+}
