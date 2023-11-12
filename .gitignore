@@ -1,2 +1,13 @@
 /.idea/
 /fleet/tutorial/
+/route/__pycache__/
+/route/.vscode/
+/route/venv/
+
+/timetable/__pycache__/
+/timetable/.vscode/
+/timetable/venv/
+
+/ticket/__pycache__/
+/ticket/.vscode/
+/ticket/venv/
