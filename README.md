@@ -10,3 +10,13 @@ https://jkulinz-my.sharepoint.com/:f:/r/personal/k12043350_students_jku_at/Docum
 
 # Zeitaufzeichnung
 https://jkulinz-my.sharepoint.com/:x:/g/personal/k12043350_students_jku_at/EU7D3YJeRBdNsA3LX3SLlP0BxeUkhurGTyd3nW3sq_-76A?e=NufeLn
+
+# Useful commands
+## Git:
+`git pull`
+
+`git commit -m "beschreibung"`
+
+`git push origin main`
+
+## Migrations: TODO: Christian
