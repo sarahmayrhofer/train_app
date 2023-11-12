@@ -453,7 +453,7 @@ def editSingleLineAdmin(line_id):
 
 
 @app.route('/register', methods=['GET', 'POST'])
-@roles_required('admin')
+#@roles_required('admin')
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():

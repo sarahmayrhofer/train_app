@@ -53,7 +53,7 @@ def load_user(id):
 
     
 class Station(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nameOfStation = db.Column(db.String(64), unique=True)
     address = db.Column(db.String(120))
     coordinates = db.Column(db.String(120))
@@ -68,7 +68,7 @@ class Station(db.Model):
         
         
 class Section(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     startStation = db.Column(db.Integer, db.ForeignKey('station.id'))
     endStation = db.Column(db.Integer, db.ForeignKey('station.id'))
     fee = db.Column(db.Float)
@@ -85,7 +85,7 @@ class Section(db.Model):
 
 
 class Event(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     section = db.Column(db.Integer, db.ForeignKey('section.id'))
     endDate = db.Column(db.Date)
     officialText = db.Column(db.String(200))
@@ -105,7 +105,7 @@ line_sections = db.Table('line_sections',
 )
 
 class Line(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nameOfLine = db.Column(db.String(64))
 
     sections = db.relationship('Section', secondary=line_sections, order_by="line_sections.c.order", backref=db.backref('lines', lazy='dynamic'))
@@ -126,14 +126,14 @@ class Line(db.Model):
 
 
 class ChosenSectionsForNewLine(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     section_rel = db.relationship('Section', backref=db.backref('chosen_sections_for_new_line', lazy=True))
 
 class AvailableSectionsForNewLine(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
 
     section_rel = db.relationship('Section', backref=db.backref('available_sections_for_new_line', lazy=True))
