@@ -1,6 +1,8 @@
 # PR-DKE
-Sheet
-https://docs.google.com/document/d/1wV3tXbajk6cUSa5gO5zf_Nd15CgyKKjxHdSjP2-bJhk/edit?usp=sharing
+## Protokolle:
+- [Protokoll LVA am 2023-11-03](https://jkulinz-my.sharepoint.com/:w:/r/personal/k12043350_students_jku_at/_layouts/15/Doc.aspx?sourcedoc=%7B5B114373-C146-44DA-BEBF-F56F17647E81%7D&file=Protokoll%20LVA%20am%202023-11-03.docx&action=default&mobileredirect=true)
+- [Protokoll LVA am 2023-11-24](https://jkulinz-my.sharepoint.com/:w:/r/personal/k12043350_students_jku_at/_layouts/15/Doc.aspx?sourcedoc=%7B9D29063B-9DE0-4758-90DA-2F09541D9204%7D&file=Protokoll%20LVA%20am%202023-11-24.docx&action=default&mobileredirect=true)
+- [Protokoll Teammeeting am 2023-11-12](https://jkulinz-my.sharepoint.com/:w:/r/personal/k12043350_students_jku_at/_layouts/15/Doc.aspx?sourcedoc=%7B19A234E5-14E7-42F9-BB67-8BBA423D6E68%7D&file=Protokoll%20Teammeeting%20am%202023-11-12.docx&action=default&mobileredirect=true)
 
 # Link zum geteilten Onedrive-Ordner
 Wichtig: Ihr müsst mit euren JKU-Account eingeloggt sein.
