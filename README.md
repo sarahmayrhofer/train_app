@@ -19,4 +19,9 @@ https://jkulinz-my.sharepoint.com/:x:/g/personal/k12043350_students_jku_at/EU7D3
 
 `git push origin main`
 
-## Migrations: TODO: Christian
+## Migrations: (Wichtig: man muss das venv aktiviert haben, die ganze Sache ist auch im Mega Tutorial beschrieben)
+flask db migrate -m "Beschreibung"
+flask db upgrade
+
+
+
