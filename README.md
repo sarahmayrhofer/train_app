@@ -23,8 +23,7 @@ https://jkulinz-my.sharepoint.com/:x:/g/personal/k12043350_students_jku_at/EU7D3
 flask db migrate -m "Beschreibung"
 flask db upgrade
 
-Hilfreiche Links:
-Sicherstellen dass id nicht wiederverwendet wird: https://stackoverflow.com/questions/20572093/make-sure-sqlalchemy-doesnt-re-use-numeric-ids
+
 
 
 
