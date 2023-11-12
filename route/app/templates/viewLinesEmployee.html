@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Strecken anzeigen</h1>
+    <table border="1">
+        <tr>
+            <th>Streckenname</th>
+            <th>Abschnitte</th>
+            <th>Startbahnhof der Strecke</th>
+            <th>Endbahnhof der Strecke</th>
+            <th>Ereignisse vorhanden?</th>
+            <th></th> <!-- Empty header for the Details button -->
+        </tr>
+        {% for line in lines %}
+            <tr>
+                <td>{{ line.nameOfLine }}</td>
+                <td>
+                    {% for section in line.sections %}
+                        {{ section.start_station_rel.nameOfStation }} - {{ section.end_station_rel.nameOfStation }}<br>
+                    {% endfor %}
+                </td>
+                <td>{{ line.startStation.nameOfStation if line.startStation else 'N/A' }}</td>
+                <td>{{ line.endStation.nameOfStation if line.endStation else 'N/A' }}</td>
+                <td>
+                    {% if line.valid_events_exist %}
+                        Ja, Ereignisse vorhanden
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('viewSpecificSectionEmployee', line_id=line.id) }}" class="btn btn-info">Details</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

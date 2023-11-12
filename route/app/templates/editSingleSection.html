@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Abschnitt bearbeiten</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.startStation.label }}<br>
+            {{ form.startStation() }}
+        </p>
+        <p>
+            {{ form.endStation.label }}<br>
+            {{ form.endStation() }}
+        </p>
+        <p>
+            {{ form.fee.label }}<br>
+            {{ form.fee() }}
+        </p>
+        <p>
+            {{ form.distance.label }}<br>
+            {{ form.distance() }}
+        </p>
+        <p>
+            {{ form.maxSpeed.label }}<br>
+            {{ form.maxSpeed() }}
+        </p>
+        <p>
+            {{ form.trackWidth.label }}<br>
+            {{ form.trackWidth() }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

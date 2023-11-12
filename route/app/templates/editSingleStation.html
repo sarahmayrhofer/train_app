@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Bahnhof bearbeiten</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.nameOfStation.label }}<br>
+            {{ form.nameOfStation(size=32) }}<br>
+        </p>
+        <p>
+            {{ form.address.label }}<br>
+            {{ form.address(size=32) }}<br>
+        </p>
+        <p>
+            {{ form.coordinates.label }}<br>
+            {{ form.coordinates(size=32) }}<br>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
