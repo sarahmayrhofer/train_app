@@ -1058,12 +1058,12 @@
             "type": "string",
             "description": "The name of the train, e.g RJX2"
           },
-          "wagon_ids": {
+          "wagons": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "$ref": "#/components/schemas/Wagon"
             },
-            "description": "List of wagon IDs. First ID is the locomotive"
+            "description": "List of wagons. The first wagon is the locomotive"
           },
           "position": {
             "type": "string",
