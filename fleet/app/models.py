@@ -7,6 +7,7 @@ class Train(db.Model):
     position = db.Column(db.String(50))
 
     wagons = db.relationship('Wagon', backref='train', lazy=True)
+    maintenances = db.relationship('Maintenance', backref='train', lazy=True)
 
     def __repr__(self):
         return f"<Train(id={self.id}, name={self.name}, wagon_ids={self.wagon_ids}, position={self.position})>"
@@ -49,3 +50,15 @@ class NormalWagon(Wagon):
 
     def __repr__(self):
         return f"<NormalWagon(id={self.id}, track_width={self.track_width}, max_weight={self.max_weight}, number_of_seats={self.number_of_seats})>"
+
+
+class Maintenance(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    description = db.Column(db.String(255), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    assigned_employees = db.Column(db.ARRAY(db.Integer), nullable=True)
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
+
+    def __repr__(self):
+        return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date}, assigned_employees={self.assigned_employees}, train_id={self.train_id})>"
