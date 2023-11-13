@@ -4,8 +4,9 @@ from fleet.run import db
 class Train(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
-    wagon_ids = db.Column(db.ARRAY(db.Integer), nullable=False)
     position = db.Column(db.String(50))
+
+    wagons = db.relationship('Wagon', backref='train', lazy=True)
 
     def __repr__(self):
         return f"<Train(id={self.id}, name={self.name}, wagon_ids={self.wagon_ids}, position={self.position})>"
@@ -16,13 +17,15 @@ class Wagon(db.Model):
     track_width = db.Column(db.Integer, nullable=False)
     wagon_type = db.Column(db.String(20))
 
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
+
     __mapper_args__ = {
         'polymorphic_identity': 'wagon',
         'polymorphic_on': wagon_type
     }
 
     def __repr__(self):
-        return f"<Wagon(id={self.id}, track_width={self.track_width}, wagon_type={self.wagon_type})>"
+        return f"<Wagon(id={self.id}, track_width={self.track_width}, wagon_type={self.wagon_type}, train_id={self.train_id})>"
 
 
 class Locomotive(Wagon):
@@ -33,7 +36,7 @@ class Locomotive(Wagon):
     }
 
     def __repr__(self):
-        return f"<Locomotive(id={self.id}, track_width={self.track_width}, max_traction={self.max_traction})>"
+        return f"<Locomotive(id={self.id}, track_width={self.track_width}, max_traction={self.max_traction}, train_id={self.train_id})>"
 
 
 class NormalWagon(Wagon):
