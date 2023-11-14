@@ -54,7 +54,7 @@ def load_user(id):
     
 class Station(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nameOfStation = db.Column(db.String(64), unique=True)
+    nameOfStation = db.Column(db.String(64))
     address = db.Column(db.String(120))
     coordinates = db.Column(db.String(120))
  

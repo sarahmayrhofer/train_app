@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Create a New Line</h1>
+    <h1>Neue Strecke erstellen</h1>
     <form action="{{ url_for('newLineAdminEnterDetails') }}" method="post">
-        <label for="nameOfLine">Name of Line:</label>
+        <label for="nameOfLine">Name der Strecke:</label>
         <input type="text" id="nameOfLine" name="nameOfLine" required>
         <br><br>
         {% if start_station %}
@@ -16,6 +16,6 @@
             <span>{{ end_station }}</span>
             <br><br>
         {% endif %}
-        <input type="submit" value="Create Line">
+        <input type="submit" value="Strecke erstellen">
     </form>
 {% endblock %}

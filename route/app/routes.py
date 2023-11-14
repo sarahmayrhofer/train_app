@@ -184,8 +184,18 @@ def deleteSection(id):
 def editSingleSection(id):
     section = Section.query.get_or_404(id)
     form = SectionForm()
+
+    # Check if the section is part of a line or multiple lines
+    is_part_of_line = Line.query.filter(Line.sections.contains(section)).first() is not None
+
     form.startStation.choices = [(s.id, s.nameOfStation) for s in Station.query.all()]
     form.endStation.choices = [(s.id, s.nameOfStation) for s in Station.query.all()]
+
+    # If the section is part of a line, disable the startStation, endStation, and trackWidth fields
+    if is_part_of_line:
+        form.startStation.render_kw = {'disabled': 'disabled'}
+        form.endStation.render_kw = {'disabled': 'disabled'}
+        form.trackWidth.render_kw = {'disabled': 'disabled'}
 
     if form.validate_on_submit():
         section.startStation = form.startStation.data
