@@ -22,7 +22,8 @@
                 <td>{{ line.startStation.nameOfStation if line.startStation else 'N/A' }}</td>
                 <td>{{ line.endStation.nameOfStation if line.endStation else 'N/A' }}</td>
                 <td>
-                    <a href="{{ url_for('editSingleLineAdmin', line_id=line.id) }}">Bearbeiten</a>
+                    <a href="{{ url_for('editSingleLineAdmin', line_id=line.id) }}">Nur Name bearbeiten</a>
+                    <a href="{{ url_for('editSingleLineSections', line_id=line.id) }}">Abschnitte bearbeiten</a>
                 </td>
                 <td>
                     <form action="{{ url_for('deleteLineAdmin') }}" method="post">

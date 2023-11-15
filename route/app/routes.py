@@ -283,10 +283,11 @@ def deleteEvent(id):
 def newLineAdminStart():
     return render_template('newLineAdminStart.html')
 
-
 @app.route('/newLineAdminSectionsAssistantPrepareDB', methods=['POST'])
 @roles_required('admin')
 def newLineAdminSectionsAssistantPrepareDB():
+    line_id = request.form.get('line_id')
+
     # Clear the chosen_sections_for_new_line table
     ChosenSectionsForNewLine.query.delete()
 
@@ -301,18 +302,25 @@ def newLineAdminSectionsAssistantPrepareDB():
         new_available_section = AvailableSectionsForNewLine(section_id=section.id)
         db.session.add(new_available_section)
 
+    # If a line ID was passed, load the sections of the line and add them to the chosen_sections_for_new_line table
+    if line_id:
+        line = Line.query.get(line_id)
+        for section in line.sections:
+            new_chosen_section = ChosenSectionsForNewLine(section_id=section.id)
+            db.session.add(new_chosen_section)
+
     db.session.commit()
 
-    return redirect(url_for('newLineAdminSectionsAssistantFrontend'))
+    return redirect(url_for('LineAdminSectionsAssistantFrontend', line_id=line_id))
 
 
-@app.route('/newLineAdminSectionsAssistantFrontend')
+@app.route('/LineAdminSectionsAssistantFrontend')
 @roles_required('admin')
-def newLineAdminSectionsAssistantFrontend():
+def LineAdminSectionsAssistantFrontend():
     chosen_sections = ChosenSectionsForNewLine.query.all()
     available_sections = AvailableSectionsForNewLine.query.all()
 
-    return render_template('newLineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
+    return render_template('LineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
 
 @app.route('/moveSectionToChosen/<int:section_id>', methods=['POST'])
 @roles_required('admin')
@@ -343,7 +351,7 @@ def moveSectionToChosen(section_id):
     db.session.commit()
 
     # Redirect the user back to the original page
-    return redirect(url_for('newLineAdminSectionsAssistantFrontend'))
+    return redirect(url_for('LineAdminSectionsAssistantFrontend'))
 
 
 @app.route('/removeLastSectionFromChosenSections/<int:section_id>', methods=['POST'])
@@ -382,7 +390,7 @@ def removeLastSectionFromChosenSections(section_id):
     db.session.commit()
 
     # Redirect the user back to the original page
-    return redirect(url_for('newLineAdminSectionsAssistantFrontend'))
+    return redirect(url_for('LineAdminSectionsAssistantFrontend'))
 
 
 @app.route('/newLineAdminEnterDetails', methods=['GET', 'POST'])
@@ -460,6 +468,17 @@ def editSingleLineAdmin(line_id):
 
     return render_template('editSingleLineAdmin.html', line=line)
 
+
+
+
+
+@app.route('/editSingleLineSections/<int:line_id>', methods=['GET', 'POST'])
+@roles_required('admin')
+def editSingleLineSections(line_id):
+    line = Line.query.get_or_404(line_id)
+    chosen_sections = line.sections
+    available_sections = Section.query.all()
+    return render_template('LineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
 
 
 @app.route('/register', methods=['GET', 'POST'])
