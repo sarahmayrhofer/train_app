@@ -14,10 +14,19 @@
 /timetable/.vscode/
 /timetable/venv/
 /timetable/app/__pycache__/
+<<<<<<< HEAD
 
 
 /tickets/__pycache__/
 /tickets/.vscode/
 /tickets/venv/
 /tickets/app/__pycache__/
+=======
+
+
+/ticket/__pycache__/
+/ticket/.vscode/
+/ticket/venv/
+/ticket/app/__pycache__/
+>>>>>>> 6de83585c9f476f7c3baa706df13b17e5449a1e3
 
