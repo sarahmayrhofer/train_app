@@ -32,6 +32,9 @@ Passwort: admin_test
 Mitarbeiter: employee_test
 Passwort: employee_test
 
+#Hinweise Tipps und Tricks
+Wenn der migrate-Befehl nicht funktioniert, kann es hilfreich sein, die inhalte der Tabelle "alembic_Version" zu löschen. Dazu braucht man eventuell die sqlite-tools: https://sqlite.org/2023/sqlite-tools-win-x64-3440000.zip
+
 
 
 

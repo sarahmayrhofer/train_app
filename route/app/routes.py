@@ -23,6 +23,7 @@ from app.models import User, Role
 from flask_security.decorators import roles_required
 from app.forms import EditUserForm
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, join
 
 
 @app.route('/')
@@ -109,6 +110,8 @@ def editStationsAdmin():
 
 
 
+from sqlalchemy.exc import IntegrityError
+
 @app.route('/deleteStation/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteStation(id):
@@ -169,13 +172,24 @@ def editSectionsAdmin():
     sections = Section.query.all()
     return render_template('editSectionsAdmin.html', sections=sections)
 
+
+from sqlalchemy.exc import IntegrityError
+
 @app.route('/deleteSection/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteSection(id):
     sectionToDelete = Section.query.get_or_404(id)
-    db.session.delete(sectionToDelete)
-    db.session.commit()
+
+    try:
+        db.session.delete(sectionToDelete)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash('Abschnitt ist noch in Verwendung und kann nicht gelöscht werden.', 'error')
+        return redirect(url_for('editSectionsAdmin'))
+
     return redirect(url_for('editSectionsAdmin'))
+
 
 
 
@@ -269,13 +283,22 @@ def editSingleEvent(id):
         form.endDate.data = event.endDate.strftime('%Y-%m-%d') if event.endDate else ''
     return render_template('editSingleEvent.html', title='Edit Event', form=form)
 
+
+
 @app.route('/deleteEvent/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteEvent(id):
     eventToDelete = Event.query.get_or_404(id)
-    db.session.delete(eventToDelete)
-    db.session.commit()
+    try:
+        db.session.delete(eventToDelete)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        flash('Das Ereignis kann nicht gelöscht werden, da es von anderen Datensätzen referenziert wird.')
+    else:
+        flash('Das Ereignis wurde gelöscht.')
     return redirect(url_for('editEventsAdmin'))
+
 
 
 @app.route('/newLineAdminStart')
@@ -286,8 +309,6 @@ def newLineAdminStart():
 @app.route('/newLineAdminSectionsAssistantPrepareDB', methods=['POST'])
 @roles_required('admin')
 def newLineAdminSectionsAssistantPrepareDB():
-    line_id = request.form.get('line_id')
-
     # Clear the chosen_sections_for_new_line table
     ChosenSectionsForNewLine.query.delete()
 
@@ -302,25 +323,20 @@ def newLineAdminSectionsAssistantPrepareDB():
         new_available_section = AvailableSectionsForNewLine(section_id=section.id)
         db.session.add(new_available_section)
 
-    # If a line ID was passed, load the sections of the line and add them to the chosen_sections_for_new_line table
-    if line_id:
-        line = Line.query.get(line_id)
-        for section in line.sections:
-            new_chosen_section = ChosenSectionsForNewLine(section_id=section.id)
-            db.session.add(new_chosen_section)
-
     db.session.commit()
 
-    return redirect(url_for('LineAdminSectionsAssistantFrontend', line_id=line_id))
+    return redirect(url_for('newLineAdminSectionsAssistantFrontend'))
 
 
-@app.route('/LineAdminSectionsAssistantFrontend')
+@app.route('/newLineAdminSectionsAssistantFrontend')
 @roles_required('admin')
-def LineAdminSectionsAssistantFrontend():
+def newLineAdminSectionsAssistantFrontend():
     chosen_sections = ChosenSectionsForNewLine.query.all()
     available_sections = AvailableSectionsForNewLine.query.all()
 
-    return render_template('LineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
+    return render_template('newLineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
+
+from flask import request
 
 @app.route('/moveSectionToChosen/<int:section_id>', methods=['POST'])
 @roles_required('admin')
@@ -329,12 +345,14 @@ def moveSectionToChosen(section_id):
     section = Section.query.get(section_id)
 
     # Add this section to the ChosenSectionsForNewLine table
-    chosen_section = ChosenSectionsForNewLine(section_id=section.id)
+    chosen_sections = ChosenSectionsForNewLine.query.all()
+    order = 0 if not chosen_sections else chosen_sections[-1].order + 1
+    chosen_section = ChosenSectionsForNewLine(section_id=section.id, order=order)
     db.session.add(chosen_section)
-    db.session.commit()  # Commit immediately to ensure timestamp is recorded
+    db.session.commit()
 
     # Get the last section from the ChosenSectionsForNewLine table
-    last_section = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.timestamp.desc()).first()
+    last_section = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order.desc()).first()
 
     # Get all sections from the Section table where the startStation equals the endStation of the last section
     available_sections = Section.query.filter_by(startStation=last_section.section_rel.endStation).all()
@@ -350,8 +368,9 @@ def moveSectionToChosen(section_id):
     # Commit the changes to the database
     db.session.commit()
 
-    # Redirect the user back to the original page
-    return redirect(url_for('LineAdminSectionsAssistantFrontend'))
+    #This is necessary because the route can be accessed from multiple other routes.
+    # Redirect the user back to the previous page
+    return redirect(request.referrer)
 
 
 @app.route('/removeLastSectionFromChosenSections/<int:section_id>', methods=['POST'])
@@ -369,7 +388,7 @@ def removeLastSectionFromChosenSections(section_id):
     db.session.delete(chosen_section)
 
     # Get the last section from the ChosenSectionsForNewLine table
-    last_section = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.timestamp.desc()).first()
+    last_section = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order.desc()).first()
 
     if last_section is None:
         # If there are no more sections in the ChosenSectionsForNewLine table, add all sections to the AvailableSectionsForNewLine table
@@ -382,15 +401,16 @@ def removeLastSectionFromChosenSections(section_id):
     AvailableSectionsForNewLine.query.delete()
 
     # Add the sections to the AvailableSectionsForNewLine table
-    for section in sections:
+    for i, section in enumerate(sections):
         available_section = AvailableSectionsForNewLine(section_id=section.id)
         db.session.add(available_section)
 
     # Commit the changes to the database
     db.session.commit()
 
-    # Redirect the user back to the original page
-    return redirect(url_for('LineAdminSectionsAssistantFrontend'))
+    #This is necessary because the route can be accessed from multiple other routes.
+    # Redirect the user back to the previous page
+    return redirect(request.referrer)
 
 
 @app.route('/newLineAdminEnterDetails', methods=['GET', 'POST'])
@@ -398,7 +418,7 @@ def removeLastSectionFromChosenSections(section_id):
 def newLineAdminEnterDetails():
     if request.method == 'POST':
         name_of_line = request.form['nameOfLine']
-        chosen_sections = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.timestamp).all()
+        chosen_sections = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order).all()
 
         line = Line(nameOfLine=name_of_line)
         db.session.add(line)
@@ -412,7 +432,7 @@ def newLineAdminEnterDetails():
         return redirect(url_for('index'))  # or wherever you want to redirect the user after creating the line
 
     else:
-        chosen_sections = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.timestamp).all()
+        chosen_sections = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order).all()
         start_station = chosen_sections[0].section_rel.start_station_rel.nameOfStation if chosen_sections else None
         end_station = chosen_sections[-1].section_rel.end_station_rel.nameOfStation if chosen_sections else None
         return render_template('newLineAdminEnterDetails.html', start_station=start_station, end_station=end_station)
@@ -423,25 +443,76 @@ def newLineAdminEnterDetails():
 def editLinesAdmin():
     if request.method == 'POST':
         line_id = request.form.get('line_id')
-        new_name = request.form.get('new_name')
-        action = request.form.get('action')
-
         line = Line.query.get(line_id)
 
-        if action == 'edit':
-            line.nameOfLine = new_name
-        elif action == 'delete':
+        if line:
             db.session.delete(line)
-
-        db.session.commit()
+            db.session.commit()
 
         return redirect(url_for('editLinesAdmin'))
 
-    else:
-        lines = Line.query.all()
-        return render_template('editLinesAdmin.html', lines=lines)        
+    lines = Line.query.all()
+    return render_template('editLinesAdmin.html', lines=lines)
  
-    
+
+@app.route('/editSingleLineAdminPrepareDB/<int:id>', methods=['GET'])
+@roles_required('admin')
+def editSingleLineAdminPrepareDB(id):
+    # Get the line with the given ID
+    line = Line.query.get(id)
+
+    # Clear the AvailableSectionsForNewLine and ChosenSectionsForNewLine tables
+    AvailableSectionsForNewLine.query.delete()
+    ChosenSectionsForNewLine.query.delete()
+
+    # Load the sections of the line into the ChosenSectionsForNewLine table
+    for order, section in enumerate(line.sections):
+        chosen_section = ChosenSectionsForNewLine(section_id=section.id, order=order)
+        db.session.add(chosen_section)
+
+    # Get the end station of the last section in the ChosenSectionsForNewLine table
+    last_end_station = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order.desc()).first().section_rel.end_station_rel
+
+    # Load the sections where the start station equals the last end station into the AvailableSectionsForNewLine table
+    available_sections = Section.query.filter_by(startStation=last_end_station.id).all()
+    for section in available_sections:
+        available_section = AvailableSectionsForNewLine(section_id=section.id)
+        db.session.add(available_section)
+
+    db.session.commit()
+
+    return redirect(url_for('editSingleLineAdminSectionsAssistantFrontend', line_id=id))
+
+
+
+@app.route('/editSingleLineAdminSectionsAssistantFrontend/<int:line_id>', methods=['GET'])
+@roles_required('admin')
+def editSingleLineAdminSectionsAssistantFrontend(line_id):
+    # Get the line with the given ID
+    line = Line.query.get(line_id)
+
+    # Get the chosen sections and available sections for the line
+    chosen_sections = ChosenSectionsForNewLine.query.all()
+    available_sections = AvailableSectionsForNewLine.query.all()
+
+    # Render the template and pass the line, chosen sections, and available sections to it
+    return render_template('editSingleLineAdminSectionsAssistantFrontend.html', line=line, chosen_sections=chosen_sections, available_sections=available_sections)
+
+
+@app.route('/editSingleLineChangeName/<int:line_id>', methods=['GET', 'POST'])
+@roles_required('admin')
+def editSingleLineChangeName(line_id):
+    line = Line.query.get(line_id)
+    if request.method == 'POST':
+        name_of_line = request.form['nameOfLine']
+        line.nameOfLine = name_of_line
+        db.session.commit()
+        return redirect(url_for('index'))  # or wherever you want to redirect the user after editing the line
+    else:
+        return render_template('editSingleLineChangeName.html', line_id=line_id, nameOfLine=line.nameOfLine)
+
+        
+        
 @app.route('/deleteLineAdmin', methods=['POST'])
 @roles_required('admin')
 def deleteLineAdmin():
@@ -455,34 +526,10 @@ def deleteLineAdmin():
     return redirect(url_for('editLinesAdmin'))
 
 
-@app.route('/editSingleLineAdmin/<int:line_id>', methods=['GET', 'POST'])
-@roles_required('admin')
-def editSingleLineAdmin(line_id):
-    line = Line.query.get(line_id)
-
-    if request.method == 'POST':
-        new_name = request.form.get('new_name')
-        line.nameOfLine = new_name
-        db.session.commit()
-        return redirect(url_for('editLinesAdmin'))
-
-    return render_template('editSingleLineAdmin.html', line=line)
-
-
-
-
-
-@app.route('/editSingleLineSections/<int:line_id>', methods=['GET', 'POST'])
-@roles_required('admin')
-def editSingleLineSections(line_id):
-    line = Line.query.get_or_404(line_id)
-    chosen_sections = line.sections
-    available_sections = Section.query.all()
-    return render_template('LineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
 
 
 @app.route('/register', methods=['GET', 'POST'])
-#@roles_required('admin')
+@roles_required('admin')
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -496,7 +543,7 @@ def register():
             user.roles.append(employee_role)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        flash('Benutzer angelegt')
         return redirect(url_for('index'))
     return render_template('register.html', title='Register', form=form)
 

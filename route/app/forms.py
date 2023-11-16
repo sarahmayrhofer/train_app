@@ -6,9 +6,9 @@ from app.models import User
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember Me')
-    submit = SubmitField('Sign In')
+    password = PasswordField('Passwort', validators=[DataRequired()])
+    remember_me = BooleanField('Eingeloggt bleiben')
+    submit = SubmitField('Einloggen')
 
 
 class RegistrationForm(FlaskForm):
@@ -73,14 +73,14 @@ class EventForm(FlaskForm):
 
 
 class EditLineForm(FlaskForm):
-    new_name = StringField('Neuer Linienname:', validators=[DataRequired()])
+    new_name = StringField('Neuer Streckenname:', validators=[DataRequired()])
     submit = SubmitField('Änderungen speichern')
 
 
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('New Password')
+    password = PasswordField('Neues Passwort')
     is_admin = BooleanField('Administrator')
     submit = SubmitField('Bestätigen')
 

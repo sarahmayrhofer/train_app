@@ -5,7 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5
 from datetime import datetime
 
-
+"""
+IMPORTANT: I use Nullable=false to make sure that the foreign keys are not null. in some cases, this is not what we want.
+"""
     
  
 
@@ -69,8 +71,8 @@ class Station(db.Model):
         
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    startStation = db.Column(db.Integer, db.ForeignKey('station.id'))
-    endStation = db.Column(db.Integer, db.ForeignKey('station.id'))
+    startStation = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    endStation = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
     fee = db.Column(db.Float)
     distance = db.Column(db.Float)
     maxSpeed = db.Column(db.Integer)
@@ -86,7 +88,7 @@ class Section(db.Model):
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    section = db.Column(db.Integer, db.ForeignKey('section.id'))
+    section = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
     endDate = db.Column(db.Date)
     officialText = db.Column(db.String(200))
     internalText = db.Column(db.String(200))
@@ -100,7 +102,7 @@ class Event(db.Model):
 # Association table
 line_sections = db.Table('line_sections',
     db.Column('line_id', db.Integer, db.ForeignKey('line.id')),
-    db.Column('section_id', db.Integer, db.ForeignKey('section.id')),
+    db.Column('section_id', db.Integer, db.ForeignKey('section.id'), nullable=False),
     db.Column('order', db.Integer)
 )
 
@@ -124,14 +126,16 @@ class Line(db.Model):
 
 
 
-
+# There, the foreign keys should be nullable
 class ChosenSectionsForNewLine(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    order = db.Column(db.Integer)
 
     section_rel = db.relationship('Section', backref=db.backref('chosen_sections_for_new_line', lazy=True))
 
+
+# There, the foreign keys should be nullable
 class AvailableSectionsForNewLine(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
