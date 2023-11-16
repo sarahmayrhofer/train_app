@@ -7,16 +7,16 @@
 /route/.vscode/
 /route/venv/
 /route/app/__pycache__/
-/route/migrations/
+
 
 /timetable/__pycache__/
 /timetable/.vscode/
 /timetable/venv/
 /timetable/app/__pycache__/
-/timetable/migrations/
+
 
 /ticket/__pycache__/
 /ticket/.vscode/
 /ticket/venv/
 /ticket/app/__pycache__/
-/ticket/migrations/
+
