@@ -39,8 +39,13 @@ principals = Principal(app)
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
-from app.resources import StationResource  # import the resource
+from app.resources import SectionListResource, StationListResource, EventListResource, LineListResource
+
+
 # Restful
 api = Api(app)
-api.add_resource(StationResource, '/route/stations')
+api.add_resource(StationListResource, '/route/stations')
+api.add_resource(SectionListResource, '/route/sections')
+api.add_resource(EventListResource, '/route/events')
+api.add_resource(LineListResource, '/route/lines')
 

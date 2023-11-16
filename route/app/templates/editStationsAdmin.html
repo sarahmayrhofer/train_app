@@ -6,7 +6,6 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Externe ID</th>
                 <th>Name des Bahnhofs</th>
                 <th>Adresse</th>
                 <th>Koordinaten</th>
@@ -18,7 +17,6 @@
             {% for station in stations %}
             <tr>
                 <td>{{ station.id }}</td>
-                <td>{{ station.externId }}</td>
                 <td>{{ station.nameOfStation }}</td>
                 <td>{{ station.address }}</td>
                 <td>{{ station.coordinates }}</td>

@@ -1,5 +1,8 @@
 /.idea/
+/.vscode/
 /fleet/tutorial/
+/fleet/env/
+
 /route/__pycache__/
 /route/.vscode/
 /route/venv/

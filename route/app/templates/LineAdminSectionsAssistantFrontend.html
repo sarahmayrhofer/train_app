@@ -19,7 +19,7 @@
             <td>
                 {% if loop.last %}
                 <form action="{{ url_for('removeLastSectionFromChosenSections', section_id=chosen_section.section_id) }}" method="post">
-                    <button type="submit">Letzten Abschnitt löschen</button>
+                    <button type="submit">Letzten Abschnitt löschen bzw. aus der Auswahl herausnehmen</button>
                 </form>
                 {% endif %}
             </td>
@@ -48,6 +48,9 @@
         </tr>
         {% endfor %}
     </table>
+    <!-- Wir für das Ändern der Abschnitte einer bestehenden Strecke gebraucht
+    -->
+    <input type="hidden" name="line_id" value="{{ line_id }}">
 
     <a href="{{ url_for('newLineAdminEnterDetails') }}">
         <button>Weiter zum Erstellen der Strecke</button>
