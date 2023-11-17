@@ -3,12 +3,16 @@ from flask import render_template
 
 main = Blueprint('main', __name__)
 
+@main.before_request
+def before_request():
+    print("Before Request")
 
 # Index Page
 @main.route('/')
+@main.route('/index')
 def index():
     user = {'username': 'Tobias Schwap'}
-    return render_template('index.html', page_name='Übersicht', user=user)
+    return render_template('overview.html', page_name='Übersicht', user=user)
 
 
 # Trains Overview
