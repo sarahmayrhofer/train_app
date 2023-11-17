@@ -19,20 +19,23 @@ def index():
 @main.route('/trains/')
 @main.route('/trains')
 def trains_overview():
-    return "Trains Overview Page"
+    user = {'username': 'Tobias Schwap'}
+    return render_template('overview.html', page_name='Übersicht', user=user)
 
 
 # Train by ID
 @main.route('/trains/<int:train_id>')
 def train_by_id(train_id):
-    return f"Train with ID {train_id}"
+    user = {'username': 'Tobias Schwap'}
+    return render_template('train_details.html', page_name='Zug: TODO', user=user)
 
 
 # Users Page
 @main.route('/users/')
 @main.route('/users')
 def users():
-    return "Users Page"
+    user = {'username': 'Tobias Schwap'}
+    return render_template('user_management.html', page_name='Userverwaltung', user=user)
 
 
 # User by ID
@@ -45,7 +48,8 @@ def user_by_id(user_id):
 @main.route('/maintenances/')
 @main.route('/maintenances')
 def maintenance_overview():
-    return "Maintenance Overview Page"
+    user = {'username': 'Tobias Schwap'}
+    return render_template('maintenances.html', page_name='Wartungen', user=user)
 
 
 # Maintenance by ID
