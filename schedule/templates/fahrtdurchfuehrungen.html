@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Fahrtdurchführungen</title>
+</head>
+<body>
+<h1>Fahrtdurchführungen</h1>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Datum</th>
+        <th>Zug_id</th>
+        <!-- Fügen Sie hier weitere Spalten hinzu -->
+    </tr>
+    {% for fahrt in fahrtdurchfuehrungen %}
+    <tr>
+        <td>{{ fahrt.id }}</td>
+        <td>{{ fahrt.datum }}</td>
+        <td>{{ fahrt.zug_id }}</td>
+        <!-- Fügen Sie hier weitere Daten hinzu -->
+        <td>
+            <form action="{{ url_for('main.loesche_fahrtdurchfuehrung', id=fahrt.id) }}" method="POST">
+                <button type="submit" style="color: red;">X</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="/neue_fahrtdurchfuehrung">Neue Fahrtdurchführung anlegen</a>
+</body>
+</html>
