@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Neue Strecke erstellen</h1>
+    <form action="{{ url_for('newLineAdminEnterDetails') }}" method="post">
+        <label for="nameOfLine">Name der Strecke:</label>
+        <input type="text" id="nameOfLine" name="nameOfLine" required>
+        <br><br>
+        {% if start_station %}
+            <label>Startbahnhof der Strecke:</label>
+            <span>{{ start_station }}</span>
+            <br><br>
+        {% endif %}
+        {% if end_station %}
+            <label>Endbahnhof der Strecke:</label>
+            <span>{{ end_station }}</span>
+            <br><br>
+        {% endif %}
+        <input type="submit" value="Strecke erstellen">
+    </form>
+{% endblock %}

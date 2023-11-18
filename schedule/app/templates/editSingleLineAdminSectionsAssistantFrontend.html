@@ -1,0 +1,8 @@
+{% extends "LineSectionsAssistantTemplate.html" %}
+
+{% block extra %}
+    <br>
+    <a href="{{ url_for('editSingleLineChangeName', line_id=line.id) }}">
+        <button>Weiter zum Abschließen der Änderungen</button>
+    </a>
+{% endblock %}

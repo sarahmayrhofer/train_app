@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Name der Strecke ändern</h1>
+    <form action="{{ url_for('editSingleLineChangeName', line_id=line_id) }}" method="post">
+        <label for="nameOfLine">Neuer Name der Strecke:</label>
+        <input type="text" id="nameOfLine" name="nameOfLine" value="{{ nameOfLine }}" required>
+        <br><br>
+        {% if start_station %}
+            <label>Startbahnhof der Strecke:</label>
+            <span>{{ start_station }}</span>
+            <br><br>
+        {% endif %}
+        {% if end_station %}
+            <label>Endbahnhof der Strecke:</label>
+            <span>{{ end_station }}</span>
+            <br><br>
+        {% endif %}
+        <input type="submit" value="Name ändern">
+    </form>
+{% endblock %}
