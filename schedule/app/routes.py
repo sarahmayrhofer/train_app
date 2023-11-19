@@ -4,6 +4,7 @@ from flask import request, redirect, url_for
 from .models import Fahrtdurchführung, Train
 from app.db import db
 from datetime import datetime
+from .api_services import get_stations
 
 main = Blueprint('main', __name__)
 
@@ -24,10 +25,10 @@ def neue_fahrtdurchfuehrung():
     if request.method == 'POST':
         datum_string = request.form['datum']  # Datum als String
         datum = datetime.strptime(datum_string, '%Y-%m-%d').date()  # Konvertierung in ein date-Objekt
-        
+        start_station_id = request.form.get('station_id')
         zug_id = request.form.get('zug_id')  # Hier sollten Sie sicherstellen, dass Sie eine gültige Zug-ID erhalten
 
-        neue_fahrt = Fahrtdurchführung(datum=datum, zug_id=zug_id)
+        neue_fahrt = Fahrtdurchführung(datum=datum, zug_id=zug_id, start_station=start_station_id)
         db.session.add(neue_fahrt)
         db.session.commit()
 
@@ -35,7 +36,8 @@ def neue_fahrtdurchfuehrung():
 
     # Hier wird das Formular für eine GET-Anfrage gerendert
     zuege = Train.query.all()  # Liste der Züge abfragen
-    return render_template('neue_fahrtdurchfuehrung.html', zuege=zuege)  # Liste an die Vorlage übergeben
+    stations = get_stations()
+    return render_template('neue_fahrtdurchfuehrung.html', zuege=zuege, stations=stations)  # Liste an die Vorlage übergeben
 
 @main.route('/loesche_fahrtdurchfuehrung/<int:id>', methods=['POST'])
 def loesche_fahrtdurchfuehrung(id):

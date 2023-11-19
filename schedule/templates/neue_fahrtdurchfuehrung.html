@@ -16,6 +16,13 @@
             <option value="{{ zug.id }}">{{ zug.name, zug.id }}</option>
             {% endfor %}
         </select>
+
+        <label for="start_station">Startbahnhof:</label>
+        <select name="station_id" id="station_id">
+            {% for station in stations %}
+            <option value="{{ station['id'] }}">{{ station['nameOfStation'], station['id'] }}</option>
+            {% endfor %}
+        </select>
         
         <input type="submit" value="Fahrtdurchführung erstellen">
     </form>
