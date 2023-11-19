@@ -1,10 +1,9 @@
+from flask import redirect, url_for
 from flask import render_template
 
 from fleet.app import app, db
 from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm
 from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train
-
-print("Imported routes")
 
 
 @app.before_request
@@ -25,7 +24,8 @@ def index():
 
     trains = Train.query.all()
 
-    return render_template('overview.html', page_name='Übersicht', user=user, wagons=wagons, locomotives=locomotives, trains=trains)
+    return render_template('overview.html', page_name='Übersicht', user=user, wagons=wagons, locomotives=locomotives,
+                           trains=trains)
 
 
 @app.route('/newWagon', methods=['GET', 'POST'])
@@ -39,12 +39,14 @@ def new_wagon():
             wagon = Locomotive(track_width=form.track_width.data, max_traction=form.max_traction.data)
             db.session.add(wagon)
             db.session.commit()
+            return redirect(url_for('index'))
 
         elif form.wagon_type.data == 'normal_wagon':
             wagon = NormalWagon(track_width=form.track_width.data, max_weight=form.max_weight.data,
                                 number_of_seats=form.number_of_seats.data)
             db.session.add(wagon)
             db.session.commit()
+            return redirect(url_for('index'))
 
     return render_template('new_wagon.html', page_name='Neuer Wagen', user=user, form=form)
 
@@ -106,6 +108,7 @@ def new_train():
 
         db.session.add(train)
         db.session.commit()
+        return redirect(url_for('index'))
 
     return render_template('new_train.html', page_name='Neuer Zug', user=user, form=form)
 
@@ -142,7 +145,8 @@ def new_maintenance():
         print(maintenance)
         db.session.add(maintenance)
         db.session.commit()
-        print("Added new maintenance")
+        return redirect(url_for('index'))
+        
     user = {'username': 'Tobias Schwap'}
     return render_template('new_maintenance.html', page_name='Neue Wartung', user=user, form=form)
 
