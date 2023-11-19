@@ -1,21 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Neuen Wagon erstellen</h1>
-<form method="POST">
+<script>
+  // Function to toggle visibility of specific fields based on wagon type
+  function toggleFields() {
+    var wagonType = document.getElementById('wagon_type').value;
+    var maxTractionField = document.getElementById('max_traction');
+    var maxWeightField = document.getElementById('max_weight');
+    var numberOfSeatsField = document.getElementById('number_of_seats');
+
+    // Hide all fields initially
+    maxTractionField.style.display = 'none';
+    maxWeightField.style.display = 'none';
+    numberOfSeatsField.style.display = 'none';
+
+    // Show fields based on the selected wagon type
+    if (wagonType === 'locomotive') {
+      maxTractionField.style.display = 'block';
+    } else if (wagonType === 'normal_wagon') {
+      maxWeightField.style.display = 'block';
+      numberOfSeatsField.style.display = 'block';
+    }
+  }
+</script>
+<body>
+<h1>Neuen Wagen erstellen</h1>
+
+<form method="POST" oninput="toggleFields()">
     {{ form.hidden_tag() }}
+
     <p>
-        {{ form.track_width.label }}<br>
-        {{ form.track_width(size=32) }}
+        <label for="{{ form.track_width.id }}">{{form.track_width.label}}:</label><br>
+        {{ form.track_width(id="track_width") }}
+        <br>
+    </p>
+
+
+    <p>
+        <label for="{{ form.wagon_type.id }}">{{form.wagon_type.label}}:</label><br>
+        {{ form.wagon_type(id="wagon_type") }}
+        <br>
+    </p>
+
+    <div id="max_traction" style="display: none;">
+        <label for="{{ form.max_traction.id }}">{{form.max_traction.label}}:</label><br>
+        {{ form.max_traction(size=10, placeholder="in t.") }}
+        <br>
+    </div>
+
+    <p>
+    <div id="max_weight" style="display: none;">
+        <label for="{{ form.max_weight.id }}">{{form.max_weight.label}}:</label><br>
+        {{ form.max_weight(size=10, placeholder="in t.") }}
+        <br>
+    </div>
     </p>
     <p>
-        {{ form.max_weight.label }}<br>
-        {{ form.max_weight(size=32) }}
+    <div id="number_of_seats" style="display: none;">
+        <label for="{{ form.number_of_seats.id }}">{{form.number_of_seats.label}}:</label><br>
+        {{ form.number_of_seats(size=10) }}
+        <br>
+    </div>
     </p>
-    <p>
-        {{ form.number_of_seats.label }}<br>
-        {{ form.number_of_seats(size=32) }}
-    </p>
-    <p>{{ form.submit() }}</p>
+
+
+    {{ form.submit() }}
 </form>
+
+<script>
+  // Set the initial state based on the selected wagon type
+  toggleFields();
+</script>
+</body>
 {% endblock %}

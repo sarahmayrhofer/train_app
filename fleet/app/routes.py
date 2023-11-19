@@ -2,7 +2,7 @@ from flask import render_template
 
 from fleet.app import app, db
 from fleet.app.forms import NewWagonForm, NewMaintenanceForm
-from fleet.app.models import Maintenance, Wagon
+from fleet.app.models import Maintenance, Locomotive, NormalWagon, Wagon, Train
 
 print("Imported routes")
 
@@ -19,19 +19,32 @@ def before_request():
 @app.route('/trains')
 def index():
     user = {'username': 'Tobias Schwap'}
-    return render_template('overview.html', page_name='Übersicht', user=user)
+
+    locomotives = Locomotive.query.all()
+    wagons = NormalWagon.query.all()
+    print(wagons)
+    return render_template('overview.html', page_name='Übersicht', user=user, wagons=wagons, locomotives=locomotives)
 
 
 @app.route('/newWagon', methods=['GET', 'POST'])
 def new_wagon():
-    form = NewWagonForm()
-    if form.validate_on_submit():
-        wagon = Wagon(track_width=form.track_width.data, max_weight=form.max_weight.data,
-                      number_of_seats=form.number_of_seats.data)
-        # db.session.add(wagon)
-        # db.session.commit()
     user = {'username': 'Tobias Schwap'}
-    return render_template('new_wagon.html', page_name='Neue Wartung', user=user, form=form)
+
+    form = NewWagonForm()
+
+    if form.validate_on_submit():
+        if form.wagon_type.data == 'locomotive':
+            wagon = Locomotive(track_width=form.track_width.data, max_traction=form.max_traction.data)
+            db.session.add(wagon)
+            db.session.commit()
+
+        elif form.wagon_type.data == 'normal_wagon':
+            wagon = NormalWagon(track_width=form.track_width.data, max_weight=form.max_weight.data,
+                                number_of_seats=form.number_of_seats.data)
+            db.session.add(wagon)
+            db.session.commit()
+
+    return render_template('new_wagon.html', page_name='Neuer Wagen', user=user, form=form)
 
 
 # Train by ID

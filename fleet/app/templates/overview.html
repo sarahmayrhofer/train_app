@@ -34,13 +34,7 @@
             <th>In Wartung</th>
         </tr>
         <!-- Iterate through your list of trains and create rows -->
-        {% for train in trains %}
-        <tr onclick="window.location='/train/{{ train.id }}';">
-            <td>{{ train.id }}</td>
-            <td>{{ train.departure }}</td>
-            <td>{{ train.destination }}</td>
-        </tr>
-        {% endfor %}
+
         <tr>
             <td colspan="3"><button>Hinzufügen</button></td>
         </tr>
@@ -53,15 +47,13 @@
             <th>Zug</th>
         </tr>
         <!-- Iterate through your list of trains and create rows -->
-        {% for train in trains %}
-        <tr onclick="window.location='/train/{{ train.id }}';">
-            <td>{{ train.id }}</td>
-            <td>{{ train.departure }}</td>
-            <td>{{ train.destination }}</td>
+        {% for locomotive in locomotives %}
+        <tr>
+            <td>{{ locomotive.id }}</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3"><button>Hinzufügen</button></td>
+            <td colspan="3"><button onclick="window.location.href = './newWagon'">Hinzufügen</button></td>
         </tr>
     </table>
 
@@ -72,15 +64,13 @@
             <th>Zug</th>
         </tr>
         <!-- Iterate through your list of trains and create rows -->
-        {% for train in trains %}
-        <tr onclick="window.location='/train/{{ train.id }}';">
-            <td>{{ train.id }}</td>
-            <td>{{ train.departure }}</td>
-            <td>{{ train.destination }}</td>
+        {% for wagon in wagons %}
+        <tr>
+            <td>{{ wagon.id }}</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3"><button>Hinzufügen</button></td>
+            <td colspan="3"><button onclick="window.location.href = './newWagon'">Hinzufügen</button></td>
         </tr>
     </table>
 </div>
