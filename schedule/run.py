@@ -20,6 +20,7 @@ with app.app_context():
         zug2 = Train(name="Zug 2")
         db.session.add(zug1)
         db.session.add(zug2)
+        db.session.commit()  # Führen Sie zuerst einen commit durch, um die IDs zu generieren
 
         # Erstellen Sie einige Fahrtdurchführungen
         fahrt1 = Fahrtdurchführung(datum=datetime(2023, 1, 1, 10, 0, 0), zug_id=zug1.id)
