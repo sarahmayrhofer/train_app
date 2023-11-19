@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Neuen Wagon erstellen</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.track_width.label }}<br>
+        {{ form.track_width(size=32) }}
+    </p>
+    <p>
+        {{ form.max_weight.label }}<br>
+        {{ form.max_weight(size=32) }}
+    </p>
+    <p>
+        {{ form.number_of_seats.label }}<br>
+        {{ form.number_of_seats(size=32) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
