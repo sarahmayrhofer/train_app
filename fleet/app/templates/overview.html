@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <style>
+        .table-container {
+            display: flex;
+        }
+        table {
+            border-collapse: collapse;
+            width: 30%;
+            margin: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="table-container">
+    <table>
+        <caption>Züge</caption>
+        <tr>
+            <th>Zug ID</th>
+            <th>Zug Name</th>
+            <th>Wartung</th>
+        </tr>
+        <!-- Iterate through your list of trains and create rows -->
+        {% for train in trains %}
+        <tr>
+            <td>{{ train.id }}</td>
+            <td>{{ train.name }}</td>
+            <td>{{ train.maintenance }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3"><button onclick="window.location.href = './newTrain'">Hinzufügen</button></td>
+        </tr>
+    </table>
+
+    <table>
+        <caption>Triebwagenübersicht</caption>
+        <tr>
+            <th>Wagen ID</th>
+            <th>Zug</th>
+        </tr>
+        <!-- Iterate through your list of trains and create rows -->
+        {% for locomotive in locomotives %}
+        <tr>
+            <td>{{ locomotive.id }}</td>
+            <td>{{ locomotive.train_id }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3"><button onclick="window.location.href = './newWagon'">Hinzufügen</button></td>
+        </tr>
+    </table>
+
+    <table>
+        <caption>Personenwagenübersicht</caption>
+        <tr>
+            <th>Wagen ID</th>
+            <th>Zug</th>
+        </tr>
+        <!-- Iterate through your list of trains and create rows -->
+        {% for wagon in wagons %}
+        <tr>
+            <td>{{ wagon.id }}</td>
+            <td>{{ wagon.train_id }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3"><button onclick="window.location.href = './newWagon'">Hinzufügen</button></td>
+        </tr>
+    </table>
+</div>
+
+
+
+{% endblock %}

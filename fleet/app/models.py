@@ -1,16 +1,17 @@
-from fleet.run import db
+from fleet.app import db
 
 
 class Train(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
-    position = db.Column(db.String(50))
+    position = db.Column(db.String(50), nullable=True)
 
     wagons = db.relationship('Wagon', backref='train', lazy=True)
+
     maintenances = db.relationship('Maintenance', backref='train', lazy=True)
 
     def __repr__(self):
-        return f"<Train(id={self.id}, name={self.name}, wagon_ids={self.wagon_ids}, position={self.position})>"
+        return f"<Train(id={self.id}, name={self.name}, wagons={self.wagon_ids}, position={self.position})>"
 
 
 class Wagon(db.Model):
@@ -18,7 +19,7 @@ class Wagon(db.Model):
     track_width = db.Column(db.Integer, nullable=False)
     wagon_type = db.Column(db.String(20))
 
-    train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'), nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'wagon',
@@ -26,23 +27,23 @@ class Wagon(db.Model):
     }
 
     def __repr__(self):
-        return f"<Wagon(id={self.id}, track_width={self.track_width}, wagon_type={self.wagon_type}, train_id={self.train_id})>"
+        return f"<Wagon(id={self.id}, track_width={self.track_width}, wagon_type={self.wagon_type})>"
 
 
 class Locomotive(Wagon):
-    max_traction = db.Column(db.Float, nullable=False)
+    max_traction = db.Column(db.Float, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'locomotive',
     }
 
     def __repr__(self):
-        return f"<Locomotive(id={self.id}, track_width={self.track_width}, max_traction={self.max_traction}, train_id={self.train_id})>"
+        return f"<Locomotive(id={self.id}, track_width={self.track_width}, max_traction={self.max_traction})>"
 
 
 class NormalWagon(Wagon):
-    max_weight = db.Column(db.Float, nullable=False)
-    number_of_seats = db.Column(db.Integer, nullable=False)
+    max_weight = db.Column(db.Float, nullable=True)
+    number_of_seats = db.Column(db.Integer, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'normal_wagon',
@@ -57,8 +58,9 @@ class Maintenance(db.Model):
     description = db.Column(db.String(255), nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    assigned_employees = db.Column(db.ARRAY(db.Integer), nullable=True)
+    assigned_employees = db.Column(db.String(255), nullable=True)
+
     train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
 
     def __repr__(self):
-        return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date}, assigned_employees={self.assigned_employees}, train_id={self.train_id})>"
+        return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date}, assigned_employees={self.assigned_employees})>"

@@ -41,7 +41,16 @@
 
 
 <div style="padding: 20px;">
-    TODO
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
 </div>
 
 <div style="position: fixed; bottom: 0; right: 0; background-color: white; padding: 5px;">
