@@ -31,10 +31,16 @@
         <tr>
             <th>Zug ID</th>
             <th>Zug Name</th>
-            <th>In Wartung</th>
+            <th>Wartung</th>
         </tr>
         <!-- Iterate through your list of trains and create rows -->
-
+        {% for train in trains %}
+        <tr>
+            <td>{{ train.id }}</td>
+            <td>{{ train.name }}</td>
+            <td>{{ train.maintenance }}</td>
+        </tr>
+        {% endfor %}
         <tr>
             <td colspan="3"><button onclick="window.location.href = './newTrain'">Hinzufügen</button></td>
         </tr>
@@ -50,6 +56,7 @@
         {% for locomotive in locomotives %}
         <tr>
             <td>{{ locomotive.id }}</td>
+            <td>{{ locomotive.train_id }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -67,6 +74,7 @@
         {% for wagon in wagons %}
         <tr>
             <td>{{ wagon.id }}</td>
+            <td>{{ wagon.train_id }}</td>
         </tr>
         {% endfor %}
         <tr>

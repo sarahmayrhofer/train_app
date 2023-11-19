@@ -22,8 +22,10 @@ def index():
 
     locomotives = Locomotive.query.all()
     wagons = NormalWagon.query.all()
-    print(wagons)
-    return render_template('overview.html', page_name='Übersicht', user=user, wagons=wagons, locomotives=locomotives)
+
+    trains = Train.query.all()
+
+    return render_template('overview.html', page_name='Übersicht', user=user, wagons=wagons, locomotives=locomotives, trains=trains)
 
 
 @app.route('/newWagon', methods=['GET', 'POST'])
