@@ -21,6 +21,7 @@
     <p>
         <label for="{{ form.selected_wagons.id }}">{{ form.selected_wagons.label }}:</label>
         <span id="total_weight">0</span> t.<br>
+        <span id="warning" style="color: red;"></span><br>
         {{ form.selected_wagons() }}
         <br>
     </p>
@@ -34,7 +35,7 @@
     var selectedLocomotive = document.getElementById('{{ form.selected_locomotive.id }}');
     var totalWeightSpan = document.getElementById('total_weight');
     var maxTraction = parseFloat('{{ form.selected_locomotive}}');
-    console.log(maxTraction);
+    var warningSpan = document.getElementById('warning');
     var saveButton = document.getElementById('save_button');
 
     // Function to calculate the sum of max_weight from selected_wagons
@@ -48,6 +49,7 @@
 
       // Disable the save button if sumWeight is greater than maxTraction
       saveButton.disabled = sumWeight > maxTraction;
+      warningSpan.textContent = saveButton.disabled ? 'WARNUNG: Das Gewicht der Wagons ist zu hoch!' : '';
     }
 
     function updateMaxTraction() {
