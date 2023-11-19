@@ -1,8 +1,8 @@
 from flask import render_template
 
 from fleet.app import app, db
-from fleet.app.forms import NewWagonForm, NewMaintenanceForm
-from fleet.app.models import Maintenance, Locomotive, NormalWagon, Wagon, Train
+from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm
+from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train
 
 print("Imported routes")
 
@@ -52,6 +52,60 @@ def new_wagon():
 def train_by_id(train_id):
     user = {'username': 'Tobias Schwap'}
     return render_template('train_details.html', page_name='Zug: TODO', user=user)
+
+
+# Create a new train
+@app.route('/newTrain', methods=['GET', 'POST'])
+def new_train():
+    user = {'username': 'Tobias Schwap'}
+
+    # only get wagons that are not already assigned to a train
+    wagons = NormalWagon.query.filter_by(train_id=None).all()
+    locomotives = Locomotive.query.filter_by(train_id=None).all()
+
+    existing_wagons = []
+    existing_locomotives = []
+
+    # loop over wagons to get their information
+    for wagon in wagons:
+        wagon_info = {
+            'id': wagon.id,
+            'name': f'[Wagen {wagon.id}] {wagon.number_of_seats} Sitzplätze ({wagon.max_weight} t.)',
+            'type': 'normal_wagon',
+        }
+        existing_wagons.append(wagon_info)
+
+    for wagon in locomotives:
+        wagon_info = {
+            'id': wagon.id,
+            'name': f'[Wagen {wagon.id}] (max. {wagon.max_traction} t.)',
+            'type': 'locomotive',
+        }
+        existing_locomotives.append(wagon_info)
+
+    form = NewTrainForm()
+    form.selected_wagons.choices = [(wagon['id'], wagon['name']) for wagon in existing_wagons]
+    form.selected_locomotive.choices = [(wagon['id'], wagon['name']) for wagon in existing_locomotives]
+
+    if form.validate_on_submit():
+        # Get selected normal wagons
+        selected_wagon_ids = form.selected_wagons.data
+        selected_wagons = NormalWagon.query.filter(NormalWagon.id.in_(selected_wagon_ids)).all()
+
+        # Get selected locomotive
+        selected_locomotive_id = form.selected_locomotive.data
+        selected_locomotive = Locomotive.query.get(selected_locomotive_id)
+
+        # Include the locomotive in the list of wagons
+        all_selected_wagons = selected_wagons + [selected_locomotive] if selected_locomotive else selected_wagons
+
+        # Create a new train and associate all selected wagons
+        train = Train(name=form.name.data, wagons=all_selected_wagons)
+
+        db.session.add(train)
+        db.session.commit()
+
+    return render_template('new_train.html', page_name='Neuer Zug', user=user, form=form)
 
 
 # Users Page

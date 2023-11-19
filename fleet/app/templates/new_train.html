@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Zug erstellen</h1>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <p>
+        <label for="{{ form.name.id }}">Train Name:</label><br>
+        {{ form.name(size=30) }}
+        <br>
+    </p>
+
+    <p>
+        <label for="{{ form.selected_wagons.id }}">Select Wagons:</label><br>
+        {{ form.selected_locomotive() }}
+        <br>
+    </p>
+
+    <p>
+        <label for="{{ form.selected_wagons.id }}">Select Wagons:</label><br>
+        {{ form.selected_wagons() }}
+        <br>
+    </p>
+    {{form.submit()}}
+</form>
+{% endblock %}

@@ -4,14 +4,14 @@ from fleet.app import db
 class Train(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
-    position = db.Column(db.String(50))
+    position = db.Column(db.String(50), nullable=True)
 
-    # wagons = db.relationship('Wagon', backref='train', lazy=True)
+    wagons = db.relationship('Wagon', backref='train', lazy=True)
 
-    #  maintenances = db.relationship('Maintenance', backref='train', lazy=True)
+    maintenances = db.relationship('Maintenance', backref='train', lazy=True)
 
     def __repr__(self):
-        return f"<Train(id={self.id}, name={self.name}, wagon_ids={self.wagon_ids}, position={self.position})>"
+        return f"<Train(id={self.id}, name={self.name}, wagons={self.wagon_ids}, position={self.position})>"
 
 
 class Wagon(db.Model):
@@ -19,7 +19,7 @@ class Wagon(db.Model):
     track_width = db.Column(db.Integer, nullable=False)
     wagon_type = db.Column(db.String(20))
 
-#    train_id = db.Column(db.Integer, db.ForeignKey('train.id'), nullable=True)
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'), nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'wagon',
@@ -60,7 +60,7 @@ class Maintenance(db.Model):
     end_date = db.Column(db.Date, nullable=False)
     assigned_employees = db.Column(db.String(255), nullable=True)
 
-    # train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
 
     def __repr__(self):
         return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date}, assigned_employees={self.assigned_employees})>"

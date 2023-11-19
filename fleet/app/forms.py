@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, IntegerField, StringField, DateField, FloatField, SelectField
+from wtforms import SubmitField, IntegerField, StringField, DateField, FloatField, SelectField, SelectMultipleField
 from wtforms.validators import DataRequired, Optional
 
 
@@ -12,6 +12,7 @@ class NewWagonForm(FlaskForm):
     max_traction = FloatField('Max. Zugkraft', validators=[Optional()])
     max_weight = FloatField('Max. Gewicht', validators=[Optional()])
     number_of_seats = IntegerField('Anz. an Sitzplätzen', validators=[Optional()])
+    wagon_id = IntegerField( validators=[Optional()])
     submit = SubmitField('Bestätigen')
 
 
@@ -20,4 +21,14 @@ class NewMaintenanceForm(FlaskForm):
     start_date = DateField('Startdatum', validators=[DataRequired()])
     end_date = DateField('Enddatum', validators=[DataRequired()])
     assigned_employees = StringField('Zugewiesene Mitarbeiter', validators=[DataRequired()])
+    submit = SubmitField('Bestätigen')
+
+
+class NewTrainForm(FlaskForm):
+    name = StringField('Zug Name', validators=[DataRequired()])
+    position = StringField('Zug Position (optional)')
+
+    selected_wagons = SelectMultipleField('Wagons auswählen', coerce=int, validators=[DataRequired()])
+    selected_locomotive = SelectField('Triebfahrzeug auswählen', coerce=int, validators=[DataRequired()])
+
     submit = SubmitField('Bestätigen')
