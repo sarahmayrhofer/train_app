@@ -1,5 +1,47 @@
 <!DOCTYPE html>
 <html lang="de">
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dateFieldIndex = 1;
+        document.getElementById('addDate').addEventListener('click', function () {
+            var newDateField = document.createElement('input');
+            newDateField.type = 'date';
+            newDateField.name = 'daten[]';
+            newDateField.id = 'datum' + dateFieldIndex;
+            newDateField.required = true;
+
+            var newLabel = document.createElement('label');
+            newLabel.htmlFor = 'datum' + dateFieldIndex;
+            newLabel.textContent = 'Datum:';
+
+            var datumsfelderDiv = document.getElementById('datumsfelder');
+            datumsfelderDiv.appendChild(newLabel);
+            datumsfelderDiv.appendChild(newDateField);
+            dateFieldIndex++;
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var timeFieldIndex = 1;
+        document.getElementById('addTime').addEventListener('click', function () {
+            var newTimeField = document.createElement('input');
+            newTimeField.type = 'time';
+            newTimeField.name = 'zeiten[]';
+            newTimeField.id = 'zeit' + timeFieldIndex;
+            newTimeField.required = true;
+
+            var newLabel = document.createElement('label');
+            newLabel.htmlFor = 'zeit' + timeFieldIndex;
+            newLabel.textContent = 'Zeit:';
+
+            var zeitfelderDiv = document.getElementById('zeitfelder');
+            zeitfelderDiv.appendChild(newLabel);
+            zeitfelderDiv.appendChild(newTimeField);
+            timeFieldIndex++;
+        });
+    });
+</script>
+
 <head>
     <meta charset="UTF-8">
     <title>Neue Fahrtdurchführung</title>
@@ -7,9 +49,20 @@
 <body>
     <h1>Neue Fahrtdurchführung anlegen</h1>
     <form action="{{ url_for('main.neue_fahrtdurchfuehrung') }}" method="POST">
-        <label for="datum">Datum:</label>
-        <input type="date" name="datum" id="datum" required>
         
+        <div id="datumsfelder">
+            <label for="datum0">Datum:</label>
+            <input type="date" name="daten[]" id="datum0" required>
+        </div>
+        <button type="button" id="addDate">Weiteres Datum hinzufügen</button>
+        
+        <div id="zeitfelder">
+            <label for="zeit0">Zeit:</label>
+            <input type="time" name="zeiten[]" id="zeit0" required>
+        </div>
+        <button type="button" id="addTime">Weitere Zeit hinzufügen</button>
+
+        <div id="Rest">
         <label for="zug_id">Zug:</label>
         <select name="zug_id" id="zug_id" required>
             {% for zug in zuege %}
@@ -23,8 +76,16 @@
             <option value="{{ station['id'] }}">{{ station['nameOfStation'], station['id'] }}</option>
             {% endfor %}
         </select>
+
+        <label for="mitarbeiter_ids">Mitarbeiter-IDs (durch Komma getrennt):</label>
+        <input type="text" name="mitarbeiter_ids" id="mitarbeiter_ids">
+        </div>
+
         
+
+        <div id="submit">
         <input type="submit" value="Fahrtdurchführung erstellen">
+        </div>
     </form>
     <a href="{{ url_for('main.fahrtdurchfuehrungen') }}">Zurück zu den Fahrtdurchführungen</a>
 </body>

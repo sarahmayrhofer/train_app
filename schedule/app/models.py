@@ -4,8 +4,11 @@ class Fahrtdurchführung(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # Fügen Sie hier weitere relevante Felder hinzu, z.B.:
     datum = db.Column(db.Date, nullable=False)
+    zeit = db.Column(db.Time)
     zug_id = db.Column(db.Integer, db.ForeignKey('train.id'))
     start_station = db.Column(db.Integer)
+    mitarbeiter_ids = db.Column(db.String)
+
 
     def __repr__(self):
         return f'<Fahrtdurchführung {self.id}>'

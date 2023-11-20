@@ -13,7 +13,7 @@ def register_routes(app):
 
 @main.route('/')
 def startseite():
-    return render_template('startseite.html')  # Stellen Sie sicher, dass Sie eine entsprechende Vorlage haben
+    return render_template('startseite.html') 
 
 @main.route('/fahrtdurchfuehrungen/')
 def fahrtdurchfuehrungen():
@@ -23,13 +23,19 @@ def fahrtdurchfuehrungen():
 @main.route('/neue_fahrtdurchfuehrung', methods=['GET', 'POST'])
 def neue_fahrtdurchfuehrung():
     if request.method == 'POST':
-        datum_string = request.form['datum']  # Datum als String
-        datum = datetime.strptime(datum_string, '%Y-%m-%d').date()  # Konvertierung in ein date-Objekt
+        daten = request.form.getlist('daten[]') 
+        zeiten = request.form.getlist('zeiten[]')
         start_station_id = request.form.get('station_id')
-        zug_id = request.form.get('zug_id')  # Hier sollten Sie sicherstellen, dass Sie eine gültige Zug-ID erhalten
+        zug_id = request.form.get('zug_id') 
+        mitarbeiter_ids = request.form.get('mitarbeiter_ids')
 
-        neue_fahrt = Fahrtdurchführung(datum=datum, zug_id=zug_id, start_station=start_station_id)
-        db.session.add(neue_fahrt)
+        for datum_string in daten:
+            for zeit_string in zeiten:
+                datum = datetime.strptime(datum_string, '%Y-%m-%d').date()
+                zeit = datetime.strptime(zeit_string, '%H:%M').time()
+                neue_fahrt = Fahrtdurchführung(datum=datum, zeit=zeit, zug_id=zug_id, start_station=start_station_id, mitarbeiter_ids=mitarbeiter_ids)
+                db.session.add(neue_fahrt)
+        
         db.session.commit()
 
         return redirect(url_for('main.fahrtdurchfuehrungen'))
