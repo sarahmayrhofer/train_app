@@ -146,7 +146,7 @@ def new_maintenance():
         db.session.add(maintenance)
         db.session.commit()
         return redirect(url_for('index'))
-        
+
     user = {'username': 'Tobias Schwap'}
     return render_template('new_maintenance.html', page_name='Neue Wartung', user=user, form=form)
 
