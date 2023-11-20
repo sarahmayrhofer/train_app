@@ -2,27 +2,31 @@
 
 {% block content %}
 
-    <style>
-        .table-container {
-            display: flex;
-        }
-        table {
-            border-collapse: collapse;
-            width: 30%;
-            margin: 10px;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        button {
-            margin-top: 10px;
-        }
-    </style>
+<style>
+    .table-container {
+        display: flex;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 30%;
+        margin: 10px;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+</style>
 </head>
 <body>
 <div class="table-container">
@@ -36,13 +40,15 @@
         <!-- Iterate through your list of trains and create rows -->
         {% for train in trains %}
         <tr>
-            <td>{{ train.id }}</td>
-            <td>{{ train.name }}</td>
+            <td><a href="/trains/{{ train.id }}">{{ train.id }}</a></td>
+            <td><a href="/trains/{{ train.id }}">{{ train.name }}</a></td>
             <td>{{ train.maintenance }}</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3"><button onclick="window.location.href = './newTrain'">Hinzufügen</button></td>
+            <td colspan="3">
+                <button onclick="window.location.href = './newTrain'">Hinzufügen</button>
+            </td>
         </tr>
     </table>
 
@@ -60,7 +66,9 @@
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3"><button onclick="window.location.href = './newWagon'">Hinzufügen</button></td>
+            <td colspan="3">
+                <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
+            </td>
         </tr>
     </table>
 
@@ -78,11 +86,12 @@
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3"><button onclick="window.location.href = './newWagon'">Hinzufügen</button></td>
+            <td colspan="3">
+                <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
+            </td>
         </tr>
     </table>
 </div>
-
 
 
 {% endblock %}

@@ -1,6 +1,65 @@
 {% extends "base.html" %}
 
 {% block content %}
-Train details
+<h1>{{ train.name }}</h1>
+<p>Anzahl der Waggons: {{ train.wagons|length }}</p>
+<p>Max. Gewicht: <span id="totalMaxWeight"></span></p>
+<p>Anz. der Sitze: <span id="totalSeats"></span></p>
 
+
+<div style="display: flex;">
+    <!-- Locomotive Table -->
+    <table style="margin-right: 20px;">
+        <caption>Lokomotive</caption>
+        <tr>
+            <th>ID</th>
+            <th>Spurweite</th>
+            <th>Maximale Zugkraft</th>
+        </tr>
+        {% for wagon in train.wagons if wagon.wagon_type == 'locomotive' %}
+        <tr>
+            <td>[Wagen {{ wagon.id }}]</td>
+            <td>{{ wagon.track_width }}</td>
+            <td>{{ wagon.max_traction }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Normal Wagons Table -->
+    <table>
+        <caption>Normale Waggons</caption>
+        <tr>
+            <th>ID</th>
+            <th>Spurweite</th>
+            <th>Max. Gewicht</th>
+            <th>Sitze</th>
+        </tr>
+        {% for wagon in train.wagons if wagon.wagon_type == 'normal_wagon' %}
+        <tr>
+            <td>[Wagen {{ wagon.id }}]</td>
+            <td>{{ wagon.track_width }}</td>
+            <td>{{ wagon.max_weight }}</td>
+            <td>{{ wagon.number_of_seats }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var totalMaxWeightElement = document.getElementById('totalMaxWeight');
+    var totalSeatsElement = document.getElementById('totalSeats');
+    var totalMaxWeight = 0;
+    var totalSeats = 0;
+
+    // Iterate over normal wagons and calculate total max weight and total seats
+    {% for wagon in train.wagons if wagon.wagon_type == 'normal_wagon' %}
+    totalMaxWeight += {{ wagon.max_weight }};
+    totalSeats += {{ wagon.number_of_seats }};
+    {% endfor %}
+
+    // Display the total max weight and total seats
+    totalMaxWeightElement.textContent = totalMaxWeight;
+    totalSeatsElement.textContent = totalSeats;
+  });
+</script>
 {% endblock %}

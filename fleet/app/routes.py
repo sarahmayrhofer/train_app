@@ -55,7 +55,8 @@ def new_wagon():
 @app.route('/trains/<int:train_id>')
 def train_by_id(train_id):
     user = {'username': 'Tobias Schwap'}
-    return render_template('train_details.html', page_name='Zug: TODO', user=user)
+    train = Train.query.get(train_id)
+    return render_template('train_details.html', page_name=f'Zug: {train.name}', user=user, train=train)
 
 
 # Create a new train
