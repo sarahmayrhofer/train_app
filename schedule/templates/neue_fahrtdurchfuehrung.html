@@ -40,6 +40,48 @@
             timeFieldIndex++;
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var zeitManuellGeaendert = false;
+
+        document.getElementById('zeit0').addEventListener('input', function (e) {
+            zeitManuellGeaendert = true;
+        });
+
+        document.getElementById('zeit0').addEventListener('change', function (e) {
+            if (zeitManuellGeaendert) {
+                pruefeVerfuegbarkeit(e);
+                zeitManuellGeaendert = false; // Zurücksetzen des Flags
+            }
+        });
+
+        function pruefeVerfuegbarkeit(e) {
+            var zugId = document.getElementById('zug_id').value;
+            var datum = document.getElementById('datum0').value;
+            var zeit = e.target.value;
+            var lineId = document.getElementById('line_id').value; // Abrufen der line_id
+
+            if (zugId && datum && zeit && lineId) {
+                var request = new XMLHttpRequest();
+                request.open('GET', '/check_availability?zug_id=' + zugId + '&datum=' + datum + '&zeit=' + zeit + '&line_id=' + lineId, true);
+                request.onload = function () {
+                    if (request.status >= 200 && request.status < 400) {
+                        var resp = JSON.parse(request.responseText);
+                        if (resp.belegt) {
+                            alert('Der Zug ist zu diesem Zeitpunkt bereits belegt oder der gewählte Zeitraum kollidiert mit einer bestehenden Belegung.');
+                            e.target.value = ''; // Löscht das Zeitfeld
+                        }
+                    } else {
+                        console.error('Server error');
+                    }
+                };
+                request.onerror = function() {
+                    console.error('Request error');
+                };
+                request.send();
+            }
+        }
+    });
 </script>
 
 <head>
@@ -50,6 +92,25 @@
     <h1>Neue Fahrtdurchführung anlegen</h1>
     <form action="{{ url_for('main.neue_fahrtdurchfuehrung') }}" method="POST">
         
+        <div id="Rest">
+            <label for="zug_id">Zug:</label>
+            <select name="zug_id" id="zug_id" required>
+                {% for zug in zuege %}
+                <option value="{{ zug.id }}">{{ zug.name, zug.id }}</option>
+                {% endfor %}
+            </select>
+    
+            <label for="line">Linie/Strecke:</label>
+            <select name="line_id" id="line_id" required>
+                {% for line in lines %}
+                <option value="{{ line['id'] }}">{{ line['nameOfLine'], line['id'] }}</option>
+                {% endfor %}
+            </select>
+    
+            <label for="mitarbeiter_ids">Mitarbeiter-IDs (durch Komma getrennt):</label>
+            <input type="text" name="mitarbeiter_ids" id="mitarbeiter_ids" required>
+        </div>
+
         <div id="datumsfelder">
             <label for="datum0">Datum:</label>
             <input type="date" name="daten[]" id="datum0" required>
@@ -60,28 +121,7 @@
             <label for="zeit0">Zeit:</label>
             <input type="time" name="zeiten[]" id="zeit0" required>
         </div>
-        <button type="button" id="addTime">Weitere Zeit hinzufügen</button>
-
-        <div id="Rest">
-        <label for="zug_id">Zug:</label>
-        <select name="zug_id" id="zug_id" required>
-            {% for zug in zuege %}
-            <option value="{{ zug.id }}">{{ zug.name, zug.id }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="start_station">Startbahnhof:</label>
-        <select name="station_id" id="station_id">
-            {% for station in stations %}
-            <option value="{{ station['id'] }}">{{ station['nameOfStation'], station['id'] }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="mitarbeiter_ids">Mitarbeiter-IDs (durch Komma getrennt):</label>
-        <input type="text" name="mitarbeiter_ids" id="mitarbeiter_ids">
-        </div>
-
-        
+        <button type="button" id="addTime">Weitere Zeit hinzufügen</button>        
 
         <div id="submit">
         <input type="submit" value="Fahrtdurchführung erstellen">

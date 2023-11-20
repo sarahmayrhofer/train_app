@@ -11,9 +11,13 @@
         <th>ID</th>
         <th>Datum</th>
         <th>Uhrzeit</th>
+        <th>Endzeit</th>
         <th>Zug_id</th>
-        <th>Startbahnhof</th>
+        <th>Linie/Strecke</th>
         <th>Mitarbeiter-IDs</th>
+        <th>Preise</th>
+        <th>Bahnhof-IDs</th>
+        <th>Zeiten</th>
         <!-- Fügen Sie hier weitere Spalten hinzu -->
     </tr>
     {% for fahrt in fahrtdurchfuehrungen %}
@@ -21,9 +25,13 @@
         <td>{{ fahrt.id }}</td>
         <td>{{ fahrt.datum }}</td>
         <td>{{ fahrt.zeit }}</td>
+        <td>{{ fahrt.endzeit }}</td>
         <td>{{ fahrt.zug_id }}</td>
-        <td>{{ fahrt.start_station }}</td>
+        <td>{{ fahrt.line }}</td>
         <td>{{ fahrt.mitarbeiter_ids }}</td>
+        <td>{{ fahrt.preise }}</td>
+        <td>{{ fahrt.bahnhof_ids }}</td>
+        <td>{{ fahrt.zeiten }}</td>
         <!-- Fügen Sie hier weitere Daten hinzu -->
         <td>
             <form action="{{ url_for('main.loesche_fahrtdurchfuehrung', id=fahrt.id) }}" method="POST">
