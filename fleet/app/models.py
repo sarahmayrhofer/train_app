@@ -11,7 +11,7 @@ class Train(db.Model):
     maintenances = db.relationship('Maintenance', backref='train', lazy=True)
 
     def __repr__(self):
-        return f"<Train(id={self.id}, name={self.name}, wagons={self.wagon_ids}, position={self.position})>"
+        return f"<Train(id={self.id}, name={self.name}, wagons={self.wagons}, position={self.position})>"
 
 
 class Wagon(db.Model):
