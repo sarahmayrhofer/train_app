@@ -11,15 +11,15 @@
     <table>
         <caption>Triebwagen</caption>
         <tr>
-            <th style="width: 10px">ID</th>
-            <th style="width: 120px">Spurweite</th>
-            <th style="width: 120px">Max. Zugkraft</th>
+            <th style="width: 10px; text-align: left;">ID</th>
+            <th style="width: 120px; text-align: left;">Spurweite</th>
+            <th style="width: 120px; text-align: left;">Max. Zugkraft</th>
         </tr>
         {% for wagon in train.wagons if wagon.wagon_type == 'locomotive' %}
         <tr>
-            <td style="padding: 5px;width: 80px">[Wagen {{ wagon.id }}]</td>
-            <td style="padding: 5px;width: 120px">{{ wagon.track_width }} mm.</td>
-            <td style="padding: 5px;width: 120px">{{ wagon.max_traction }} t.</td>
+            <td style="padding: 5px; width: 80px; text-align: left;">[Wagen {{ wagon.id }}]</td>
+            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.track_width }} mm.</td>
+            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.max_traction }} t.</td>
         </tr>
         {% endfor %}
     </table>
@@ -28,17 +28,17 @@
     <table style="margin-left: 100px;">
         <caption>Personenwagen</caption>
         <tr>
-            <th style="width: 10px">ID</th>
-            <th style="width: 120px">Spurweite</th>
-            <th style="width: 120px">Max. Gewicht</th>
-            <th style="width: 120px">Sitze</th>
+            <th style="width: 10px; text-align: left;">ID</th>
+            <th style="width: 120px; text-align: left;">Spurweite</th>
+            <th style="width: 120px; text-align: left;">Max. Gewicht</th>
+            <th style="width: 120px; text-align: left;">Sitze</th>
         </tr>
         {% for wagon in train.wagons if wagon.wagon_type == 'normal_wagon' %}
         <tr>
-            <td style="padding: 5px;width: 120px">[Wagen {{ wagon.id }}]</td>
-            <td style="padding: 5px;width: 120px">{{ wagon.track_width }}</td>
-            <td style="padding: 5px;width: 120px">{{ wagon.max_weight }}</td>
-            <td style="padding: 5px;width: 120px">{{ wagon.number_of_seats }}</td>
+            <td style="padding: 5px; width: 120px; text-align: left;">[Wagen {{ wagon.id }}]</td>
+            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.track_width }}</td>
+            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.max_weight }}</td>
+            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.number_of_seats }}</td>
         </tr>
         {% endfor %}
     </table>
