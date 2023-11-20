@@ -38,4 +38,4 @@ class AllTrainsResource(Resource):
 
             result.append(train_data)
 
-        return {'trains': result}
+        return result
