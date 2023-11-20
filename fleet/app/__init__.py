@@ -4,6 +4,8 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
+from flask_restful import Api
+
 from fleet.config import Config
 
 # Create a Flask application instance
@@ -19,3 +21,8 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 # Import routes after initializing the Flask app and SQLAlchemy
 from fleet.app import routes
+
+from fleet.app.resources import AllTrainsResource
+
+api = Api(app)
+api.add_resource(AllTrainsResource, '/fleet/trains')
