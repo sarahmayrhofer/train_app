@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from flask_restful import Api
+from flask_login import LoginManager
 
 from fleet.config import Config
 
@@ -13,6 +14,9 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+login = LoginManager(app)
+login.login_view = 'login'
 
 # fixes: RuntimeError: A secret key is required to use CSRF
 # https://stackoverflow.com/questions/47687307/how-do-you-solve-the-error-keyerror-a-secret-key-is-required-to-use-csrf-whe

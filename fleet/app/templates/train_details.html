@@ -22,6 +22,11 @@
             <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.max_traction }} t.</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td colspan="3">
+                <button onclick="window.location.href = '{{ train.id }}/edit'">Bearbeiten</button>
+            </td>
+        </tr>
     </table>
 
     <!-- Normal Wagons Table -->
@@ -41,6 +46,11 @@
             <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.number_of_seats }}</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td colspan="3">
+                <button onclick="window.location.href = '{{ train.id }}/edit'">Bearbeiten</button>
+            </td>
+        </tr>
     </table>
 </div>
 <script>

@@ -53,8 +53,10 @@
     {% block content %}{% endblock %}
 </div>
 
-<div style="position: fixed; bottom: 0; right: 0; background-color: white; padding: 5px;">
-    Eingeloggt als {{ user.username }}
+<div style="position: fixed; bottom: 20px; right: 20px; background-color: white; padding: 5px;">
+    {% if user.username %}
+    angemeldet als {{ user.username }}
+    {% endif %}
 </div>
 
 <script>

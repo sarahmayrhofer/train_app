@@ -1,6 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, IntegerField, StringField, DateField, FloatField, SelectField, SelectMultipleField
-from wtforms.validators import DataRequired, Optional
+from werkzeug.routing import ValidationError
+from wtforms import SubmitField, IntegerField, StringField, DateField, FloatField, SelectField, SelectMultipleField, PasswordField, BooleanField
+from wtforms.validators import DataRequired, Optional, Email, EqualTo
+
+from fleet.app.models import User
 
 
 class NewWagonForm(FlaskForm):
@@ -32,3 +35,28 @@ class NewTrainForm(FlaskForm):
     selected_locomotive = SelectField('Triebfahrzeug auswählen', coerce=int, validators=[DataRequired()])
 
     submit = SubmitField('Bestätigen')
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
+    submit = SubmitField('Sign In')
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Register')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different username.')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different email address.')

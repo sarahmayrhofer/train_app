@@ -4,6 +4,7 @@
 /fleet/tutorial/
 /fleet/env/
 /fleet/venv/
+/fleet/app/__pycache__/
 
 /route/__pycache__/
 /route/.vscode/
