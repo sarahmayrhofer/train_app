@@ -135,7 +135,7 @@ def delete_train(train_id):
     else:
         flash('Fehler', 'error')
 
-    return redirect(url_for('index'))  # Redirect to your desired page after deletion
+    return redirect(url_for('index'))
 
 
 # Users Page
