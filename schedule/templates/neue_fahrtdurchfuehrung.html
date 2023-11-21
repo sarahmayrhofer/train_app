@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="de">
 <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        function updateOutput() {
+            var slider = document.getElementById('percent_profit');
+            var output = document.getElementById('percent_profit_output');
+            output.textContent = slider.value;
+        }
+
+        var slider = document.getElementById('percent_profit');
+        slider.addEventListener('input', updateOutput);
+
+        // Initialer Aufruf der Funktion
+        updateOutput();
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         var dateFieldIndex = 1;
         document.getElementById('addDate').addEventListener('click', function () {
@@ -41,92 +55,70 @@
         });
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var zeitManuellGeaendert = false;
-
-        document.getElementById('zeit0').addEventListener('input', function (e) {
-            zeitManuellGeaendert = true;
-        });
-
-        document.getElementById('zeit0').addEventListener('change', function (e) {
-            if (zeitManuellGeaendert) {
-                pruefeVerfuegbarkeit(e);
-                zeitManuellGeaendert = false; // Zurücksetzen des Flags
-            }
-        });
-
-        function pruefeVerfuegbarkeit(e) {
-            var zugId = document.getElementById('zug_id').value;
-            var datum = document.getElementById('datum0').value;
-            var zeit = e.target.value;
-            var lineId = document.getElementById('line_id').value; // Abrufen der line_id
-
-            if (zugId && datum && zeit && lineId) {
-                var request = new XMLHttpRequest();
-                request.open('GET', '/check_availability?zug_id=' + zugId + '&datum=' + datum + '&zeit=' + zeit + '&line_id=' + lineId, true);
-                request.onload = function () {
-                    if (request.status >= 200 && request.status < 400) {
-                        var resp = JSON.parse(request.responseText);
-                        if (resp.belegt) {
-                            alert('Der Zug ist zu diesem Zeitpunkt bereits belegt oder der gewählte Zeitraum kollidiert mit einer bestehenden Belegung.');
-                            e.target.value = ''; // Löscht das Zeitfeld
-                        }
-                    } else {
-                        console.error('Server error');
-                    }
-                };
-                request.onerror = function() {
-                    console.error('Request error');
-                };
-                request.send();
-            }
-        }
-    });
 </script>
 
 <head>
     <meta charset="UTF-8">
     <title>Neue Fahrtdurchführung</title>
+    <style>
+        .form-section {
+            margin-bottom: 20px; /* Abstand zwischen den Sektionen */
+        }
+        .form-label {
+            display: block; /* Label in einer neuen Zeile */
+            margin-bottom: 5px; /* Kleiner Abstand unter dem Label */
+        }
+        #submit {
+            margin-top: 20px; /* Abstand oberhalb des Submit-Buttons */
+        }
+    </style>
 </head>
 <body>
     <h1>Neue Fahrtdurchführung anlegen</h1>
     <form action="{{ url_for('main.neue_fahrtdurchfuehrung') }}" method="POST">
         
-        <div id="Rest">
+        <div id="Rest" class="form-section">
             <label for="zug_id">Zug:</label>
             <select name="zug_id" id="zug_id" required>
                 {% for zug in zuege %}
-                <option value="{{ zug.id }}">{{ zug.name, zug.id }}</option>
+                <option value="{{ zug['id'] }}">{{ zug['name'], zug['id'] }}</option>
                 {% endfor %}
-            </select>
+            </select> <br>
     
             <label for="line">Linie/Strecke:</label>
             <select name="line_id" id="line_id" required>
                 {% for line in lines %}
                 <option value="{{ line['id'] }}">{{ line['nameOfLine'], line['id'] }}</option>
                 {% endfor %}
-            </select>
+            </select> <br>
     
             <label for="mitarbeiter_ids">Mitarbeiter-IDs (durch Komma getrennt):</label>
             <input type="text" name="mitarbeiter_ids" id="mitarbeiter_ids" required>
         </div>
 
-        <div id="datumsfelder">
+        <div id="datumsfelder" class="form-section">
             <label for="datum0">Datum:</label>
-            <input type="date" name="daten[]" id="datum0" required>
+            <input type="date" name="daten[]" id="datum0" required> <br>
+            <button type="button" id="addDate">Weiteres Datum hinzufügen</button>
         </div>
-        <button type="button" id="addDate">Weiteres Datum hinzufügen</button>
         
-        <div id="zeitfelder">
+        
+        <div id="zeitfelder" class="form-section">
             <label for="zeit0">Zeit:</label>
-            <input type="time" name="zeiten[]" id="zeit0" required>
+            <input type="time" name="zeiten[]" id="zeit0" required> <br>
+            <button type="button" id="addTime">Weitere Zeit hinzufügen</button>
         </div>
-        <button type="button" id="addTime">Weitere Zeit hinzufügen</button>        
+         
+        
+
+        <label for="percent_profit">Preisaufschlag (%):</label>
+        <input type="range" id="percent_profit" name="percent_profit" min="0" max="200" value="0">
+        <output id="percent_profit_output" for="percent_profit">0</output>%
 
         <div id="submit">
-        <input type="submit" value="Fahrtdurchführung erstellen">
+            <input type="submit" value="Fahrtdurchführung erstellen">
         </div>
-    </form>
+    </form> <br>
     <a href="{{ url_for('main.fahrtdurchfuehrungen') }}">Zurück zu den Fahrtdurchführungen</a>
 </body>
 </html>

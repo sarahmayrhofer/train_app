@@ -7,12 +7,19 @@ def get_lines():
         return response.json()
     else:
         return []
+    
+def get_trains():
+    response = requests.get("http://127.0.0.1:5002/fleet/trains")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return []
 
-def berechne_preise_und_bahnhof_ids(line):
+def berechne_preise_und_bahnhof_ids(line,percent_profit = 0, price_per_km = 100):
     preise = []
     bahnhof_ids = [line['startStationId']]
     for section in line['sections']:
-        preis = section['distance'] * 1.12
+        preis = (round(section['distance'] * price_per_km, 2) + section['fee'])*(1+percent_profit/100) #Presikalkulation kostendeckend + Profitaufschlag
         preise.append(preis)
         bahnhof_ids.append(section['endStationId'])
     return preise, bahnhof_ids

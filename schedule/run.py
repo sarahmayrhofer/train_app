@@ -1,5 +1,5 @@
 from flask import Flask
-from app.models import Train, Fahrtdurchführung
+from app.models import Fahrtdurchführung
 from app.routes import main
 from config import Config
 from app.db import db  # Importieren Sie die Datenbankinstanz
@@ -14,19 +14,12 @@ with app.app_context():
     db.create_all()
 
     # Prüfen, ob die Datenbank leer ist
-    if not Train.query.first():
-        # Erstellen Sie einige Züge
-        zug1 = Train(name="Zug 1")
-        zug2 = Train(name="Zug 2")
-        db.session.add(zug1)
-        db.session.add(zug2)
-        db.session.commit()  # Führen Sie zuerst einen commit durch, um die IDs zu generieren
-
+    if not Fahrtdurchführung.query.first():
         # Erstellen Sie einige Fahrtdurchführungen
-        fahrt1 = Fahrtdurchführung(datum=datetime(2023, 1, 1, 10, 0, 0), zug_id=zug1.id)
-        fahrt2 = Fahrtdurchführung(datum=datetime(2023, 1, 2, 12, 0, 0), zug_id=zug2.id)
-        fahrt3 = Fahrtdurchführung(datum=datetime(2023, 1, 5, 11, 0, 0), zug_id=zug1.id)
-        fahrt4 = Fahrtdurchführung(datum=datetime(2023, 2, 15, 11, 0, 0), zug_id=zug1.id)
+        fahrt1 = Fahrtdurchführung(datum=datetime(2023, 1, 1, 10, 0, 0))
+        fahrt2 = Fahrtdurchführung(datum=datetime(2023, 1, 2, 12, 0, 0))
+        fahrt3 = Fahrtdurchführung(datum=datetime(2023, 1, 5, 11, 0, 0))
+        fahrt4 = Fahrtdurchführung(datum=datetime(2023, 2, 15, 11, 0, 0))
         db.session.add(fahrt1)
         db.session.add(fahrt2)
         db.session.add(fahrt3)

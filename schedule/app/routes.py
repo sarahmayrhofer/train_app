@@ -1,10 +1,11 @@
 from flask import Blueprint
 from flask import render_template
 from flask import request, redirect, url_for, jsonify
-from .models import Fahrtdurchführung, Train
+from .models import Fahrtdurchführung
 from app.db import db
 from datetime import datetime
 from .api_services import *
+import json
 
 main = Blueprint('main', __name__)
 
@@ -29,10 +30,11 @@ def neue_fahrtdurchfuehrung():
         zug_id = request.form.get('zug_id') 
         mitarbeiter_ids = request.form.get('mitarbeiter_ids')
         line = hole_line(int(line_id))  # Funktion, die die Linieninformation abruft
+        percent_profit = request.form.get('percent_profit', type=int) or 0
 
         for datum_string in daten:
             for zeit_string in zeiten:
-                preise, bahnhof_ids = berechne_preise_und_bahnhof_ids(line)
+                preise, bahnhof_ids = berechne_preise_und_bahnhof_ids(line, percent_profit)
                 arr_zeiten = berechne_zeiten(line, zeit_string)
 
                 datum = datetime.strptime(datum_string, '%Y-%m-%d').date()
@@ -45,7 +47,7 @@ def neue_fahrtdurchfuehrung():
         return redirect(url_for('main.fahrtdurchfuehrungen'))
 
     # Hier wird das Formular für eine GET-Anfrage gerendert
-    zuege = Train.query.all()  # Liste der Züge abfragen
+    zuege = get_trains()  # Liste der Züge abfragen
     lines = get_lines()
     return render_template('neue_fahrtdurchfuehrung.html', zuege=zuege, lines=lines)  # Liste an die Vorlage übergeben
 
@@ -56,29 +58,24 @@ def loesche_fahrtdurchfuehrung(id):
     db.session.commit()
     return redirect(url_for('main.fahrtdurchfuehrungen'))
 
-@main.route('/check_availability')
-def check_availability():
-    zug_id = request.args.get('zug_id')
-    datum = request.args.get('datum')
-    zeit = request.args.get('zeit')
-    line_id = request.args.get('line_id')
+@main.route('/timetable', methods=['GET'])
+def api_fahrtdurchfuehrungen():
+    alle_fahrtdurchfuehrungen = Fahrtdurchführung.query.all()
+    fahrtdurchfuehrungen_liste = []
 
-    # Konvertieren Sie Datum und Zeit in ein DateTime-Objekt
-    startzeit_obj = datetime.strptime(f'{datum} {zeit}', '%Y-%m-%d %H:%M')
+    for fahrt in alle_fahrtdurchfuehrungen:
+        fahrt_dict = {
+            'id': fahrt.id,
+            'datum': fahrt.datum.isoformat(),
+            'zeit': fahrt.zeit.isoformat() if fahrt.zeit else None,
+            'endzeit': fahrt.endzeit.isoformat() if fahrt.endzeit else None,
+            'zug_id': fahrt.zug_id,
+            'line': fahrt.line,
+            'mitarbeiter_ids': [int(id.strip()) for id in fahrt.mitarbeiter_ids.split(',')] if fahrt.mitarbeiter_ids else [],
+            'preise': [float(preis.strip()) for preis in fahrt.preise[1:-1].split(',')] if fahrt.preise else [],
+            'bahnhof_ids': [int(id.strip()) for id in fahrt.bahnhof_ids[1:-1].split(',')] if fahrt.bahnhof_ids else [],
+            'zeiten': [zeit.strip() for zeit in fahrt.zeiten[1:-1].split(',')] if fahrt.zeiten else []
+        }
+        fahrtdurchfuehrungen_liste.append(fahrt_dict)
 
-    # Holen Sie die Linieninformationen, um die Gesamtdauer zu berechnen
-    line = hole_line(int(line_id))
-    if line is None:
-        return jsonify({'error': 'Linie nicht gefunden'}), 400
-
-    gesamtdauer = sum([section['distance'] / section['maxSpeed'] for section in line['sections']])
-    endzeit_obj = startzeit_obj + timedelta(hours=gesamtdauer)
-
-    # Überprüfen Sie, ob der Zug zu diesem Zeitraum belegt ist
-    konflikt = Fahrtdurchführung.query.filter_by(zug_id=zug_id).filter(
-        (Fahrtdurchführung.datum == datum) &
-        ((Fahrtdurchführung.zeit <= startzeit_obj) & (Fahrtdurchführung.endzeit >= startzeit_obj) |
-         (Fahrtdurchführung.zeit <= endzeit_obj) & (Fahrtdurchführung.endzeit >= endzeit_obj))
-    ).first() is not None
-
-    return jsonify({'belegt': konflikt})
+    return jsonify(fahrtdurchfuehrungen_liste)
