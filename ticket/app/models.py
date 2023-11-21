@@ -73,3 +73,75 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+
+class Sale(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    lineForTheSale = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
+    discount = db.Column(db.Float)
+
+    sale_line_rel = db.relationship('Line', foreign_keys=[lineForTheSale])
+
+    
+class Station(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nameOfStation = db.Column(db.String(64))
+    address = db.Column(db.String(120))
+    coordinates = db.Column(db.String(120))
+
+class Section(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    startStation = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    endStation = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    fee = db.Column(db.Float)
+    distance = db.Column(db.Float)
+    maxSpeed = db.Column(db.Integer)
+    trackWidth = db.Column(db.Integer)
+
+    start_station_rel = db.relationship('Station', foreign_keys=[startStation])
+    end_station_rel = db.relationship('Station', foreign_keys=[endStation])
+
+    @property
+    def sectionName(self):
+        return f"{self.start_station_rel.nameOfStation} - {self.end_station_rel.nameOfStation}"
+
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    section = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+    endDate = db.Column(db.Date)
+    officialText = db.Column(db.String(200))
+    internalText = db.Column(db.String(200))
+
+    section_rel = db.relationship('Section', backref=db.backref('events', lazy=True))
+
+    def __repr__(self):
+        return f'<Event {self.id}>'
+
+
+# Association table
+line_sections = db.Table('line_sections',
+    db.Column('line_id', db.Integer, db.ForeignKey('line.id')),
+    db.Column('section_id', db.Integer, db.ForeignKey('section.id'), nullable=False),
+    db.Column('order', db.Integer)
+)
+
+class Line(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nameOfLine = db.Column(db.String(64))
+
+    sections = db.relationship('Section', secondary=line_sections, order_by="line_sections.c.order", backref=db.backref('lines', lazy='dynamic'))
+
+    @property
+    def startStation(self):
+        if self.sections:
+            return self.sections[0].start_station_rel
+        return None
+
+    @property
+    def endStation(self):
+        if self.sections:
+            return self.sections[-1].end_station_rel
+        return None
+
+

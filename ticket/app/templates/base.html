@@ -10,6 +10,8 @@
     <body>
         <div>
             Microblog:
+            <a href="{{ url_for('create_sale') }}">Create a new sale</a>
+            <a href="{{ url_for('sales') }}">View all sales</a>
             <a href="{{ url_for('index') }}">Home</a>
             {% if current_user.is_anonymous %}
             <a href="{{ url_for('login') }}">Login</a>

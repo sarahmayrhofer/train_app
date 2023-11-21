@@ -3,8 +3,8 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm
-from app.models import User
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm, SaleForm
+from app.models import Sale, User
 
 
 @app.before_request
@@ -17,18 +17,22 @@ def before_request():
 @app.route('/')
 @app.route('/index')
 @login_required
+
+
+
 def index():
     posts = [
         {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
+            'author': {'username': 'Ticket App'},
+            'body': 'Welcome!'
         },
         {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
+            'author': {'username': 'Ticket App'},
+            'body': 'You can crete discounts for different routes!'
         }
     ]
     return render_template('index.html', title='Home', posts=posts)
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -137,3 +141,42 @@ def unfollow(username):
         return redirect(url_for('user', username=username))
     else:
         return redirect(url_for('index'))
+    
+@app.route('/create_sale', methods=['GET', 'POST'])
+def create_sale():
+    form = SaleForm()
+    if form.validate_on_submit():
+        sale = Sale(discount=form.discount.data)
+        db.session.add(sale)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('create_sale.html', form=form)
+
+
+@app.route('/sales', methods=['GET'])
+def sales():
+    sales = Sale.query.all()
+    return render_template('sales.html', sales=sales)
+
+
+@app.route('/edit_sale/<int:id>', methods=['GET', 'POST'])
+def edit_sale(id):
+    sale = Sale.query.get_or_404(id)
+    form = SaleForm()
+
+    if form.validate_on_submit():
+        sale.discount = form.discount.data
+        db.session.commit()
+        return redirect(url_for('sales'))
+
+    elif request.method == 'GET':
+        form.discount.data = sale.discount
+
+    return render_template('edit_sale.html', form=form)
+
+@app.route('/delete_sale/<int:id>', methods=['POST'])
+def delete_sale(id):
+    sale = Sale.query.get_or_404(id)
+    db.session.delete(sale)
+    db.session.commit()
+    return redirect(url_for('sales'))

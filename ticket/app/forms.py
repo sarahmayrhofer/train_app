@@ -50,3 +50,13 @@ class EditProfileForm(FlaskForm):
 
 class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')
+
+
+from flask_wtf import FlaskForm
+from wtforms import FloatField, SubmitField
+from wtforms.validators import DataRequired
+
+class SaleForm(FlaskForm):
+    discount = FloatField('Discount', validators=[DataRequired()])
+    submit = SubmitField('Create Sale')
+    
