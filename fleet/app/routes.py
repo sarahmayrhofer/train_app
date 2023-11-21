@@ -123,6 +123,20 @@ def new_train():
 
     return render_template('new_train.html', page_name='Neuer Zug', user=current_user, form=form)
 
+@app.route('/delete_train/<int:train_id>', methods=['GET', 'POST'])
+def delete_train(train_id):
+    train = Train.query.get(train_id)
+
+    if train:
+        db.session.delete(train)
+        db.session.commit()
+
+        flash(f'Zug {train.name} gelöscht!', 'success')
+    else:
+        flash('Fehler', 'error')
+
+    return redirect(url_for('index'))
+
 
 # Users Page
 @app.route('/users/')

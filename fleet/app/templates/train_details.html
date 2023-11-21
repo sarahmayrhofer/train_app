@@ -53,6 +53,8 @@
         </tr>
     </table>
 </div>
+<br>
+<button onclick="deleteTrain('{{ train.id }}')">Zug löschen</button>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var totalMaxWeightElement = document.getElementById('totalMaxWeight');
@@ -70,5 +72,14 @@
     totalMaxWeightElement.textContent = totalMaxWeight;
     totalSeatsElement.textContent = totalSeats;
   });
+
+  function deleteTrain(trainId) {
+    if (confirm("Möchten Sie diesen Zug wirklich löschen?")) {
+      // Perform deletion logic, e.g., make an AJAX request to delete the train
+      window.location.href = '/delete_train/' + trainId;
+
+      console.log('Train deleted:', trainId);
+    }
+  }
 </script>
 {% endblock %}
