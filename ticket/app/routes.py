@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm, SaleForm
-from app.models import Sale, User
+from app.models import Sale, User, Line
 
 
 @app.before_request
@@ -141,12 +141,13 @@ def unfollow(username):
         return redirect(url_for('user', username=username))
     else:
         return redirect(url_for('index'))
-    
+
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
     form = SaleForm()
+    form.line.choices = [(line.id, line.nameOfLine) for line in Line.query.order_by('nameOfLine')]
     if form.validate_on_submit():
-        sale = Sale(discount=form.discount.data)
+        sale = Sale(discount=form.discount.data, lineForTheSale=form.line.data)
         db.session.add(sale)
         db.session.commit()
         return redirect(url_for('index'))

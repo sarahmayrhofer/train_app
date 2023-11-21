@@ -55,8 +55,9 @@ class EmptyForm(FlaskForm):
 from flask_wtf import FlaskForm
 from wtforms import FloatField, SubmitField
 from wtforms.validators import DataRequired
+from wtforms import SelectField
 
 class SaleForm(FlaskForm):
     discount = FloatField('Discount', validators=[DataRequired()])
+    line = SelectField('Line', coerce=int)
     submit = SubmitField('Create Sale')
-    
