@@ -26,6 +26,12 @@
         <br>
     </p>
 
+    <p>
+        <label for="{{ form.price_per_km.id }}">{{ form.price_per_km.label }}:</label><br>
+        {{ form.price_per_km }}
+        <br>
+    </p>
+
     {{ form.submit(disabled="true", id="save_button") }}
 </form>
 

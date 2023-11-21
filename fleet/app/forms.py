@@ -30,6 +30,7 @@ class NewMaintenanceForm(FlaskForm):
 class NewTrainForm(FlaskForm):
     name = StringField('Zug Name', validators=[DataRequired()])
     position = StringField('Zug Position (optional)')
+    price_per_km = FloatField('Preis pro Kilometer', validators=[DataRequired()])
 
     selected_wagons = SelectMultipleField('Wagons auswählen', coerce=int, validators=[DataRequired()])
     selected_locomotive = SelectField('Triebfahrzeug auswählen', coerce=int, validators=[DataRequired()])

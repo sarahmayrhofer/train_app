@@ -1,9 +1,7 @@
-from flask import request
 from flask import redirect, url_for, flash
 from flask import render_template
-
-from flask_login import login_user, logout_user, current_user, login_required
-
+from flask import request
+from flask_login import login_user, current_user, login_required
 from werkzeug.urls import url_parse
 
 from fleet.app import app, db
@@ -117,6 +115,7 @@ def new_train():
 
         # Create a new train and associate all selected wagons
         train = Train(name=form.name.data, wagons=all_selected_wagons)
+        train.price_per_km = form.price_per_km.data
 
         db.session.add(train)
         db.session.commit()
