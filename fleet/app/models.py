@@ -13,6 +13,16 @@ class Train(db.Model):
 
     maintenances = db.relationship('Maintenance', backref='train', lazy=True)
 
+    def total_max_weight(self):
+        normal_wagons = NormalWagon.query.filter_by(train_id=self.id).all()
+        total_max_weight = sum([wagon.max_weight for wagon in normal_wagons if wagon.max_weight is not None])
+        return total_max_weight
+
+    def total_number_of_seats(self):
+        normal_wagons = NormalWagon.query.filter_by(train_id=self.id).all()
+        total_number_of_seats = sum([wagon.number_of_seats for wagon in normal_wagons if wagon.number_of_seats is not None])
+        return total_number_of_seats
+
     def __repr__(self):
         return f"<Train(id={self.id}, name={self.name}, wagons={self.wagons}, position={self.position})>"
 
