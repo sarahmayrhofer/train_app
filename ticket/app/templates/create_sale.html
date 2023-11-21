@@ -1,0 +1,16 @@
+<!-- create_sale.html -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Create Sale</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.discount.label }}<br>
+            {{ form.discount(size=32) }}<br>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+
+
