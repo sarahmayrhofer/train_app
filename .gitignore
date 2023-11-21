@@ -3,7 +3,6 @@
 /.vscode/
 /fleet/tutorial/
 /fleet/env/
-/fleet/venv/
 /fleet/app/__pycache__/
 
 /route/__pycache__/
