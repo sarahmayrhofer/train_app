@@ -14,6 +14,7 @@ class AllTrainsResource(Resource):
                 'id': train.id,
                 'name': train.name,
                 'position': train.position,
+                'price_per_km': train.price_per_km,
                 'wagons': [],
                 'maintenances': []
             }

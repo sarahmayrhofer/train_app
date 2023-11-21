@@ -8,6 +8,7 @@ class Train(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
     position = db.Column(db.String(50), nullable=True)
+    price_per_km = db.Column(db.Float, nullable=True)
 
     wagons = db.relationship('Wagon', backref='train', lazy=True)
 
