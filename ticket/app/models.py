@@ -77,7 +77,10 @@ class Post(db.Model):
 
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    lineForTheSale = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
     discount = db.Column(db.Float)
+
+    sale_line_rel = db.relationship('Line', foreign_keys=[lineForTheSale])
 
     
 class Station(db.Model):
@@ -140,4 +143,5 @@ class Line(db.Model):
         if self.sections:
             return self.sections[-1].end_station_rel
         return None
+
 
