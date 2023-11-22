@@ -4,6 +4,7 @@
 
 <style>
     .table-container {
+        height: 100px;
         display: flex;
     }
 
@@ -11,6 +12,10 @@
         border-collapse: collapse;
         width: 30%;
         margin: 10px;
+    }
+
+    tr {
+        height: 20px;
     }
 
     th, td {
@@ -33,11 +38,10 @@
     <table>
         <caption>Züge</caption>
         <tr>
-            <th>Zug ID</th>
+            <th style="width: 80px">Zug ID</th>
             <th>Zug Name</th>
             <th>Wartung</th>
         </tr>
-        <!-- Iterate through your list of trains and create rows -->
         {% for train in trains %}
         <tr>
             <td><a href="/trains/{{ train.id }}">{{ train.id }}</a></td>
@@ -55,14 +59,21 @@
     <table>
         <caption>Triebwagenübersicht</caption>
         <tr>
-            <th>Wagen ID</th>
+            <th style="width: 80px">Wagen ID</th>
+            <th style="width: 80px">Zugkraft</th>
             <th>Zug</th>
         </tr>
-        <!-- Iterate through your list of trains and create rows -->
         {% for locomotive in locomotives %}
         <tr>
-            <td>{{ locomotive.id }}</td>
-            <td>{{ locomotive.train_id }}</td>
+            <td>Wagen {{ locomotive.id }}</td>
+            <td>{{ locomotive.max_traction }} t.</td>
+            <td>
+                {% if locomotive.train_id %}
+                <a href="/trains/{{ locomotive.train_id }}">{{ locomotive.train_id }}</a>
+                {% else %}
+                -
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
         <tr>
@@ -75,18 +86,27 @@
     <table>
         <caption>Personenwagenübersicht</caption>
         <tr>
-            <th>Wagen ID</th>
+            <th style="width: 80px">Wagen ID</th>
+            <th style="width: 100px">Max. Gewicht</th>
+            <th style="width: 80px">Sitzplätze</th>
             <th>Zug</th>
         </tr>
-        <!-- Iterate through your list of trains and create rows -->
         {% for wagon in wagons %}
         <tr>
-            <td>{{ wagon.id }}</td>
-            <td>{{ wagon.train_id }}</td>
+            <td>Wagen {{ wagon.id }}</td>
+            <td>{{ wagon.max_weight }} t.</td>
+            <td>{{ wagon.number_of_seats }}</td>
+            <td>
+                {% if wagon.train_id %}
+                <a href="/trains/{{ wagon.train_id }}">{{ wagon.train_id }}</a>
+                {% else %}
+                -
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3">
+            <td colspan="4">
                 <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
             </td>
         </tr>
