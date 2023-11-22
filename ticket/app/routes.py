@@ -5,6 +5,10 @@ from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm, SaleForm
 from app.models import Sale, User, Line
+from flask import request, redirect, url_for, render_template
+from app import db
+from app.models import Sale
+from app.forms import SaleForm
 
 
 @app.before_request
@@ -105,6 +109,8 @@ def edit_profile():
 
 
 
+
+
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
     form = SaleForm()
@@ -125,22 +131,28 @@ def sales():
     lines = Line.query.all()
     return render_template('sales.html', sales=sales, lines=lines)
 
+
+
 @app.route('/edit_sale/<int:id>', methods=['GET', 'POST'])
 def edit_sale(id):
     sale = Sale.query.get_or_404(id)
     form = SaleForm()
+    form.line.choices = [(line.id, line.nameOfLine) for line in Line.query.order_by('nameOfLine')]
 
     if form.validate_on_submit():
         sale.discount = form.discount.data
+        sale.lineForTheSale = form.line.data
         db.session.commit()
         return redirect(url_for('sales'))
 
     elif request.method == 'GET':
         form.discount.data = sale.discount
+        form.line.data = sale.lineForTheSale
 
     print(form.errors)  # print form errors
 
     return render_template('edit_sale.html', form=form)
+
 
 @app.route('/delete_sale/<int:id>', methods=['POST'])
 def delete_sale(id):
