@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from werkzeug.routing import ValidationError
-from wtforms import SubmitField, IntegerField, StringField, DateField, FloatField, SelectField, SelectMultipleField, PasswordField, BooleanField
+from wtforms import SubmitField, IntegerField, StringField, DateField, FloatField, SelectField, SelectMultipleField, \
+    PasswordField, BooleanField
 from wtforms.validators import DataRequired, Optional, Email, EqualTo
 
 from fleet.app.models import User
@@ -15,7 +16,7 @@ class NewWagonForm(FlaskForm):
     max_traction = FloatField('Max. Zugkraft', validators=[Optional()])
     max_weight = FloatField('Max. Gewicht', validators=[Optional()])
     number_of_seats = IntegerField('Anz. an Sitzplätzen', validators=[Optional()])
-    wagon_id = IntegerField( validators=[Optional()])
+    wagon_id = IntegerField(validators=[Optional()])
     submit = SubmitField('Bestätigen')
 
 
@@ -30,26 +31,25 @@ class NewMaintenanceForm(FlaskForm):
 class NewTrainForm(FlaskForm):
     name = StringField('Zug Name', validators=[DataRequired()])
     position = StringField('Zug Position (optional)')
-    price_per_km = FloatField('Preis pro Kilometer', validators=[DataRequired()])
-
+    price_per_km = FloatField('Preis pro Kilometer', validators=[])
     selected_wagons = SelectMultipleField('Wagons auswählen', coerce=int, validators=[DataRequired()])
     selected_locomotive = SelectField('Triebfahrzeug auswählen', coerce=int, validators=[DataRequired()])
-
     submit = SubmitField('Bestätigen')
 
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Passwort', validators=[DataRequired()])
     remember_me = BooleanField('Angemeldet bleiben')
     submit = SubmitField('Anmelden')
+
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Passwort', validators=[DataRequired()])
     password2 = PasswordField(
-        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+        'Passwort wiederholen', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Registrieren')
 
     def validate_username(self, username):

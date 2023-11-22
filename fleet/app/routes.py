@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 
 from fleet.app import app, db
 from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm
-from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train, User
+from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train, User, Wagon
 
 
 @app.before_request
@@ -53,20 +53,44 @@ def new_wagon():
     return render_template('new_wagon.html', page_name='Neuer Wagen', user=current_user, form=form)
 
 
+@app.route('/wagon/<int:wagon_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_wagon_by_id(wagon_id):
+    wagon = Wagon.query.get(wagon_id)
+
+    form = NewWagonForm()
+
+    if form.validate_on_submit():
+        wagon.wagon_type = form.wagon_type.data
+        wagon.track_width = form.track_width.data
+        wagon.train_id = form.train_id.data
+        setattr(wagon, 'max_traction', form.max_traction.data)
+        setattr(wagon, 'max_weight', form.max_weight.data)
+        setattr(wagon, 'number_of_seats', form.number_of_seats.data)
+
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    # Set form field values with wagon data
+    form.wagon_type.data = wagon.wagon_type
+    form.track_width.data = wagon.track_width
+    form.train_id.data = wagon.train_id
+    form.max_traction.data = getattr(wagon, 'max_traction', None)
+    form.max_weight.data = getattr(wagon, 'max_weight', None)
+    form.number_of_seats.data = getattr(wagon, 'number_of_seats', None)
+    form.wagon_id.data = wagon.id
+
+    return render_template('edit_wagon.html', page_name=f'Wagon: {wagon_id} bearbeiten', user=current_user,
+                           form=form, wagon=wagon)
+
+
 # Train by ID
 @app.route('/trains/<int:train_id>')
 @login_required
 def train_by_id(train_id):
     train = Train.query.get(train_id)
     return render_template('train_details.html', page_name=f'Zug: {train.name}', user=current_user, train=train)
-
-
-@app.route('/trains/<int:train_id>/edit')
-@login_required
-def edit_train_by_id(train_id):
-    train = Train.query.get(train_id)
-    return render_template('train_details.html', page_name=f'Zug: {train.name} bearbeiten', user=current_user,
-                           train=train)
 
 
 # Create a new train
@@ -123,7 +147,75 @@ def new_train():
 
     return render_template('new_train.html', page_name='Neuer Zug', user=current_user, form=form)
 
-@app.route('/delete_train/<int:train_id>', methods=['GET', 'POST'])
+
+@app.route('/editTrain/<int:train_id>', methods=['GET', 'POST'])
+@login_required
+def edit_train(train_id):
+    train = Train.query.get(train_id)
+
+    # only get wagons that are not already assigned to a train
+    wagons = NormalWagon.query.filter((NormalWagon.train_id.is_(None)) | (NormalWagon.train_id == train_id)).all()
+    locomotives = Locomotive.query.filter((Locomotive.train_id.is_(None)) | (Locomotive.train_id == train_id)).all()
+
+    existing_wagons = []
+    existing_locomotives = []
+
+    # loop over wagons to get their information
+    for wagon in wagons:
+        wagon_info = {
+            'id': wagon.id,
+            'name': f'[Wagen {wagon.id}] {wagon.number_of_seats} Sitzplätze ({wagon.max_weight} t.)',
+            'type': 'normal_wagon',
+        }
+        existing_wagons.append(wagon_info)
+
+    for wagon in locomotives:
+        wagon_info = {
+            'id': wagon.id,
+            'name': f'[Wagen {wagon.id}] (max. {wagon.max_traction} t.)',
+            'type': 'locomotive',
+        }
+        existing_locomotives.append(wagon_info)
+
+    form = NewTrainForm()
+    form.selected_wagons.choices = [(wagon['id'], wagon['name']) for wagon in existing_wagons]
+    form.selected_locomotive.choices = [(wagon['id'], wagon['name']) for wagon in existing_locomotives]
+
+    if form.validate_on_submit():
+        train.name = form.name.data
+        train.price_per_km = form.price_per_km.data
+
+
+        selected_wagon_ids = form.selected_wagons.data
+        selected_wagons = NormalWagon.query.filter(NormalWagon.id.in_(selected_wagon_ids)).all()
+
+        selected_locomotive_id = form.selected_locomotive.data
+        selected_locomotive = Locomotive.query.get(selected_locomotive_id)
+
+        all_selected_wagons = selected_wagons + [selected_locomotive] if selected_locomotive else selected_wagons
+
+        train.wagons = all_selected_wagons
+
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    # Pre-fill the form with data from the existing train
+    form.name.data = train.name
+    form.price_per_km.data = train.price_per_km
+
+    # Populate selected_wagons and selected_locomotive based on existing train's wagons
+    selected_wagons = [wagon.id for wagon in train.wagons if isinstance(wagon, NormalWagon)]
+    selected_locomotive = [wagon.id for wagon in train.wagons if isinstance(wagon, Locomotive)][
+        0] if train.wagons and any(isinstance(wagon, Locomotive) for wagon in train.wagons) else None
+
+    form.selected_wagons.data = selected_wagons
+    form.selected_locomotive.data = selected_locomotive
+
+    return render_template('edit_train.html', page_name='Zug bearbeiten', user=current_user, form=form)
+
+
+@app.route('/deleteTrain/<int:train_id>', methods=['GET', 'POST'])
 def delete_train(train_id):
     train = Train.query.get(train_id)
 
@@ -132,6 +224,21 @@ def delete_train(train_id):
         db.session.commit()
 
         flash(f'Zug {train.name} gelöscht!', 'success')
+    else:
+        flash('Fehler', 'error')
+
+    return redirect(url_for('index'))
+
+
+@app.route('/delete_wagon/<int:wagon_id>', methods=['GET', 'POST'])
+def delete_wagon(wagon_id):
+    wagon = Wagon.query.get(wagon_id)
+
+    if wagon:
+        db.session.delete(wagon)
+        db.session.commit()
+
+        flash(f'Wagen {wagon_id} gelöscht!', 'success')
     else:
         flash('Fehler', 'error')
 

@@ -1,59 +1,84 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    .table-container {
+        height: 100px;
+        display: flex;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 30%;
+        margin: 10px;
+    }
+
+    tr {
+        height: 20px;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+</style>
+
 <h1>{{ train.name }}</h1>
 <p>Anzahl der Waggons: {{ train.wagons|length }}</p>
+<p>Preis pro Km.: {{ train.price_per_km }}€</p><br>
 <p>Max. Gewicht: <span id="totalMaxWeight"></span></p>
 <p>Anz. der Sitze: <span id="totalSeats"></span></p>
 
-<div style="display: flex;">
-    <!-- Locomotive Table -->
+<div class="table-container">
     <table>
-        <caption>Triebwagen</caption>
+        <caption><h3>Triebwagenübersicht</h3></caption>
         <tr>
-            <th style="width: 10px; text-align: left;">ID</th>
-            <th style="width: 120px; text-align: left;">Spurweite</th>
-            <th style="width: 120px; text-align: left;">Max. Zugkraft</th>
+            <th style="width: 140px">Wagen ID</th>
+            <th style="width: 80px">Zugkraft</th>
         </tr>
         {% for wagon in train.wagons if wagon.wagon_type == 'locomotive' %}
         <tr>
-            <td style="padding: 5px; width: 80px; text-align: left;">[Wagen {{ wagon.id }}]</td>
-            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.track_width }} mm.</td>
-            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.max_traction }} t.</td>
+            <td><a href="/wagon/{{ wagon.id }}/edit">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
+
+            <td>{{ wagon.max_traction }} t.</td>
         </tr>
         {% endfor %}
-        <tr>
-            <td colspan="3">
-                <button onclick="window.location.href = '{{ train.id }}/edit'">Bearbeiten</button>
-            </td>
-        </tr>
     </table>
 
-    <!-- Normal Wagons Table -->
-    <table style="margin-left: 100px;">
-        <caption>Personenwagen</caption>
+    <table>
+        <caption><h3>Personenwagenübersicht</h3></caption>
         <tr>
-            <th style="width: 10px; text-align: left;">ID</th>
-            <th style="width: 120px; text-align: left;">Spurweite</th>
-            <th style="width: 120px; text-align: left;">Max. Gewicht</th>
-            <th style="width: 120px; text-align: left;">Sitze</th>
+            <th style="width: 140px">Wagen ID</th>
+            <th style="width: 100px">Max. Gewicht</th>
+            <th style="width: 80px">Sitzplätze</th>
         </tr>
         {% for wagon in train.wagons if wagon.wagon_type == 'normal_wagon' %}
         <tr>
-            <td style="padding: 5px; width: 120px; text-align: left;">[Wagen {{ wagon.id }}]</td>
-            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.track_width }}</td>
-            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.max_weight }}</td>
-            <td style="padding: 5px; width: 120px; text-align: left;">{{ wagon.number_of_seats }}</td>
+            <td><a href="/wagon/{{ wagon.id }}/edit">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
+            <td>{{ wagon.max_weight }} t.</td>
+            <td>{{ wagon.number_of_seats }}</td>
         </tr>
         {% endfor %}
-        <tr>
-            <td colspan="3">
-                <button onclick="window.location.href = '{{ train.id }}/edit'">Bearbeiten</button>
-            </td>
-        </tr>
     </table>
+
 </div>
 <br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<button onclick="editTrain('{{ train.id }}')">Zug bearbeiten</button>
 <button onclick="deleteTrain('{{ train.id }}')">Zug löschen</button>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -75,11 +100,12 @@
 
   function deleteTrain(trainId) {
     if (confirm("Möchten Sie diesen Zug wirklich löschen?")) {
-      // Perform deletion logic, e.g., make an AJAX request to delete the train
-      window.location.href = '/delete_train/' + trainId;
-
-      console.log('Train deleted:', trainId);
+      window.location.href = '/deleteTrain/' + trainId;
     }
+  }
+
+  function editTrain(trainId) {
+      window.location.href = '/editTrain/' + trainId;
   }
 </script>
 {% endblock %}

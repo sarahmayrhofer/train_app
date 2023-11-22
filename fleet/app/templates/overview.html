@@ -4,6 +4,7 @@
 
 <style>
     .table-container {
+        height: 100px;
         display: flex;
     }
 
@@ -11,6 +12,10 @@
         border-collapse: collapse;
         width: 30%;
         margin: 10px;
+    }
+
+    tr {
+        height: 20px;
     }
 
     th, td {
@@ -31,13 +36,13 @@
 <body>
 <div class="table-container">
     <table>
-        <caption>Züge</caption>
+        <caption><h3>Züge</h3></caption>
         <tr>
-            <th>Zug ID</th>
+            <th style="width: 80px">Zug ID</th>
             <th>Zug Name</th>
-            <th>Wartung</th>
+            <th>Nächste Wartung</th>
+
         </tr>
-        <!-- Iterate through your list of trains and create rows -->
         {% for train in trains %}
         <tr>
             <td><a href="/trains/{{ train.id }}">{{ train.id }}</a></td>
@@ -53,45 +58,73 @@
     </table>
 
     <table>
-        <caption>Triebwagenübersicht</caption>
+        <caption><h3>Triebwagenübersicht</h3></caption>
         <tr>
-            <th>Wagen ID</th>
+            <th style="width: 140px">Wagen ID</th>
+            <th style="width: 80px">Zugkraft</th>
             <th>Zug</th>
+            <th style="width: 25px"></th>
         </tr>
-        <!-- Iterate through your list of trains and create rows -->
         {% for locomotive in locomotives %}
         <tr>
-            <td>{{ locomotive.id }}</td>
-            <td>{{ locomotive.train_id }}</td>
+            <td><a href="/wagon/{{ locomotive.id }}/edit">Wagen {{ locomotive.id }}</a> <small>({{ locomotive.track_width }}mm)</small></td>
+
+            <td>{{ locomotive.max_traction }} t.</td>
+            <td>
+                {% if locomotive.train_id %}
+                <a href="/trains/{{ locomotive.train_id }}">{{ locomotive.train_id }}</a>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td onclick="deleteWagon('{{ locomotive.id }}')">❌</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3">
+            <td colspan="4">
                 <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
             </td>
         </tr>
     </table>
 
     <table>
-        <caption>Personenwagenübersicht</caption>
+        <caption><h3>Personenwagenübersicht</h3></caption>
         <tr>
-            <th>Wagen ID</th>
+            <th style="width: 140px">Wagen ID</th>
+            <th style="width: 100px">Max. Gewicht</th>
+            <th style="width: 80px">Sitzplätze</th>
             <th>Zug</th>
+            <th style="width: 25px"></th>
         </tr>
-        <!-- Iterate through your list of trains and create rows -->
         {% for wagon in wagons %}
         <tr>
-            <td>{{ wagon.id }}</td>
-            <td>{{ wagon.train_id }}</td>
+            <td><a href="/wagon/{{ wagon.id }}/edit">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
+            <td>{{ wagon.max_weight }} t.</td>
+            <td>{{ wagon.number_of_seats }}</td>
+            <td>
+                {% if wagon.train_id %}
+                <a href="/trains/{{ wagon.train_id }}">{{ wagon.train_id }}</a>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td onclick="deleteWagon('{{ wagon.id }}')">❌</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3">
+            <td colspan="5">
                 <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
             </td>
         </tr>
     </table>
 </div>
 
+<script>
+  function deleteWagon(wagonId) {
+    if (confirm(`Möchten Sie Wagen ${wagonId} wirklich löschen?`)) {
+      window.location.href = '/delete_wagon/' + wagonId;
+    }
+  }
+</script>
 
 {% endblock %}
