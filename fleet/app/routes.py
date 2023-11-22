@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 
 from fleet.app import app, db
 from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm
-from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train, User
+from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train, User, Wagon
 
 
 @app.before_request
@@ -123,6 +123,7 @@ def new_train():
 
     return render_template('new_train.html', page_name='Neuer Zug', user=current_user, form=form)
 
+
 @app.route('/delete_train/<int:train_id>', methods=['GET', 'POST'])
 def delete_train(train_id):
     train = Train.query.get(train_id)
@@ -132,6 +133,21 @@ def delete_train(train_id):
         db.session.commit()
 
         flash(f'Zug {train.name} gelöscht!', 'success')
+    else:
+        flash('Fehler', 'error')
+
+    return redirect(url_for('index'))
+
+
+@app.route('/delete_wagon/<int:wagon_id>', methods=['GET', 'POST'])
+def delete_wagon(wagon_id):
+    wagon = Wagon.query.get(wagon_id)
+
+    if wagon:
+        db.session.delete(wagon)
+        db.session.commit()
+
+        flash(f'Wagen {wagon_id} gelöscht!', 'success')
     else:
         flash('Fehler', 'error')
 

@@ -75,7 +75,6 @@
 
   function deleteTrain(trainId) {
     if (confirm("Möchten Sie diesen Zug wirklich löschen?")) {
-      // Perform deletion logic, e.g., make an AJAX request to delete the train
       window.location.href = '/delete_train/' + trainId;
 
       console.log('Train deleted:', trainId);

@@ -36,11 +36,12 @@
 <body>
 <div class="table-container">
     <table>
-        <caption>Züge</caption>
+        <caption><h3>Züge</h3></caption>
         <tr>
             <th style="width: 80px">Zug ID</th>
             <th>Zug Name</th>
-            <th>Wartung</th>
+            <th>Nächste Wartung</th>
+
         </tr>
         {% for train in trains %}
         <tr>
@@ -57,15 +58,16 @@
     </table>
 
     <table>
-        <caption>Triebwagenübersicht</caption>
+        <caption><h3>Triebwagenübersicht</h3></caption>
         <tr>
-            <th style="width: 80px">Wagen ID</th>
+            <th style="width: 140px">Wagen ID</th>
             <th style="width: 80px">Zugkraft</th>
             <th>Zug</th>
+            <th style="width: 25px"></th>
         </tr>
         {% for locomotive in locomotives %}
         <tr>
-            <td>Wagen {{ locomotive.id }}</td>
+            <td>Wagen {{ locomotive.id }} <small>({{ locomotive.track_width }}mm)</small></td>
             <td>{{ locomotive.max_traction }} t.</td>
             <td>
                 {% if locomotive.train_id %}
@@ -74,26 +76,28 @@
                 -
                 {% endif %}
             </td>
+            <td onclick="deleteWagon('{{ locomotive.id }}')">❌</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="3">
+            <td colspan="4">
                 <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
             </td>
         </tr>
     </table>
 
     <table>
-        <caption>Personenwagenübersicht</caption>
+        <caption><h3>Personenwagenübersicht</h3></caption>
         <tr>
-            <th style="width: 80px">Wagen ID</th>
+            <th style="width: 140px">Wagen ID</th>
             <th style="width: 100px">Max. Gewicht</th>
             <th style="width: 80px">Sitzplätze</th>
             <th>Zug</th>
+            <th style="width: 25px"></th>
         </tr>
         {% for wagon in wagons %}
         <tr>
-            <td>Wagen {{ wagon.id }}</td>
+            <td>Wagen {{ wagon.id }} <small>({{ wagon.track_width }}mm)</small></td>
             <td>{{ wagon.max_weight }} t.</td>
             <td>{{ wagon.number_of_seats }}</td>
             <td>
@@ -103,15 +107,23 @@
                 -
                 {% endif %}
             </td>
+            <td onclick="deleteWagon('{{ wagon.id }}')">❌</td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="4">
+            <td colspan="5">
                 <button onclick="window.location.href = './newWagon'">Hinzufügen</button>
             </td>
         </tr>
     </table>
 </div>
 
+<script>
+  function deleteWagon(wagonId) {
+    if (confirm(`Möchten Sie Wagen ${wagonId} wirklich löschen?`)) {
+      window.location.href = '/delete_wagon/' + wagonId;
+    }
+  }
+</script>
 
 {% endblock %}
