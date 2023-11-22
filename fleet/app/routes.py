@@ -53,6 +53,38 @@ def new_wagon():
     return render_template('new_wagon.html', page_name='Neuer Wagen', user=current_user, form=form)
 
 
+@app.route('/wagon/<int:wagon_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_wagon_by_id(wagon_id):
+    wagon = Wagon.query.get(wagon_id)
+
+    form = NewWagonForm()
+
+    if form.validate_on_submit():
+        wagon.wagon_type = form.wagon_type.data
+        wagon.track_width = form.track_width.data
+        wagon.train_id = form.train_id.data
+        setattr(wagon, 'max_traction', form.max_traction.data)
+        setattr(wagon, 'max_weight', form.max_weight.data)
+        setattr(wagon, 'number_of_seats', form.number_of_seats.data)
+
+        db.session.commit()
+
+        return redirect(url_for('index'))
+
+    # Set form field values with wagon data
+    form.wagon_type.data = wagon.wagon_type
+    form.track_width.data = wagon.track_width
+    form.train_id.data = wagon.train_id
+    form.max_traction.data = getattr(wagon, 'max_traction', None)
+    form.max_weight.data = getattr(wagon, 'max_weight', None)
+    form.number_of_seats.data = getattr(wagon, 'number_of_seats', None)
+    form.wagon_id.data = wagon.id
+
+    return render_template('edit_wagon.html', page_name=f'Wagon: {wagon_id} bearbeiten', user=current_user,
+                           form=form, wagon=wagon)
+
+
 # Train by ID
 @app.route('/trains/<int:train_id>')
 @login_required
