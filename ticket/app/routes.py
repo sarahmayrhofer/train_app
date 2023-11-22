@@ -103,44 +103,7 @@ def edit_profile():
                            form=form)
 
 
-@app.route('/follow/<username>', methods=['POST'])
-@login_required
-def follow(username):
-    form = EmptyForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=username).first()
-        if user is None:
-            flash('User {} not found.'.format(username))
-            return redirect(url_for('index'))
-        if user == current_user:
-            flash('You cannot follow yourself!')
-            return redirect(url_for('user', username=username))
-        current_user.follow(user)
-        db.session.commit()
-        flash('You are following {}!'.format(username))
-        return redirect(url_for('user', username=username))
-    else:
-        return redirect(url_for('index'))
 
-
-@app.route('/unfollow/<username>', methods=['POST'])
-@login_required
-def unfollow(username):
-    form = EmptyForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=username).first()
-        if user is None:
-            flash('User {} not found.'.format(username))
-            return redirect(url_for('index'))
-        if user == current_user:
-            flash('You cannot unfollow yourself!')
-            return redirect(url_for('user', username=username))
-        current_user.unfollow(user)
-        db.session.commit()
-        flash('You are not following {}.'.format(username))
-        return redirect(url_for('user', username=username))
-    else:
-        return redirect(url_for('index'))
 
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
@@ -150,15 +113,17 @@ def create_sale():
         sale = Sale(discount=form.discount.data, lineForTheSale=form.line.data)
         db.session.add(sale)
         db.session.commit()
+        print(form.errors)
         return redirect(url_for('index'))
     return render_template('create_sale.html', form=form)
+
 
 
 @app.route('/sales', methods=['GET'])
 def sales():
     sales = Sale.query.all()
-    return render_template('sales.html', sales=sales)
-
+    lines = Line.query.all()
+    return render_template('sales.html', sales=sales, lines=lines)
 
 @app.route('/edit_sale/<int:id>', methods=['GET', 'POST'])
 def edit_sale(id):
@@ -173,6 +138,8 @@ def edit_sale(id):
     elif request.method == 'GET':
         form.discount.data = sale.discount
 
+    print(form.errors)  # print form errors
+
     return render_template('edit_sale.html', form=form)
 
 @app.route('/delete_sale/<int:id>', methods=['POST'])
@@ -181,3 +148,5 @@ def delete_sale(id):
     db.session.delete(sale)
     db.session.commit()
     return redirect(url_for('sales'))
+
+
