@@ -32,7 +32,7 @@ def index():
         },
         {
             'author': {'username': 'Ticket App'},
-            'body': 'You can crete discounts for different routes!'
+            'body': 'You can create discounts for different routes!'
         }
     ]
     return render_template('index.html', title='Home', posts=posts)
