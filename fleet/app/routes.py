@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 
 from fleet.app import app, db
 from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm
-from fleet.app.models import Maintenance, Locomotive, NormalWagon, Train, User, Wagon
+from fleet.app.models import Locomotive, NormalWagon, Train, User, Wagon, Maintenance
 
 
 @app.before_request
@@ -185,7 +185,6 @@ def edit_train(train_id):
         train.name = form.name.data
         train.price_per_km = form.price_per_km.data
 
-
         selected_wagon_ids = form.selected_wagons.data
         selected_wagons = NormalWagon.query.filter(NormalWagon.id.in_(selected_wagon_ids)).all()
 
@@ -265,7 +264,17 @@ def user_by_id(user_id):
 @app.route('/maintenances')
 @login_required
 def maintenance_overview():
-    return render_template('maintenances.html', page_name='Wartungen', user=current_user)
+    maintenances = Maintenance.query.all()
+    return render_template('maintenances.html', page_name='Wartungen', user=current_user, maintenances=maintenances)
+
+
+# Maintenance by ID
+@app.route('/maintenances/<int:maintenance_id>')
+@login_required
+def maintenance_by_id(maintenance_id):
+    maintenance = Maintenance.query.get(maintenance_id)
+
+    return render_template('maintenance.html', page_name='Wartung', user=current_user, maintenance=maintenance)
 
 
 # Create a new maintenance task
@@ -273,22 +282,50 @@ def maintenance_overview():
 @login_required
 def new_maintenance():
     form = NewMaintenanceForm()
+
+    trains = Train.query.all()
+    users = User.query.all()
+
+    existing_trains = []
+    existing_users = []
+
+    for train in trains:
+        train_info = {
+            'id': train.id,
+            'name': train.name,
+        }
+        existing_trains.append(train_info)
+
+    for user in users:
+        user_info = {
+            'id': user.id,
+            'name': user.username,
+            'role': user.role,
+        }
+        existing_users.append(user_info)
+
+    form = NewMaintenanceForm()
+    form.train_id.choices = [(train['id'], train['name']) for train in existing_trains]
+    form.assigned_employees.choices = [(user['id'], user['name']) for user in existing_users]
+
     if form.validate_on_submit():
-        maintenance = Maintenance(description=form.description.data, start_date=form.start_date.data,
-                                  end_date=form.end_date.data, assigned_employees=form.assigned_employees.data)
-        print(maintenance)
-        db.session.add(maintenance)
+        tmp = form.assigned_employees.data
+        assigned_employees = User.query.filter(User.id.in_(tmp)).all()
+
+        train_id = Train.query.get(form.train_id.data)
+
+        new_maintenance = Maintenance()
+        new_maintenance.description = form.description.data
+        new_maintenance.start_date = form.start_date.data
+        new_maintenance.end_date = form.end_date.data
+        new_maintenance.train_id = train_id.id
+        new_maintenance.assigned_employees = assigned_employees
+
+        db.session.add(new_maintenance)
         db.session.commit()
         return redirect(url_for('index'))
 
     return render_template('new_maintenance.html', page_name='Neue Wartung', user=current_user, form=form)
-
-
-# Maintenance by ID
-@app.route('/maintenances/<int:maintenance_id>')
-@login_required
-def maintenance_by_id(maintenance_id):
-    return f"Maintenance with ID {maintenance_id}"
 
 
 # Login

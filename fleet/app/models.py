@@ -21,7 +21,8 @@ class Train(db.Model):
 
     def total_number_of_seats(self):
         normal_wagons = NormalWagon.query.filter_by(train_id=self.id).all()
-        total_number_of_seats = sum([wagon.number_of_seats for wagon in normal_wagons if wagon.number_of_seats is not None])
+        total_number_of_seats = sum(
+            [wagon.number_of_seats for wagon in normal_wagons if wagon.number_of_seats is not None])
         return total_number_of_seats
 
     def __repr__(self):
@@ -72,12 +73,20 @@ class Maintenance(db.Model):
     description = db.Column(db.String(255), nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    assigned_employees = db.Column(db.String(255), nullable=True)
+
+    assigned_employees = db.relationship('User', secondary='maintenance_user_association', backref='maintenance',
+                                         lazy='dynamic')
 
     train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
 
     def __repr__(self):
-        return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date}, assigned_employees={self.assigned_employees})>"
+        return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date})>"
+
+
+maintenance_user_association = db.Table('maintenance_user_association',
+                                        db.Column('maintenance_id', db.Integer, db.ForeignKey('maintenance.id')),
+                                        db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+                                        )
 
 
 class User(UserMixin, db.Model):

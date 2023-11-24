@@ -7,6 +7,15 @@ from wtforms.validators import DataRequired, Optional, Email, EqualTo
 from fleet.app.models import User
 
 
+class NewMaintenanceForm(FlaskForm):
+    description = StringField('Beschreibung', validators=[DataRequired()])
+    start_date = DateField('Enddatum', validators=[DataRequired()])
+    end_date = DateField('Startdatum', validators=[DataRequired()])
+    assigned_employees = SelectMultipleField('Mitarbeiter auswählen', coerce=int, validators=[DataRequired()])
+    train_id = SelectField('Zug auswählen', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Bestätigen')
+
+
 class NewWagonForm(FlaskForm):
     wagon_type = SelectField('Wagon Typ', choices=[('locomotive', 'Triebwagen'),
                                                    ('normal_wagon', 'Wagon')], validators=[DataRequired()])
@@ -17,14 +26,6 @@ class NewWagonForm(FlaskForm):
     max_weight = FloatField('Max. Gewicht', validators=[Optional()])
     number_of_seats = IntegerField('Anz. an Sitzplätzen', validators=[Optional()])
     wagon_id = IntegerField(validators=[Optional()])
-    submit = SubmitField('Bestätigen')
-
-
-class NewMaintenanceForm(FlaskForm):
-    description = StringField('Beschreibung', validators=[DataRequired()])
-    start_date = DateField('Startdatum', validators=[DataRequired()])
-    end_date = DateField('Enddatum', validators=[DataRequired()])
-    assigned_employees = StringField('Zugewiesene Mitarbeiter', validators=[DataRequired()])
     submit = SubmitField('Bestätigen')
 
 

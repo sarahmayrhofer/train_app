@@ -47,7 +47,13 @@
         <tr>
             <td><a href="/trains/{{ train.id }}">{{ train.id }}</a></td>
             <td><a href="/trains/{{ train.id }}">{{ train.name }}</a></td>
-            <td>{{ train.maintenance }}</td>
+            <td>
+                {% if train.maintenances %}
+                {{ train.maintenances | map(attribute='start_date') | min }}
+                {% else %}
+                -
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
         <tr>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Wartungs-Details</h2>
+<ul>
+    <li><strong>ID:</strong> {{ maintenance.id }}</li>
+    <li><strong>Beschreibung:</strong> {{ maintenance.description }}</li>
+    <li><strong>Start:</strong> {{ maintenance.start_date }}</li>
+    <li><strong>Ende:</strong> {{ maintenance.end_date }}</li>
+    <li><strong>Zugeteilte Mitarbeiter:</strong>
+        <ul>
+            {% for user in maintenance.assigned_employees %}
+            <li>{{ user.username }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    <li><strong>Zug:</strong> <a href="/trains/{{maintenance.train_id}}">{{ maintenance.train_id }}</a></li>
+</ul>
+
+{% endblock %}

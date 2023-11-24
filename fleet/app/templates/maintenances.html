@@ -1,6 +1,72 @@
 {% extends "base.html" %}
 
 {% block content %}
-Maintenances
+
+<style>
+    .table-container {
+        height: 100px;
+        display: flex;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: 10px;
+    }
+
+    tr {
+        height: 20px;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+<div class="table-container">
+    <table>
+        <caption><h3>Wartungen</h3></caption>
+        <tr>
+            <th style="width: 40px">ID</th>
+            <th style="width: 40px">Zug</th>
+            <th style="width: 80px">Start</th>
+            <th style="width: 80px">Ende</th>
+            <th>Beschreibung</th>
+        </tr>
+        {% for maintenance in maintenances %}
+        <tr>
+            <td><a href="/maintenances/{{maintenance.id}}">
+                {{ maintenance.id }}
+            </a></td>
+            <td>
+                <a href="/trains/{{maintenance.train_id}}">
+                    {{ maintenance.train_id }}
+                </a>
+            </td>
+            <td>{{ maintenance.start_date }}</td>
+            <td>{{ maintenance.end_date }}</td>
+            <td>{{ maintenance.description }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="5">
+                <button onclick="window.location.href = './newMaintenance'">Hinzufügen</button>
+            </td>
+        </tr>
+    </table>
+
+
+</div>
 
 {% endblock %}

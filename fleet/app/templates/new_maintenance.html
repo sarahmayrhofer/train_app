@@ -4,26 +4,37 @@
 <h1>Neue Wartung erstellen</h1>
 <form method="POST">
     {{ form.hidden_tag() }}
+
     <p>
-        <label for="description">{{form.description.label}}:</label><br>
-        {{ form.description(class="form-control", placeholder="Beschreibung") }}
+        <label for="{{ form.description.id }}">{{ form.description.label }}:</label><br>
+        {{ form.description(size=255) }}
+        <br>
     </p>
 
     <p>
         <label for="start_date">{{form.start_date.label}}:</label><br>
         {{ form.start_date(class="form-control", placeholder="Startdatum") }}
+        <br>
     </p>
 
     <p>
         <label for="end_date">{{form.end_date.label}}:</label><br>
         {{ form.end_date(class="form-control", placeholder="Enddatum") }}
+        <br>
     </p>
 
     <p>
-        <label for="assigned_employees">{{form.assigned_employees.label}}:</label><br>
-        {{ form.assigned_employees(class="form-control", placeholder="Zugewiesene Mitarbeiter") }}
-    <p>
+        <label for="{{ form.assigned_employees.id }}">{{ form.assigned_employees.label }}:</label><br>
+        {{ form.assigned_employees() }}
+        <br>
+    </p>
 
-        {{ form.submit() }}
+    <p>
+        <label for="{{ form.train_id.id }}">{{ form.train_id.label }}:</label><br>
+        {{ form.train_id() }}
+        <br>
+    </p>
+
+    {{ form.submit() }}
 </form>
 {% endblock %}

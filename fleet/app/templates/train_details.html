@@ -78,6 +78,34 @@
 <br>
 <br>
 <br>
+<div class="table-container">
+    <table>
+        <caption><h3>Wartungen</h3></caption>
+        <tr>
+            <th style="width: 20px">ID</th>
+            <th style="width: 80px">Start</th>
+            <th style="width: 80px">Ende</th>
+            <th style="width: 140px">Beschreibung</th>
+        </tr>
+        {% for maintenance in train.maintenances %}
+        <tr>
+            <td><a href="/maintenances/{{maintenance.id}}">
+                {{ maintenance.id }}
+            </a></td>
+            <td>{{ maintenance.start_date }}</td>
+            <td>{{ maintenance.end_date }}</td>
+            <td>{{ maintenance.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 <button onclick="editTrain('{{ train.id }}')">Zug bearbeiten</button>
 <button onclick="deleteTrain('{{ train.id }}')">Zug löschen</button>
 <script>
