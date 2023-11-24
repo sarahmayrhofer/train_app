@@ -1,3 +1,4 @@
+
 <!-- edit_sale.html -->
 {% extends "base.html" %}
 
@@ -8,6 +9,10 @@
         <p>
             {{ form.discount.label }}<br>
             {{ form.discount(size=32) }}<br>
+        </p>
+        <p>
+            {{ form.line.label }}<br>
+            {{ form.line() }}<br>
         </p>
         <p>{{ form.submit() }}</p>
     </form>
