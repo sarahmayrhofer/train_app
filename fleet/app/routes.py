@@ -5,7 +5,7 @@ from flask_login import login_user, current_user, login_required
 from werkzeug.urls import url_parse
 
 from fleet.app import app, db
-from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm
+from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm, NewUserForm
 from fleet.app.models import Locomotive, NormalWagon, Train, User, Wagon, Maintenance
 
 
@@ -252,6 +252,20 @@ def users():
     users = User.query.all()
 
     return render_template('users.html', page_name='Userverwaltung', user=current_user, users=users)
+
+@app.route('/newUser', methods=['GET', 'POST'])
+@login_required
+def new_user():
+    form = NewUserForm()
+
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.role= form.role.data
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+
+    return render_template('new_user.html', page_name='Neuen Benutzer anlegen', user=current_user, form=form)
 
 
 # User by ID
