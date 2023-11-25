@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .table-container {
+        height: 100px;
+        display: flex;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 30%;
+        margin: 10px;
+    }
+
+    tr {
+        height: 20px;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+</style>
+
+<div class="table-container">
+    <table>
+        <caption><h3>Mitarbeiterübersicht</h3></caption>
+        <tr>
+            <th style="width: 140px">User ID</th>
+            <th style="width: 80px">Name</th>
+            <th style="width: 80px">Rolle</th>
+        </tr>
+        {% for user in users%}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.role }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

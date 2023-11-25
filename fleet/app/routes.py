@@ -249,7 +249,9 @@ def delete_wagon(wagon_id):
 @app.route('/users')
 @login_required
 def users():
-    return render_template('user_management.html', page_name='Userverwaltung', user=current_user)
+    users = User.query.all()
+
+    return render_template('users.html', page_name='Userverwaltung', user=current_user, users=users)
 
 
 # User by ID

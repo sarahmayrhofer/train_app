@@ -37,12 +37,14 @@
 <div class="table-container">
     <table>
         <caption><h3>Wartungen</h3></caption>
+        <br>
         <tr>
             <th style="width: 40px">ID</th>
             <th style="width: 40px">Zug</th>
             <th style="width: 80px">Start</th>
             <th style="width: 80px">Ende</th>
             <th>Beschreibung</th>
+            <th>Mitarbeiter</th>
         </tr>
         {% for maintenance in maintenances %}
         <tr>
@@ -57,15 +59,20 @@
             <td>{{ maintenance.start_date }}</td>
             <td>{{ maintenance.end_date }}</td>
             <td>{{ maintenance.description }}</td>
+            <td>
+                {% for user in maintenance.assigned_employees %}
+                {{ user.username }}
+                {% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
         </tr>
         {% endfor %}
         <tr>
-            <td colspan="5">
+            <td colspan="6">
                 <button onclick="window.location.href = './newMaintenance'">Hinzufügen</button>
             </td>
         </tr>
     </table>
-
 
 </div>
 
