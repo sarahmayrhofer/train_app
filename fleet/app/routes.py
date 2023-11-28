@@ -108,7 +108,7 @@ def new_train():
     for wagon in wagons:
         wagon_info = {
             'id': wagon.id,
-            'name': f'[Wagen {wagon.id}] {wagon.number_of_seats} Sitzplätze ({wagon.max_weight} t.)',
+            'name': f'[Wagen {wagon.id}] {wagon.number_of_seats} Sitzplätze ({wagon.max_weight} t.)  | {wagon.track_width}mm.',
             'type': 'normal_wagon',
         }
         existing_wagons.append(wagon_info)
@@ -116,7 +116,7 @@ def new_train():
     for wagon in locomotives:
         wagon_info = {
             'id': wagon.id,
-            'name': f'[Wagen {wagon.id}] (max. {wagon.max_traction} t.)',
+            'name': f'[Wagen {wagon.id}] (max. {wagon.max_traction} t.)  | {wagon.track_width}mm.',
             'type': 'locomotive',
         }
         existing_locomotives.append(wagon_info)
@@ -164,7 +164,7 @@ def edit_train(train_id):
     for wagon in wagons:
         wagon_info = {
             'id': wagon.id,
-            'name': f'[Wagen {wagon.id}] {wagon.number_of_seats} Sitzplätze ({wagon.max_weight} t.)',
+            'name': f'[Wagen {wagon.id}] {wagon.number_of_seats} Sitzplätze ({wagon.max_weight} t.) | {wagon.track_width}mm.)',
             'type': 'normal_wagon',
         }
         existing_wagons.append(wagon_info)
@@ -172,7 +172,7 @@ def edit_train(train_id):
     for wagon in locomotives:
         wagon_info = {
             'id': wagon.id,
-            'name': f'[Wagen {wagon.id}] (max. {wagon.max_traction} t.)',
+            'name': f'[Wagen {wagon.id}] (max. {wagon.max_traction} t.)  | {wagon.track_width}mm.',
             'type': 'locomotive',
         }
         existing_locomotives.append(wagon_info)

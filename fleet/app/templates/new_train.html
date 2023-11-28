@@ -42,11 +42,17 @@
     var totalWeightSpan = document.getElementById('total_weight');
     let maxTraction = selectedLocomotive.options[selectedLocomotive.selectedIndex].text.split('(max. ')[1].split(
         ' ')[0];
+    let locomotiveTrackWidth = parseFloat(
+        selectedLocomotive.options[selectedLocomotive.selectedIndex].text.split('|')[1].trim());
+
+    console.log(parseFloat(locomotiveTrackWidth));
     var warningSpan = document.getElementById('warning');
     var saveButton = document.getElementById('save_button');
 
     // Function to calculate the sum of max_weight from selected_wagons
     function calculateWeightSum() {
+      saveButton.disabled = false;
+      checkTrackWidth();
       var sumWeight = Array.from(selectedWagons.selectedOptions).reduce(function(sum, option) {
         return sum + parseFloat(option.text.split('(')[1].split(' ')[0] || 0);
       }, 0);
@@ -57,11 +63,25 @@
       // Disable the save button if sumWeight is greater than maxTraction
       saveButton.disabled = sumWeight > maxTraction;
       warningSpan.textContent = saveButton.disabled ? 'WARNUNG: Das Gewicht der Wagons ist zu hoch!' : '';
+
     }
 
     function updateMaxTraction() {
+      checkTrackWidth();
       maxTraction = selectedLocomotive.options[selectedLocomotive.selectedIndex].text.split('(max. ')[1].split(' ')[0];
-      console.log(maxTraction);
+    }
+
+    function checkTrackWidth() {
+      locomotiveTrackWidth = parseFloat(
+          selectedLocomotive.options[selectedLocomotive.selectedIndex].text.split('|')[1].trim());
+
+      // check track widths:
+      Array.from(selectedWagons.selectedOptions).forEach(value => {
+        let current = parseFloat(value.text.split('|')[1].trim());
+        if (current !== locomotiveTrackWidth) {
+          saveButton.disabled = true;
+        }
+      });
     }
 
     // Attach the calculateWeightSum function to the change event of selected_wagons
@@ -70,6 +90,7 @@
 
     // Initial calculation on page load
     calculateWeightSum();
+    checkTrackWidth();
   });
 </script>
 {% endblock %}
