@@ -6,7 +6,6 @@ from wtforms.validators import DataRequired, Optional, Email, EqualTo
 
 from fleet.app.models import User
 
-
 class NewMaintenanceForm(FlaskForm):
     description = StringField('Beschreibung', validators=[DataRequired()])
     start_date = DateField('Enddatum', validators=[DataRequired()])

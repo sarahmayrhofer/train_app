@@ -17,4 +17,7 @@
     <li><strong>Zug:</strong> <a href="/trains/{{maintenance.train_id}}">{{ maintenance.train_id }}</a></li>
 </ul>
 
+<button onclick="window.location.href = '/editMaintenance/{{maintenance.id}}'">Bearbeiten</button><br>
+<button onclick="window.location.href = '/deleteMaintenance/{{maintenance.id}}'">Löschen</button>
+
 {% endblock %}

@@ -253,6 +253,7 @@ def users():
 
     return render_template('users.html', page_name='Userverwaltung', user=current_user, users=users)
 
+
 @app.route('/newUser', methods=['GET', 'POST'])
 @login_required
 def new_user():
@@ -260,7 +261,7 @@ def new_user():
 
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
-        user.role= form.role.data
+        user.role = form.role.data
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -342,6 +343,71 @@ def new_maintenance():
         return redirect(url_for('index'))
 
     return render_template('new_maintenance.html', page_name='Neue Wartung', user=current_user, form=form)
+
+
+@app.route('/editMaintenance/<int:maintenance_id>', methods=['GET', 'POST'])
+@login_required
+def edit_maintenance(maintenance_id):
+    maintenance = Maintenance.query.get_or_404(maintenance_id)
+
+    form = NewMaintenanceForm(obj=maintenance)
+
+    trains = Train.query.all()
+    users = User.query.all()
+
+    existing_trains = []
+    existing_users = []
+
+    for train in trains:
+        train_info = {
+            'id': train.id,
+            'name': train.name,
+        }
+        existing_trains.append(train_info)
+
+    for user in users:
+        user_info = {
+            'id': user.id,
+            'name': user.username,
+            'role': user.role,
+        }
+        existing_users.append(user_info)
+
+    form.train_id.choices = [(train['id'], train['name']) for train in existing_trains]
+    form.assigned_employees.choices = [(user['id'], user['name']) for user in existing_users]
+
+    if form.validate_on_submit():
+        tmp = form.assigned_employees.data
+        assigned_employees = User.query.filter(User.id.in_(tmp)).all()
+
+        train_id = Train.query.get(form.train_id.data)
+
+        maintenance.description = form.description.data
+        maintenance.start_date = form.start_date.data
+        maintenance.end_date = form.end_date.data
+        maintenance.train_id = train_id.id
+        maintenance.assigned_employees = assigned_employees
+
+        db.session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('edit_maintenance.html', page_name='Wartung bearbeiten', user=current_user, form=form,
+                           maintenance=maintenance)
+
+
+@app.route('/deleteMaintenance/<int:maintenance_id>', methods=['GET', 'POST'])
+def delete_maintenance(maintenance_id):
+    maintenance = Maintenance.query.get(maintenance_id)
+
+    if maintenance:
+        db.session.delete(maintenance)
+        db.session.commit()
+
+        flash(f'Wartung gelöscht!', 'success')
+    else:
+        flash('Fehler', 'error')
+
+    return redirect(url_for('index'))
 
 
 # Login
