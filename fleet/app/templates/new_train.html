@@ -52,7 +52,6 @@
     // Function to calculate the sum of max_weight from selected_wagons
     function calculateWeightSum() {
       saveButton.disabled = false;
-      checkTrackWidth();
       var sumWeight = Array.from(selectedWagons.selectedOptions).reduce(function(sum, option) {
         return sum + parseFloat(option.text.split('(')[1].split(' ')[0] || 0);
       }, 0);
@@ -64,6 +63,7 @@
       saveButton.disabled = sumWeight > maxTraction;
       warningSpan.textContent = saveButton.disabled ? 'WARNUNG: Das Gewicht der Wagons ist zu hoch!' : '';
 
+      checkTrackWidth();
     }
 
     function updateMaxTraction() {
@@ -78,8 +78,10 @@
       // check track widths:
       Array.from(selectedWagons.selectedOptions).forEach(value => {
         let current = parseFloat(value.text.split('|')[1].trim());
+        console.log('current: ' + current);
         if (current !== locomotiveTrackWidth) {
           saveButton.disabled = true;
+          warningSpan.textContent = saveButton.disabled ? 'WARNUNG: Die Spurweiten stimmen nicht überein!' : '';
         }
       });
     }
