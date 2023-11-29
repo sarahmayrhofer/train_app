@@ -4,7 +4,8 @@ from wtforms import SubmitField, IntegerField, StringField, DateField, FloatFiel
     PasswordField, BooleanField
 from wtforms.validators import DataRequired, Optional, Email, EqualTo
 
-from fleet.app.models import User
+from fleet.app.models import User, Maintenance
+
 
 class NewMaintenanceForm(FlaskForm):
     description = StringField('Beschreibung', validators=[DataRequired()])
@@ -13,6 +14,17 @@ class NewMaintenanceForm(FlaskForm):
     assigned_employees = SelectMultipleField('Mitarbeiter auswählen', coerce=int, validators=[DataRequired()])
     train_id = SelectField('Zug auswählen', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Bestätigen')
+
+    def validate_assigned_employees(self, field):
+        # Check if selected employees are already assigned to other maintenance tasks
+        conflicting_maintenance = Maintenance.query.filter(
+            Maintenance.start_date <= self.end_date.data,
+            Maintenance.end_date >= self.start_date.data,
+            Maintenance.assigned_employees.any(User.id.in_(field.data))
+        ).first()
+
+        if conflicting_maintenance:
+            raise ValidationError('Ein oder mehrere Mitarbeiter sind bereits für eine andere Wartung eingeplant.')
 
 
 class NewWagonForm(FlaskForm):
