@@ -57,9 +57,9 @@ class EditStationForm(FlaskForm):
 class SectionForm(FlaskForm):
     startStation = SelectField('Start Bahnhof', coerce=int)
     endStation = SelectField('End Bahnhof', coerce=int)
-    fee = FloatField('Entgelt', validators=[DataRequired()])
-    distance = FloatField('Länge', validators=[DataRequired()])
-    maxSpeed = IntegerField('Maximalgeschwindigkeit', validators=[DataRequired()])
+    fee = FloatField('Entgelt in EUR', validators=[DataRequired()])
+    distance = FloatField('Länge in km', validators=[DataRequired()])
+    maxSpeed = IntegerField('Maximalgeschwindigkeit in km/h', validators=[DataRequired()])
     trackWidth = IntegerField('Spurweite in mm', validators=[DataRequired()])
     submit = SubmitField('Bestätigen')
 
