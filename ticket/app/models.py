@@ -3,7 +3,8 @@ from hashlib import md5
 from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from .db import db
+from datetime import datetime
 
 followers = db.Table(
     'followers',
@@ -130,4 +131,21 @@ class Line(db.Model):
             return self.sections[-1].end_station_rel
         return None
 
+#Daten von Shedule
 
+
+
+class Fahrtdurchführung(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    datum = db.Column(db.Date, nullable=False)
+    zeit = db.Column(db.Time)
+    endzeit = db.Column(db.Time)
+    zug_id = db.Column(db.Integer)
+    line = db.Column(db.Integer)
+    mitarbeiter_ids = db.Column(db.String)
+    preise = db.Column(db.String)  # Spalte für Preise
+    bahnhof_ids = db.Column(db.String)  # Spalte für Bahnhof-IDs
+    zeiten = db.Column(db.String)  # Spalte für Zeiten
+
+    def __repr__(self):
+        return f'<Fahrtdurchführung {self.id}>'
