@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Streckenhaltepläne</title>
+</head>
+<body>
+    <h1>Streckenhaltepläne</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Ursprungsstrecke</th>
+            <th>Name</th>
+            <th>Startbahnhof</th>
+            <th>Haltebahnhöfe</th>
+        </tr>
+        {% for plan in streckenhalteplaene %}
+        <tr>
+            <td>{{ plan.id }}</td>
+            <td>{{ plan.original_line_id }}</td>
+            <td>{{ plan.name }}</td>
+            <td>{{ plan.start_station_id }}</td>
+            <td>{{ plan.sections | map(attribute='endStation') | join(' ') }}</td>
+            <td>
+                <form action="{{ url_for('main.loesche_streckenhalteplan', id=plan.id) }}" method="POST">
+                    <button type="submit" style="color: red;">X</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/streckenhalteplan/">Neuen Streckenhalteplan anlegen</a>
+</body>
+{% endblock %}

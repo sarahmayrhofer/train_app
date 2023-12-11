@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html lang="de">
+{% extends "base.html" %}
+
+{% block content %}
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
         function updateOutput() {
@@ -55,6 +56,12 @@
         });
     });
 
+    function formatMitarbeiterIDs() {
+        var ausgewaehlteMitarbeiter = document.getElementById('mitarbeiter').selectedOptions;
+        var ids = Array.from(ausgewaehlteMitarbeiter).map(option => option.value);
+        document.getElementById('mitarbeiter_ids').value = ids.join(',');
+    }
+
 </script>
 
 <head>
@@ -83,17 +90,27 @@
                 {% for zug in zuege %}
                 <option value="{{ zug['id'] }}">{{ zug['name'], zug['id'] }}</option>
                 {% endfor %}
-            </select> <br>
-    
+            </select> 
+            <br>
+            <br>
             <label for="line">Linie/Strecke:</label>
             <select name="line_id" id="line_id" required>
                 {% for line in lines %}
                 <option value="{{ line['id'] }}">{{ line['nameOfLine'], line['id'] }}</option>
                 {% endfor %}
             </select> <br>
-    
-            <label for="mitarbeiter_ids">Mitarbeiter-IDs (durch Komma getrennt):</label>
-            <input type="text" name="mitarbeiter_ids" id="mitarbeiter_ids" required>
+            
+            <br>
+
+            <label for="mitarbeiter">Mitarbeiter:</label>
+            <select id="mitarbeiter" name="mitarbeiter" multiple>
+                {% for mitarbeiter in alle_mitarbeiter %}
+                <option value="{{ mitarbeiter.id }}">{{ mitarbeiter.username }} (ID: {{ mitarbeiter.id }})</option>
+                {% endfor %}
+            </select>
+
+            <input type="hidden" id="mitarbeiter_ids" name="mitarbeiter_ids">
+            
         </div>
 
         <div id="datumsfelder" class="form-section">
@@ -116,9 +133,9 @@
         <output id="percent_profit_output" for="percent_profit">0</output>%
 
         <div id="submit">
-            <input type="submit" value="Fahrtdurchführung erstellen">
+            <input type="submit" value="Fahrtdurchführung erstellen" onclick="formatMitarbeiterIDs()">
         </div>
     </form> <br>
     <a href="{{ url_for('main.fahrtdurchfuehrungen') }}">Zurück zu den Fahrtdurchführungen</a>
 </body>
-</html>
+{% endblock %}

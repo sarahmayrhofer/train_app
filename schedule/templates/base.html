@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ page_name }}</title>
+    <style>
+        /* Define styles for the menu */
+        .menu {
+            display: none;
+            position: absolute;
+            top: 30px;
+            right: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            z-index: 1;
+        }
+
+        .page-name {
+            font-family: "Helvetica";
+            font-weight: bold;
+            color: white;
+            margin-left: 100px;
+        }
+    </style>
+</head>
+<body style="margin: 0px">
+
+<div style="background-color: red; height: 50px; display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+    <h1 class="page-name">{{ page_name }}</h1>
+    <img id="menu-icon" src="{{ url_for('static', filename='icons/menu_icon.png') }}" style="width: 30px; height: 30px; cursor: pointer;">
+</div>
+
+<div class="menu" id="menu">
+    <ul>
+        <li><a href="/fahrtdurchfuehrungen/">Fahrtdurchführungen</a></li>
+        <li><a href="/neue_fahrtdurchfuehrung">Fahrtdurchführung anlegen</a></li>
+        <li><a href="/streckenhalteplaene">Streckenhaltepläne</a></li>
+        <li><a href="/streckenhalteplan/">Streckenhalteplan anlegen</a></li>
+        <li><a href="/users">Mitarbeiterübersicht</a></li>
+        <li><a href="/newUser">Mitarbeiter anlegen</a></li>
+        <br>
+        <li><a href="/login">Erneut einloggen</a></li>
+    </ul>
+</div>
+
+
+<div style="padding: 20px;">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</div>
+
+<div style="position: fixed; bottom: 20px; right: 20px; background-color: white; padding: 5px;">
+    {% if current_user.username %}
+    angemeldet als {{ current_user.username}} (Rolle: {{current_user.role}})
+    {% endif %}
+</div>
+
+<script>
+  const menuIcon = document.getElementById('menu-icon');
+  const menu = document.getElementById('menu');
+
+  menuIcon.addEventListener('click', () => {
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.addEventListener('click', (event) => {
+    if (event.target !== menuIcon && event.target !== menu) {
+      menu.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

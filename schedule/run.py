@@ -1,12 +1,20 @@
 from flask import Flask
-from app.models import Fahrtdurchführung
-from app.routes import main
+from flask_login import LoginManager
 from config import Config
+from app.models import Fahrtdurchführung, User
+from app.routes import main
 from app.db import db  # Importieren Sie die Datenbankinstanz
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 db.init_app(app)  # Initialisieren Sie die Datenbank mit der App
 
