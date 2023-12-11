@@ -2,8 +2,10 @@ from datetime import datetime
 from hashlib import md5
 from app import db, login
 from flask_login import UserMixin
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-from .db import db
+#from .db import db
+from app import db
 from datetime import datetime
 
 followers = db.Table(
@@ -132,8 +134,6 @@ class Line(db.Model):
         return None
 
 #Daten von Shedule
-
-
 
 class Fahrtdurchführung(db.Model):
     id = db.Column(db.Integer, primary_key=True)

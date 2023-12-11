@@ -21,6 +21,8 @@ import json
 from flask import flash
 from app import db
 from app.models import Station
+import requests
+from bs4 import BeautifulSoup
 
 @app.before_request
 def before_request():
@@ -214,6 +216,31 @@ def fetch_stations():
 
 
 # Routen zum Importieren der Daten Ende
+#neue route shedule
+
+def get_fahrtdurchfuehrungen():
+    response = requests.get("http://127.0.0.1:5000/fahrtdurchfuehrungen/")
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Now you can use the soup object to parse the HTML
+    for item in soup.find_all('tr'):
+        print(item)
+
+
+    #print(response.text)
+
+    # Only parse the response as JSON if it's not empty
+    #if response.text:
+     #   data = response.json()
+        
+        # Now you can use the data
+      #  for item in data:
+       #     print(item)
+    else:
+        print("No data received from the server.")
+   
+
+get_fahrtdurchfuehrungen()  # Call the function here
 
 
 if __name__ == '__main__':
