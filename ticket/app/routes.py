@@ -123,7 +123,6 @@ def edit_profile():
 
 
 
-
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
     form = SaleForm()
@@ -219,26 +218,21 @@ def fetch_stations():
 #neue route shedule
 
 def get_fahrtdurchfuehrungen():
+
     response = requests.get("http://127.0.0.1:5000/fahrtdurchfuehrungen/")
-    soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Now you can use the soup object to parse the HTML
-    for item in soup.find_all('tr'):
-        print(item)
-
-
-    #print(response.text)
-
-    # Only parse the response as JSON if it's not empty
-    #if response.text:
-     #   data = response.json()
-        
-        # Now you can use the data
-      #  for item in data:
-       #     print(item)
+    if response.text:
+        try:
+            return response.json()
+        except ValueError:
+            print("Invalid JSON response")
+            return None
     else:
-        print("No data received from the server.")
+        print("Empty response")
+        return None
+    
    
+
 
 get_fahrtdurchfuehrungen()  # Call the function here
 
