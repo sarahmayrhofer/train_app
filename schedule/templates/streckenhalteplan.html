@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Streckenhalteplan</title>
+    <style>
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+    <script>
+        var lines = {{ lines | tojson | safe }};
+        var allStations = {{ all_stations | tojson | safe }};
+
+        function getStationNameById(id) {
+            var station = allStations.find(station => station.id == id);
+            return station ? station.nameOfStation : 'Unbekannte Station';
+        }
+
+        function showStops() {
+            var selectedLineId = document.getElementById('lineSelect').value;
+            var line = lines.find(l => l.id == selectedLineId);
+            var stationIds = [];
+            if (line) {
+                stationIds.push(line.startStationId);
+                line.sections.forEach(section => {
+                    stationIds.push(section.endStationId);
+                });
+            }
+            updateStopsDisplay(stationIds);
+        }
+
+        function updateStopsDisplay(stationIds) {
+            var stopsContainer = document.getElementById('stopsContainer');
+            stopsContainer.innerHTML = '';
+            stationIds.forEach(id => {
+                var stopDiv = document.createElement('div');
+                var stationName = getStationNameById(id);
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = true;
+                checkbox.setAttribute('data-station-id', id);
+                
+                stopDiv.innerHTML = `Station ${id} - ${stationName} `;
+                stopDiv.appendChild(checkbox);
+                stopsContainer.appendChild(stopDiv);
+            });
+        }
+
+        function saveStreckenhalteplan() {
+            var selectedLineId = document.getElementById('lineSelect').value;
+            var planName = document.getElementById('planName').value;
+            var checkboxes = document.querySelectorAll('#stopsContainer input[type=checkbox]');
+            
+            // Erstellen der stations_status-Liste
+            var stations_status = Array.from(checkboxes).map(checkbox => checkbox.checked ? parseInt(checkbox.getAttribute('data-station-id')) : false);
+
+            if (!planName || stations_status.filter(status => status !== false).length < 2) {
+                alert("Fehler - Es müssen mindestens 2 Haltestellen ausgewählt werden und ein Name muss vergeben werden");
+                return;
+            }
+
+            var data = {
+                line_id: selectedLineId,
+                name: planName,
+                stations_status: stations_status
+            };
+
+            fetch('/save_streckenhalteplan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert("Erfolgreich hinzugefügt");
+                } else if (data.error) {
+                    alert("Fehler: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Fehler beim Speichern des Streckenhalteplans', error);
+            });
+        }
+
+
+        
+    </script>
+</head>
+<body>
+    <h1>Streckenhalteplan</h1>
+    <label for="lineSelect">Wählen Sie eine Strecke:</label>
+    <select id="lineSelect" onchange="showStops()">
+        <option value="">--Wählen Sie eine Strecke--</option>
+        {% for line in lines %}
+        <option value="{{ line.id }}">{{ line.nameOfLine }}</option>
+        {% endfor %}
+    </select>
+
+    <div id="stopsContainer">
+        <!-- Hier werden die Haltestellen mit Checkboxen angezeigt -->
+    </div>
+
+    <input type="text" id="planName" placeholder="Name des Streckenhalteplans">
+    <button onclick="saveStreckenhalteplan()">Speichern</button>
+    <div id="messageDiv"></div>
+
+    <a href="{{ url_for('main.streckenhalteplaene') }}">Zurück zu den Streckenhalteplänen</a>
+</body>
+{% endblock %}

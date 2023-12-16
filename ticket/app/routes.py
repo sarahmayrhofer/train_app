@@ -1,3 +1,4 @@
+
 from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
@@ -10,6 +11,18 @@ from app import db
 from app.models import Sale
 from app.forms import SaleForm
 
+from flask import flash
+from app import db
+from app.models import Station
+from flask import redirect, url_for
+
+import http.client
+import json
+from flask import flash
+from app import db
+from app.models import Station
+import requests
+from bs4 import BeautifulSoup
 
 @app.before_request
 def before_request():
@@ -110,7 +123,6 @@ def edit_profile():
 
 
 
-
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
     form = SaleForm()
@@ -162,3 +174,69 @@ def delete_sale(id):
     return redirect(url_for('sales'))
 
 
+
+
+
+# Routen zum Importieren der Daten Beginn
+
+
+def fetch_and_save_stations():
+    conn = http.client.HTTPConnection("127.0.0.1", 5001)
+    conn.request("GET", "/route/stations")
+    response = conn.getresponse()
+
+    if response.status != 200:
+        flash('Failed to fetch stations: HTTP ' + str(response.status))
+        return
+
+    data = json.loads(response.read().decode())
+
+    for station_data in data:
+        station = Station(
+            id=station_data['id'],
+            nameOfStation=station_data['nameOfStation'],
+            address=station_data['address'],
+            coordinates=station_data['coordinates']
+        )
+        db.session.add(station)
+
+    db.session.commit()
+    flash('Stations fetched and saved successfully.')
+
+@app.route('/fetch_stations', methods=['POST'])
+def fetch_stations():
+    fetch_and_save_stations()
+    return redirect(url_for('index'))
+
+
+
+
+
+
+
+# Routen zum Importieren der Daten Ende
+#neue route shedule
+
+def get_fahrtdurchfuehrungen():
+
+    response = requests.get("http://127.0.0.1:5000/fahrtdurchfuehrungen/")
+
+    if response.text:
+        try:
+            return response.json()
+        except ValueError:
+            print("Invalid JSON response")
+            return None
+    else:
+        print("Empty response")
+        return None
+    
+   
+
+
+get_fahrtdurchfuehrungen()  # Call the function here
+
+
+if __name__ == '__main__':
+    print('Starting application with app.run()')
+    app.run(port=5003)

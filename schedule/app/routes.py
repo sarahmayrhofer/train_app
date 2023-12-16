@@ -6,6 +6,7 @@ from app.db import db
 from datetime import datetime
 from .api_services import *
 import json
+from bs4 import BeautifulSoup
 
 main = Blueprint('main', __name__)
 
