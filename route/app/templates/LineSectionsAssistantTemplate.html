@@ -1,51 +1,59 @@
+<!-- 
+    Assistant for choosing sections for a line. 
+    It is used for creating a line as well as editing an existing line. 
+    To save the available and chosen sections, tables in the database are used.
+-->
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>ausgewählte Abschnitte</h1>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Start Bahnhof</th>
-            <th>End Bahnhof</th>
-            <th>Aktion</th>
-        </tr>
-        {% for chosen_section in chosen_sections %}
-        <tr>
-            <td>{{ chosen_section.section_id }}</td>
-            <td>{{ chosen_section.section_rel.start_station_rel.nameOfStation }}</td>
-            <td>{{ chosen_section.section_rel.end_station_rel.nameOfStation }}</td>
-            <td>
-                {% if loop.last %}
-                <form action="{{ url_for('removeLastSectionFromChosenSections', section_id=chosen_section.section_id) }}" method="post">
-                    <button type="submit">Letzten Abschnitt löschen</button>
-                </form>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<h1>ausgewählte Abschnitte</h1>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Start Bahnhof</th>
+        <th>End Bahnhof</th>
+        <th>Aktion</th>
+    </tr>
+    {% for chosen_section in chosen_sections %}
+    <tr>
+        <td>{{ chosen_section.section_id }}</td>
+        <td>{{ chosen_section.section_rel.start_station_rel.nameOfStation }}</td>
+        <td>{{ chosen_section.section_rel.end_station_rel.nameOfStation }}</td>
+        <td>
+            <!-- If it is the last section, the button to remove it is shown. The process of removing is done in the routes.py.-->
+            {% if loop.last %}
+            <form action="{{ url_for('removeLastSectionFromChosenSections', section_id=chosen_section.section_id) }}"
+                method="post">
+                <button type="submit">Letzten Abschnitt löschen</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 
-    <h1>Verfügbare Abschnitte</h1>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Start Bahnhof</th>
-            <th>End Bahnhof</th>
-            <th>Aktion</th>
-        </tr>
-        {% for available_section in available_sections %}
-        <tr>
-            <td>{{ available_section.section_id }}</td>
-            <td>{{ available_section.section_rel.start_station_rel.nameOfStation }}</td>
-            <td>{{ available_section.section_rel.end_station_rel.nameOfStation }}</td>
-            <td>
-                <form action="{{ url_for('moveSectionToChosen', section_id=available_section.section_id) }}" method="post">
-                    <button type="submit">Abschnitt hinzufügen</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<h1>Verfügbare Abschnitte</h1>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Start Bahnhof</th>
+        <th>End Bahnhof</th>
+        <th>Aktion</th>
+    </tr>
+    {% for available_section in available_sections %}
+    <tr>
+        <td>{{ available_section.section_id }}</td>
+        <td>{{ available_section.section_rel.start_station_rel.nameOfStation }}</td>
+        <td>{{ available_section.section_rel.end_station_rel.nameOfStation }}</td>
+        <td>
+            <!-- button to add a section to the chosen sections. The process of adding is done in the routes.py.-->
+            <form action="{{ url_for('moveSectionToChosen', section_id=available_section.section_id) }}" method="post">
+                <button type="submit">Abschnitt hinzufügen</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 
-    {% block extra %}{% endblock %}
+{% block extra %}{% endblock %}
 {% endblock %}

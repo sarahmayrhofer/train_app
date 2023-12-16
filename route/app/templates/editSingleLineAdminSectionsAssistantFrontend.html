@@ -1,8 +1,11 @@
+<!-- This is part of the process to edit lines. At first the assistant to choose sections is displayed. 
+     The button takes the admin to the page where he/she can edit the name of the line and save.-->
+     
 {% extends "LineSectionsAssistantTemplate.html" %}
 
 {% block extra %}
-    <br>
-    <a href="{{ url_for('editSingleLineChangeName', line_id=line.id) }}">
-        <button>Weiter zum Abschließen der Änderungen</button>
-    </a>
+<br>
+<a href="{{ url_for('editSingleLineChangeName', line_id=line.id) }}">
+    <button>Weiter zum Abschließen der Änderungen</button>
+</a>
 {% endblock %}

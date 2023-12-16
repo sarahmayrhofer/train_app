@@ -43,7 +43,8 @@ security = Security(app, user_datastore)
 
 from app.resources import SectionListResource, StationListResource, EventListResource, LineListResource
 
-# Restful
+# for Restful interface, the resources are defined in the resources.py file.
+# When a GET request is made to one of these URL paths, the get method of the corresponding resource class is called.
 api = Api(app)
 api.add_resource(StationListResource, '/route/stations')
 api.add_resource(SectionListResource, '/route/sections')
