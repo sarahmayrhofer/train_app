@@ -1,6 +1,8 @@
 from flask_restful import Resource
 from app.models import Station, Section, Event, Line
 
+# In this file, the resources for the RESTful API are defined. The paths are specified in the __init__.py file in the route/app folder.
+
 class StationListResource(Resource):
     def get(self):
         stations = Station.query.all()

@@ -2,26 +2,13 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
-from app.models import AvailableSectionsForNewLine, ChosenSectionsForNewLine, User
-from app.forms import EditProfileForm
-from app.forms import EmptyForm
-from app.forms import newStationAdminForm
-from app.models import Station
-from app.forms import EditStationForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyForm, newStationAdminForm, EditStationForm, SectionForm, EventForm, EditUserForm
+from app.models import AvailableSectionsForNewLine, ChosenSectionsForNewLine, User, Station, Section, Event, Line, line_sections, User, Role
 from flask import render_template, url_for, flash, redirect
-from app.forms import SectionForm
-from app.models import Section
-from app.forms import SectionForm
-from app.forms import EventForm
-from app.models import Event
 from datetime import datetime
 from flask import request, render_template, flash, redirect, url_for, session
 from app import app, db
-from app.models import Line, Section, line_sections
-from app.models import User, Role
 from flask_security.decorators import roles_required
-from app.forms import EditUserForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, join
 
@@ -32,7 +19,7 @@ from sqlalchemy import select, join
 def index():
     return render_template('index.html', title='Home')
 
-
+# Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -50,15 +37,13 @@ def login():
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
-
+# Logout route
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
-
-
-
+# route for the user profile
 @app.route('/user/<username>')
 @login_required
 def user(username):
@@ -67,14 +52,13 @@ def user(username):
     form = EmptyForm()
     return render_template('user.html', user=user, form=form)    
     
-from datetime import datetime
-
+# this is from the megatutorial
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
         db.session.commit() 
 
-
+#route to edit the profile of a user
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -87,9 +71,8 @@ def edit_profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
     return render_template('edit_profile.html', title='Edit Profile', form=form) 
-
         
-
+# route to create a new station
 @app.route('/newStationAdmin', methods=['GET', 'POST'])
 @login_required
 @roles_required('admin')
@@ -102,21 +85,18 @@ def newStationAdmin():
         return redirect(url_for('index'))
     return render_template('newStationAdmin.html', form=form)
 
+# Route to show, edit and delete stations. For editing and deletion, the admin is redirected to another page.
 @app.route('/editStationsAdmin')
 @roles_required('admin')
 def editStationsAdmin():
     stations = Station.query.all()
     return render_template('editStationsAdmin.html', stations=stations)
 
-
-
-from sqlalchemy.exc import IntegrityError
-
+# route to delete a station
 @app.route('/deleteStation/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteStation(id):
     stationToDelete = Station.query.get_or_404(id)
-    
     try:
         db.session.delete(stationToDelete)
         db.session.commit()
@@ -124,10 +104,9 @@ def deleteStation(id):
         db.session.rollback()
         flash('Bahnhof ist in Verwendung und kann nicht gelöscht werden.')
         return redirect(url_for('editStationsAdmin'))
-
     return redirect(url_for('editStationsAdmin'))
 
-
+# route to edit a single station
 @app.route('/editSingleStation/<int:id>', methods=['GET', 'POST'])
 @roles_required('admin')
 def editSingleStation(id):
@@ -150,8 +129,7 @@ def editSingleStation(id):
     return render_template('editSingleStation.html', title='Edit Station', form=form)
 
 
-
-
+# route to create a new section
 @app.route('/newSectionAdmin', methods=['GET', 'POST'])
 @roles_required('admin')
 def newSectionAdmin():
@@ -166,6 +144,7 @@ def newSectionAdmin():
         return redirect(url_for('index'))
     return render_template('newSectionAdmin.html', title='Neuer Abschnitt', form=form)
 
+# Route to show, edit and delete sections. For editing and deletion, the admin is redirected to another page.
 @app.route('/editSectionsAdmin')
 @roles_required('admin')
 def editSectionsAdmin():
@@ -173,8 +152,7 @@ def editSectionsAdmin():
     return render_template('editSectionsAdmin.html', sections=sections)
 
 
-from sqlalchemy.exc import IntegrityError
-
+# route to delete a section
 @app.route('/deleteSection/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteSection(id):
@@ -191,8 +169,7 @@ def deleteSection(id):
     return redirect(url_for('editSectionsAdmin'))
 
 
-
-
+# route to edit a single section
 @app.route('/editSingleSection/<int:id>', methods=['GET', 'POST'])
 @roles_required('admin')
 def editSingleSection(id):
@@ -210,7 +187,8 @@ def editSingleSection(id):
         form.startStation.render_kw = {'disabled': 'disabled'}
         form.endStation.render_kw = {'disabled': 'disabled'}
         form.trackWidth.render_kw = {'disabled': 'disabled'}
-
+    
+    # To commit the changes to the database
     if form.validate_on_submit():
         section.startStation = form.startStation.data
         section.endStation = form.endStation.data
@@ -222,6 +200,7 @@ def editSingleSection(id):
         flash('Die Änderungen wurden erfolgreich durchgeführt.')
         return redirect(url_for('editSingleSection', id=section.id))
 
+    # To show the current values of the section in the form
     elif request.method == 'GET':
         form.startStation.data = section.startStation
         form.endStation.data = section.endStation
@@ -233,7 +212,7 @@ def editSingleSection(id):
     return render_template('editSingleSection.html', title='Edit Section', form=form)
 
 
-
+# route to create a new event
 @app.route('/newEventAdmin', methods=['GET', 'POST'])
 @roles_required('admin')
 def newEventAdmin():
@@ -250,7 +229,7 @@ def newEventAdmin():
     return render_template('newEventAdmin.html', title='Add Event', form=form)
 
 
-
+# Route to show, edit and delete events. For editing and deletion, the admin is redirected to another page.
 @app.route('/editEventsAdmin')
 @roles_required('admin')
 def editEventsAdmin():
@@ -258,6 +237,7 @@ def editEventsAdmin():
     return render_template('editEventsAdmin.html', events=events)
 
 
+# route to edit a single event
 @app.route('/editSingleEvent/<int:id>', methods=['GET', 'POST'])
 @roles_required('admin')
 def editSingleEvent(id):
@@ -284,7 +264,7 @@ def editSingleEvent(id):
     return render_template('editSingleEvent.html', title='Edit Event', form=form)
 
 
-
+# route to delete an event
 @app.route('/deleteEvent/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteEvent(id):
@@ -300,12 +280,13 @@ def deleteEvent(id):
     return redirect(url_for('editEventsAdmin'))
 
 
-
+# route to start the assistant for creating a new line
 @app.route('/newLineAdminStart')
 @roles_required('admin')
 def newLineAdminStart():
     return render_template('newLineAdminStart.html')
 
+# for the assistant for new lines, the temp tables in the database need to be prepared
 @app.route('/newLineAdminSectionsAssistantPrepareDB', methods=['POST'])
 @roles_required('admin')
 def newLineAdminSectionsAssistantPrepareDB():
@@ -327,7 +308,8 @@ def newLineAdminSectionsAssistantPrepareDB():
 
     return redirect(url_for('newLineAdminSectionsAssistantFrontend'))
 
-
+# route for the frontend of the assistant for creating a new line (to choose the sections)
+# the chosen sections and the available sections are passed to the html template
 @app.route('/newLineAdminSectionsAssistantFrontend')
 @roles_required('admin')
 def newLineAdminSectionsAssistantFrontend():
@@ -336,8 +318,8 @@ def newLineAdminSectionsAssistantFrontend():
 
     return render_template('newLineAdminSectionsAssistantFrontend.html', chosen_sections=chosen_sections, available_sections=available_sections)
 
-from flask import request
 
+# route to move a section from the available sections to the chosen sections
 @app.route('/moveSectionToChosen/<int:section_id>', methods=['POST'])
 @roles_required('admin')
 def moveSectionToChosen(section_id):
@@ -373,6 +355,7 @@ def moveSectionToChosen(section_id):
     return redirect(request.referrer)
 
 
+# route to remove a section from the chosen sections (only the last section is allowed to be removed) 
 @app.route('/removeLastSectionFromChosenSections/<int:section_id>', methods=['POST'])
 @roles_required('admin')
 def removeLastSectionFromChosenSections(section_id):
@@ -381,7 +364,7 @@ def removeLastSectionFromChosenSections(section_id):
 
     # Check if the reference exists
     if chosen_section is None:
-        # Handle the error (this is just an example)
+        # Handle the error 
         return "Error: No section found with the given ID", 404
 
     # Remove the reference to the section from the ChosenSectionsForNewLine table
@@ -412,7 +395,7 @@ def removeLastSectionFromChosenSections(section_id):
     # Redirect the user back to the previous page
     return redirect(request.referrer)
 
-
+# route to enter the details of the new line (the sections are already chosen)
 @app.route('/newLineAdminEnterDetails', methods=['GET', 'POST'])
 @roles_required('admin')
 def newLineAdminEnterDetails():
@@ -429,7 +412,7 @@ def newLineAdminEnterDetails():
 
         db.session.commit()
 
-        return redirect(url_for('index'))  # or wherever you want to redirect the user after creating the line
+        return redirect(url_for('index'))  
 
     else:
         chosen_sections = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order).all()
@@ -437,7 +420,7 @@ def newLineAdminEnterDetails():
         end_station = chosen_sections[-1].section_rel.end_station_rel.nameOfStation if chosen_sections else None
         return render_template('newLineAdminEnterDetails.html', start_station=start_station, end_station=end_station)
 
-
+# Route to show, edit and delete lines. For editing and deletion, the admin is redirected to another page.
 @app.route('/editLinesAdmin', methods=['GET', 'POST'])
 @roles_required('admin')
 def editLinesAdmin():
@@ -454,7 +437,7 @@ def editLinesAdmin():
     lines = Line.query.all()
     return render_template('editLinesAdmin.html', lines=lines)
  
-
+# When the assistant for editing a line is started, the temp tables in the database need to be prepared
 @app.route('/editSingleLineAdminPrepareDB/<int:id>', methods=['GET'])
 @roles_required('admin')
 def editSingleLineAdminPrepareDB(id):
@@ -484,7 +467,7 @@ def editSingleLineAdminPrepareDB(id):
     return redirect(url_for('editSingleLineAdminSectionsAssistantFrontend', line_id=id))
 
 
-
+# route to show the frontend of the assistant for editing a line (to alter the sections)
 @app.route('/editSingleLineAdminSectionsAssistantFrontend/<int:line_id>', methods=['GET'])
 @roles_required('admin')
 def editSingleLineAdminSectionsAssistantFrontend(line_id):
@@ -498,7 +481,7 @@ def editSingleLineAdminSectionsAssistantFrontend(line_id):
     # Render the template and pass the line, chosen sections, and available sections to it
     return render_template('editSingleLineAdminSectionsAssistantFrontend.html', line=line, chosen_sections=chosen_sections, available_sections=available_sections)
 
-
+# route to render the template for editing the name of a line (the sections can be altered in a previous step)
 @app.route('/editSingleLineChangeName/<int:line_id>', methods=['GET', 'POST'])
 @roles_required('admin')
 def editSingleLineChangeName(line_id):
@@ -507,12 +490,12 @@ def editSingleLineChangeName(line_id):
         name_of_line = request.form['nameOfLine']
         line.nameOfLine = name_of_line
         db.session.commit()
-        return redirect(url_for('index'))  # or wherever you want to redirect the user after editing the line
+        return redirect(url_for('index'))  
     else:
         return render_template('editSingleLineChangeName.html', line_id=line_id, nameOfLine=line.nameOfLine)
 
         
-        
+# route to delete a line        
 @app.route('/deleteLineAdmin', methods=['POST'])
 @roles_required('admin')
 def deleteLineAdmin():
@@ -527,7 +510,7 @@ def deleteLineAdmin():
 
 
 
-
+# route to create a new user. The name is a bit misleading because it is taken from the megatutorial.
 @app.route('/register', methods=['GET', 'POST'])
 @roles_required('admin')
 def register():
@@ -548,6 +531,7 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
+# Route to show, edit and delete users. For editing and deletion, the admin is redirected to another page.
 @app.route('/editUsersAdmin')
 @roles_required('admin')
 def editUsersAdmin():
@@ -555,6 +539,8 @@ def editUsersAdmin():
     return render_template('editUsersAdmin.html', users=users)
 from werkzeug.security import generate_password_hash
 
+
+# route to edit a single user
 @app.route('/editSingleUser/<int:id>', methods=['GET', 'POST'])
 @roles_required('admin')
 def editSingleUser(id):
@@ -576,7 +562,7 @@ def editSingleUser(id):
     form.is_admin.data = any(role.name == 'admin' for role in user.roles)
     return render_template('editSingleUser.html', form=form)
 
-
+# route to delete a single user
 @app.route('/deleteSingleUser/<int:id>', methods=['POST'])
 @roles_required('admin')
 def deleteSingleUser(id):
@@ -585,7 +571,7 @@ def deleteSingleUser(id):
     db.session.commit()
     return redirect(url_for('editUsersAdmin'))
 
-
+# display the lines for the employees
 @app.route('/viewLinesEmployee')
 @roles_required('employee')
 def viewLinesEmployee():
@@ -594,6 +580,7 @@ def viewLinesEmployee():
         line.valid_events_exist = any(section.events for section in line.sections)
     return render_template('viewLinesEmployee.html', lines=lines)
 
+# display the specific sections of a line for the employees
 @app.route('/viewSpecificSectionEmployee/<int:line_id>')
 @roles_required('employee')
 def viewSpecificSectionEmployee(line_id):
@@ -601,6 +588,7 @@ def viewSpecificSectionEmployee(line_id):
     sections = line.sections  # get the sections of the line
     return render_template('viewSpecificSectionEmployee.html', sections=sections, now=datetime.utcnow().date())
 
+# display the stations for the employees
 @app.route('/viewStationsEmployee')
 @roles_required('employee')
 def viewStationsEmployee():

@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 
-#This is a workaround for the sqlite3 foreign key problem. It did not work how it is described in moodle, so i made it that way.
+#This is a workaround for the sqlite3 foreign key problem. I made it that way.
 @app.before_first_request
 def setup():
     # Changes for Foreign Keys
@@ -31,8 +31,6 @@ from app import routes, models
 from flask_security import Security, SQLAlchemyUserDatastore, UserMixin, RoleMixin
 from flask_principal import Principal
 from app.models import User, Role
-
-# Changes for Access-Control
 
 # Flask-Principal
 principals = Principal(app)
