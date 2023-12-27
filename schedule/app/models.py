@@ -33,6 +33,11 @@ class Streckenhalteplan(db.Model):
     end_station_id = db.Column(db.Integer)
     original_line_id = db.Column(db.Integer)
     sections = db.relationship('Section', backref='streckenhalteplan')
+    travel_duration = db.Column(db.Float)
+
+    def calculate_travel_duration(self):
+        self.travel_duration = sum([section.distance / section.maxSpeed for section in self.sections])
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

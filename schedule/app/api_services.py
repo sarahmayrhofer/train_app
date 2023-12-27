@@ -19,6 +19,8 @@ def get_prepared_lines(streckenhalteplaene):
             'nameOfLine': plan.name,
             'startStationId': plan.start_station_id,
             'endStationId': plan.end_station_id,
+            'original_line_id': plan.original_line_id,
+            'travel_duration': plan.travel_duration,
             'sections': format_sections(plan.sections)
         }
         lines.append(line)
@@ -65,7 +67,7 @@ def berechne_preise_und_bahnhof_ids(line,percent_profit = 0, price_per_km = 100)
     #print(line['sections'])
     for section in line['sections']:
         preis = (round(section['distance'] * price_per_km, 2) + section['fee'])*(1+percent_profit/100) #Presikalkulation kostendeckend + Profitaufschlag
-        preise.append(preis)
+        preise.append(round(preis,2))
         bahnhof_ids.append(section['endStationId'])
     return preise, bahnhof_ids
 
@@ -142,7 +144,7 @@ def create_streckenhalteplan(line_data, plan_name, stations_status):
     end_station_id = valid_station_ids[-1]
     
     # Create the Streckenhalteplan instance
-    new_plan = Streckenhalteplan(name=plan_name, start_station_id=start_station_id, end_station_id=end_station_id, original_line_id=line_data['id'])
+    new_plan = Streckenhalteplan(name=plan_name, start_station_id=start_station_id, end_station_id=end_station_id, original_line_id=line_data['id'], travel_duration=0.0)
     db.session.add(new_plan)
 
     # Create Section instances for each section in line_data
@@ -161,6 +163,8 @@ def create_streckenhalteplan(line_data, plan_name, stations_status):
             )
             db.session.add(new_section)
             new_plan.sections.append(new_section)
+
+    new_plan.calculate_travel_duration()
 
     # Commit the changes to the database
     db.session.commit()

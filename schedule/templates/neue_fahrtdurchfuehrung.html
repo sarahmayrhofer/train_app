@@ -2,6 +2,104 @@
 
 {% block content %}
 <script>
+    var allEntries =  {{ all_entries | tojson }};
+    var zuege = {{ zuege | tojson }};
+    var linien = {{ lines | tojson }};
+    var original_linien = {{ original_lines | tojson }};
+
+    var EntriesPrepared = []
+    allEntries.forEach(entry => {
+        var linieTravelDuration = linien.find(linie => linie.id == entry.line).travel_duration
+
+        var { endzeit, endDatum } = berechneEndzeitUndDatum(entry["datum"], entry["zeit"], linieTravelDuration);
+        EntriesPrepared.push({ startdatum: entry["datum"], startzeit: entry["zeit"], enddatum: endDatum, endzeit: endzeit });
+    });
+
+    function berechneEndzeitUndDatum(startdatum, startzeit, dauerInStunden) {
+        var startDatumZeit = new Date(startdatum + 'T' + startzeit);
+
+        // Berechnung der Endzeit in Millisekunden
+        var dauerInMillisekunden = dauerInStunden * 60 * 60 * 1000;
+        var endDatumZeit = new Date(startDatumZeit.getTime() + dauerInMillisekunden);
+
+        // Formatierung der Endzeit im HH:MM-Format
+        var endzeit = formatiereZeit(endDatumZeit);
+
+        // Überprüfung, ob das Datum sich geändert hat (Überlauf über Mitternacht)
+        var endDatum = endDatumZeit.toISOString().substring(0, 10);
+
+        // Wenn die Endzeit kleiner als die Startzeit ist, ist das Datum auf den nächsten Tag übergegangen
+        if (endzeit < startzeit) {
+            endDatum = new Date(endDatumZeit.getTime() + 24 * 60 * 60 * 1000).toISOString().substring(0, 10);
+        }
+
+        return { endzeit, endDatum };
+    }
+
+    function formatiereZeit(date) {
+        var stunden = date.getHours().toString().padStart(2, '0');
+        var minuten = date.getMinutes().toString().padStart(2, '0');
+        return stunden + ':' + minuten;
+    }
+
+    function pruefeZeitlicheUeberschneidungen(kombinationen, EntriesPrepared) {
+        kombinationen.forEach(kombination => {
+            EntriesPrepared.forEach(entryPrepared => {
+                let startKombination = new Date(kombination.startdatum + 'T' + kombination.startzeit);
+                let endKombination = new Date(kombination.enddatum + 'T' + kombination.endzeit);
+                let startEntryPrepared = new Date(entryPrepared.startdatum + 'T' + entryPrepared.startzeit);
+                let endEntryPrepared = new Date(entryPrepared.enddatum + 'T' + entryPrepared.endzeit);
+
+                // Überprüfen, ob die Endzeit der Kombination nach der Startzeit des vorbereiteten Eintrags liegt und
+                // die Startzeit der Kombination vor der Endzeit des vorbereiteten Eintrags
+                if (startKombination < endEntryPrepared && endKombination > startEntryPrepared) {
+                    console.log(`Überschneidung gefunden: Eintrag Geplant [${entryPrepared.startdatum} ${entryPrepared.startzeit}] - [${entryPrepared.enddatum} ${entryPrepared.endzeit}] mit Kombination [${kombination.startdatum} ${kombination.startzeit}] - [${kombination.enddatum} ${kombination.endzeit}]`);
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // ...
+
+        function updateZeitDatumKombinationen() {
+            var daten = document.querySelectorAll('input[name="daten[]"]');
+            var zeiten = document.querySelectorAll('input[name="zeiten[]"]');
+            var kombinationen = [];
+            var linieGewaehlt = document.getElementById('hidden_line_id').value;
+            var linieTravelDuration = linien.find(linie => linie.id == linieGewaehlt).travel_duration
+
+            daten.forEach(datum => {
+                if (datum.value) {
+                    zeiten.forEach(zeit => {
+                        if (zeit.value.length === 5) { // Überprüfen, ob die Zeit vollständig ist (HH:MM)
+                            var { endzeit, endDatum } = berechneEndzeitUndDatum(datum.value, zeit.value, linieTravelDuration);
+                            kombinationen.push({ startdatum: datum.value, startzeit: zeit.value, enddatum: endDatum, endzeit: endzeit });
+                        }
+                    });
+                }
+            });
+
+            console.log("Kreuzprodukt der Zeit- und Datumskombinationen: ", kombinationen, "Alle Einträge bisher", EntriesPrepared);
+            pruefeZeitlicheUeberschneidungen(kombinationen, EntriesPrepared);
+        }
+
+        // Event Delegation für Datumsfelder
+        document.body.addEventListener('change', function(event) {
+            if (event.target.name === 'daten[]') {
+                updateZeitDatumKombinationen();
+            }
+        });
+
+        // Event Delegation für Zeitfelder
+        document.body.addEventListener('change', function(event) {
+            if (event.target.name === 'zeiten[]') {
+                updateZeitDatumKombinationen();
+            }
+        });
+    });
+    //-----------
+
     document.addEventListener('DOMContentLoaded', (event) => {
         function updateOutput() {
             var slider = document.getElementById('percent_profit');
@@ -35,6 +133,53 @@
             dateFieldIndex++;
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+            function deaktiviereErstenSchritt() {
+                document.getElementById('zug_id').disabled = true;
+                document.getElementById('line_id').disabled = true;
+                document.getElementById('mitarbeiter').disabled = true;
+                document.getElementById('bestaetigeErstenSchritt').disabled = true;
+            }
+
+            function zeigeZweitenSchritt() {
+                formatMitarbeiterIDs(); 
+                document.getElementById('hidden_zug_id').value = document.getElementById('zug_id').value;
+                document.getElementById('hidden_line_id').value = document.getElementById('line_id').value;
+                document.getElementById('hidden_mitarbeiter_ids').value = document.getElementById('mitarbeiter_ids').value;
+                //document.getElementById('ersterSchritt').style.display = 'none';
+                document.getElementById('zweiterSchritt').style.display = 'block';
+            }
+            
+            function pruefeSpurbreite(zugId, linieId) {
+                var zugSpurbreite = zuege.find(zug => zug.id == zugId).wagons[0].track_width; // Annahme: Alle Waggons haben dieselbe Spurbreite
+                var linieIdOriginal = linien.find(linie => linie.id == linieId).original_line_id;
+                var lin = original_linien.find(linie => linie.id == linieIdOriginal);
+                var streckenSpurbreite = lin.sections[0].trackWidth; // Annahme: Alle Abschnitte haben dieselbe Spurbreite
+
+                return zugSpurbreite === streckenSpurbreite;
+            }
+
+            document.getElementById('bestaetigeErstenSchritt').addEventListener('click', function () {
+                var zugGewaehlt = document.getElementById('zug_id').value;
+                var linieGewaehlt = document.getElementById('line_id').value;
+                var mitarbeiterGewaehlt = document.getElementById('mitarbeiter').selectedOptions.length > 0;
+                var spurbreiteOk = pruefeSpurbreite(zugGewaehlt, linieGewaehlt);
+
+                if (!zugGewaehlt) {
+                    alert('Bitte wählen Sie einen Zug aus.');
+                } else if (!linieGewaehlt) {
+                    alert('Bitte wählen Sie eine Linie aus.');
+                } else if (!mitarbeiterGewaehlt) {
+                    alert('Bitte wählen Sie mindestens einen Mitarbeiter aus.');
+                } else if (!spurbreiteOk) {
+                    alert('Die Spurbreite des Zuges und der Strecke passen nicht zusammen.');  
+                } else {
+                    zeigeZweitenSchritt();
+                    deaktiviereErstenSchritt();
+                }
+            });
+        });
 
     document.addEventListener('DOMContentLoaded', function () {
         var timeFieldIndex = 1;
@@ -78,62 +223,79 @@
         #submit {
             margin-top: 20px; /* Abstand oberhalb des Submit-Buttons */
         }
+
+        #zweiterSchritt {
+            display: none; /* Anfangs versteckt */
+        }
     </style>
 </head>
 <body>
     <h1>Neue Fahrtdurchführung anlegen</h1>
     <form action="{{ url_for('main.neue_fahrtdurchfuehrung') }}" method="POST">
         
-        <div id="Rest" class="form-section">
-            <label for="zug_id">Zug:</label>
-            <select name="zug_id" id="zug_id" required>
-                {% for zug in zuege %}
-                <option value="{{ zug['id'] }}">{{ zug['name'], zug['id'] }}</option>
-                {% endfor %}
-            </select> 
-            <br>
-            <br>
-            <label for="line">Linie/Strecke:</label>
-            <select name="line_id" id="line_id" required>
-                {% for line in lines %}
-                <option value="{{ line['id'] }}">{{ line['nameOfLine'], line['id'] }}</option>
-                {% endfor %}
-            </select> <br>
+        <!-- Erster Schritt -->
+        <div id="ersterSchritt" class="form-section">
+            <div id="Rest" class="form-section">
+                <label for="zug_id">Zug/Zug-ID:</label>
+                <select name="zug_id" id="zug_id" required>
+                    {% for zug in zuege %}
+                    <option value="{{ zug['id'] }}">{{ zug['name'], zug['id'] }}</option>
+                    {% endfor %}
+                </select> 
+                <br>
+                <br>
+                <label for="line">Linie/Streckenhalteplan:</label>
+                <select name="line_id" id="line_id" required>
+                    {% for line in lines %}
+                    <option value="{{ line['id'] }}">{{ line['nameOfLine'], line['id'] }}</option>
+                    {% endfor %}
+                </select> <br>
+                
+                <br>
+
+                <label for="mitarbeiter">Mitarbeiter:</label>
+                <select id="mitarbeiter" name="mitarbeiter" multiple>
+                    {% for mitarbeiter in alle_mitarbeiter %}
+                    <option value="{{ mitarbeiter.id }}">{{ mitarbeiter.username }} (ID: {{ mitarbeiter.id }})</option>
+                    {% endfor %}
+                </select>
+
+                <input type="hidden" id="mitarbeiter_ids" name="mitarbeiter_ids">
+                
+            </div>
+            <button type="button" id="bestaetigeErstenSchritt">Bestätigen</button>
+        </div>
+
+        <!-- Versteckte Felder für die Werte der Auswahl-Felder -->
+        <input type="hidden" name="zug_id" id="hidden_zug_id">
+        <input type="hidden" name="line_id" id="hidden_line_id">
+        <input type="hidden" name="mitarbeiter_ids" id="hidden_mitarbeiter_ids">
+        
+
+        <!-- Zweiter Schritt -->
+        <div id="zweiterSchritt">
+            <div id="datumsfelder" class="form-section">
+                <label for="datum0">Datum:</label>
+                <input type="date" name="daten[]" id="datum0" required> <br>
+                <button type="button" id="addDate">Weiteres Datum hinzufügen</button> <br>
+            </div>
             
-            <br>
-
-            <label for="mitarbeiter">Mitarbeiter:</label>
-            <select id="mitarbeiter" name="mitarbeiter" multiple>
-                {% for mitarbeiter in alle_mitarbeiter %}
-                <option value="{{ mitarbeiter.id }}">{{ mitarbeiter.username }} (ID: {{ mitarbeiter.id }})</option>
-                {% endfor %}
-            </select>
-
-            <input type="hidden" id="mitarbeiter_ids" name="mitarbeiter_ids">
             
-        </div>
+            <div id="zeitfelder" class="form-section">
+                <label for="zeit0">Zeit:</label>
+                <input type="time" name="zeiten[]" id="zeit0" required> <br>
+                <button type="button" id="addTime">Weitere Zeit hinzufügen</button> <br>
+            </div>
+            
+            
 
-        <div id="datumsfelder" class="form-section">
-            <label for="datum0">Datum:</label>
-            <input type="date" name="daten[]" id="datum0" required> <br>
-            <button type="button" id="addDate">Weiteres Datum hinzufügen</button>
-        </div>
-        
-        
-        <div id="zeitfelder" class="form-section">
-            <label for="zeit0">Zeit:</label>
-            <input type="time" name="zeiten[]" id="zeit0" required> <br>
-            <button type="button" id="addTime">Weitere Zeit hinzufügen</button>
-        </div>
-         
-        
+            <label for="percent_profit">Preisaufschlag (%):</label>
+            <input type="range" id="percent_profit" name="percent_profit" min="0" max="200" value="0">
+            <output id="percent_profit_output" for="percent_profit">0</output>%
 
-        <label for="percent_profit">Preisaufschlag (%):</label>
-        <input type="range" id="percent_profit" name="percent_profit" min="0" max="200" value="0">
-        <output id="percent_profit_output" for="percent_profit">0</output>%
-
-        <div id="submit">
-            <input type="submit" value="Fahrtdurchführung erstellen" onclick="formatMitarbeiterIDs()">
+            <div id="submit">
+                <input type="submit" value="Fahrtdurchführung erstellen" onclick="formatMitarbeiterIDs()">
+            </div>
         </div>
     </form> <br>
     <a href="{{ url_for('main.fahrtdurchfuehrungen') }}">Zurück zu den Fahrtdurchführungen</a>

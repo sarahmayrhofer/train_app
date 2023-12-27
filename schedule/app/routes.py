@@ -1,12 +1,27 @@
 from flask import Blueprint
+from flask import flash
 from flask import render_template
 from flask import request, redirect, url_for, jsonify
-from .models import Fahrtdurchführung
+from .models import Fahrtdurchführung, Streckenhalteplan, User
 from app.db import db
 from datetime import datetime
 from .api_services import *
 import json
-from bs4 import BeautifulSoup
+from .forms import LoginForm, NewUserForm, RegistrationForm
+from flask_login import login_user, current_user, login_required
+from werkzeug.urls import url_parse
+from functools import wraps
+import datetime
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash("Diese Seite ist nur für Administratoren zugänglich.", "warning")
+            return redirect(url_for('main.index'))  # Oder eine andere geeignete Route
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 main = Blueprint('main', __name__)
 
@@ -15,22 +30,54 @@ def register_routes(app):
 
 @main.route('/')
 def startseite():
-    return render_template('startseite.html') 
+    return redirect(url_for('main.login'))
+
+@main.route('/index')
+def index():
+    return render_template('index.html', page_name='Übersicht', user=current_user)
 
 @main.route('/fahrtdurchfuehrungen/')
+@login_required
 def fahrtdurchfuehrungen():
     alle_fahrtdurchfuehrungen = Fahrtdurchführung.query.order_by(Fahrtdurchführung.datum, Fahrtdurchführung.zeit).all()
-    return render_template('fahrtdurchfuehrungen.html', fahrtdurchfuehrungen=alle_fahrtdurchfuehrungen)
+    return render_template('fahrtdurchfuehrungen.html', page_name='Fahrtdurchführungen', user=current_user, fahrtdurchfuehrungen=alle_fahrtdurchfuehrungen)
+
+def serialize_datetime(obj):
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+    elif isinstance(obj, datetime.time):
+        return obj.strftime("%H:%M")
+    else:
+        raise TypeError("Type not serializable")
 
 @main.route('/neue_fahrtdurchfuehrung', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def neue_fahrtdurchfuehrung():
+    #GET
+    alle_mitarbeiter = User.query.all()
+    all_entries = Fahrtdurchführung.query.all()  
+    entries_as_dicts = [
+        {
+            'datum': serialize_datetime(entry.datum),
+            'zeit': serialize_datetime(entry.zeit),
+            'line': entry.line
+        }
+        for entry in all_entries
+    ]  
+    zuege = get_trains()  # Liste der Züge abfragen
+    streckenhalteplaene = Streckenhalteplan.query.all()
+    lines = get_prepared_lines(streckenhalteplaene)
+    original_lines = get_lines() # Liste der originalstrecke
+
+    #POST
     if request.method == 'POST':
         daten = request.form.getlist('daten[]') 
         zeiten = request.form.getlist('zeiten[]')
         line_id = request.form.get('line_id')
         zug_id = request.form.get('zug_id') 
         mitarbeiter_ids = request.form.get('mitarbeiter_ids')
-        line = hole_line(int(line_id))  # Funktion, die die Linieninformation abruft
+        line = hole_line_prepared(int(line_id), lines) # Funktion, die die Linieninformation abruft
         percent_profit = request.form.get('percent_profit', type=int) or 0
 
         for datum_string in daten:
@@ -47,12 +94,12 @@ def neue_fahrtdurchfuehrung():
 
         return redirect(url_for('main.fahrtdurchfuehrungen'))
 
-    # Hier wird das Formular für eine GET-Anfrage gerendert
-    zuege = get_trains()  # Liste der Züge abfragen
-    lines = get_lines()
-    return render_template('neue_fahrtdurchfuehrung.html', zuege=zuege, lines=lines)  # Liste an die Vorlage übergeben
+    #GET-Anfrage gerendert
+    return render_template('neue_fahrtdurchfuehrung.html', page_name='Fahrtdurchführung anlegen', user=current_user, zuege=zuege, lines=lines, alle_mitarbeiter=alle_mitarbeiter, original_lines=original_lines, all_entries=entries_as_dicts)  # Liste an die Vorlage übergeben
 
 @main.route('/loesche_fahrtdurchfuehrung/<int:id>', methods=['POST'])
+@login_required
+@admin_required
 def loesche_fahrtdurchfuehrung(id):
     fahrt = Fahrtdurchführung.query.get_or_404(id)
     db.session.delete(fahrt)
@@ -65,6 +112,10 @@ def api_fahrtdurchfuehrungen():
     fahrtdurchfuehrungen_liste = []
 
     for fahrt in alle_fahrtdurchfuehrungen:
+        #Link the original Route id to simplify the Application of discounts
+        streckenhalteplan = Streckenhalteplan.query.filter_by(id=fahrt.line).first()
+        original_line_id = streckenhalteplan.original_line_id if streckenhalteplan else None
+    
         fahrt_dict = {
             'id': fahrt.id,
             'datum': fahrt.datum.isoformat(),
@@ -72,6 +123,7 @@ def api_fahrtdurchfuehrungen():
             'endzeit': fahrt.endzeit.isoformat() if fahrt.endzeit else None,
             'zug_id': fahrt.zug_id,
             'line': fahrt.line,
+            'original_line': original_line_id,
             'mitarbeiter_ids': [int(id.strip()) for id in fahrt.mitarbeiter_ids.split(',')] if fahrt.mitarbeiter_ids else [],
             'preise': [float(preis.strip()) for preis in fahrt.preise[1:-1].split(',')] if fahrt.preise else [],
             'bahnhof_ids': [int(id.strip()) for id in fahrt.bahnhof_ids[1:-1].split(',')] if fahrt.bahnhof_ids else [],
@@ -80,3 +132,121 @@ def api_fahrtdurchfuehrungen():
         fahrtdurchfuehrungen_liste.append(fahrt_dict)
 
     return jsonify(fahrtdurchfuehrungen_liste)
+
+#Route zur Übersicht für Streckenhaltepläne
+@main.route('/streckenhalteplaene')
+@login_required
+def streckenhalteplaene():
+    alle_streckenhalteplaene = Streckenhalteplan.query.all()
+    return render_template('streckenhalteplaene.html', page_name='Streckenhaltepläne', user=current_user, streckenhalteplaene=alle_streckenhalteplaene)
+
+# Route für die erstellung eines Streckenhalteplans
+@main.route('/streckenhalteplan/')
+@login_required
+@admin_required
+def streckenhalteplan():
+    lines = get_lines()
+    all_stations = get_all_stations() 
+    return render_template('streckenhalteplan.html', page_name='Streckenhalteplan anlegen', user=current_user, lines=lines, all_stations=all_stations)
+
+@main.route('/save_streckenhalteplan', methods=['POST'])
+@login_required
+@admin_required
+def save_streckenhalteplan():
+    # Daten aus dem Formular extrahieren
+    line_id = request.form.get('line_id')
+    plan_name = request.form.get('name')
+    stations_status_str = request.form.get('stations_status')
+
+    # Parsen des stations_status-Strings in ein Python-Liste
+    try:
+        stations_status = json.loads(stations_status_str)
+    except json.JSONDecodeError:
+        return jsonify({"error": "Ungültige Daten für stations_status"}), 400
+
+    line_data = hole_line(int(line_id))  # Holt die vollständige Linieninformation
+    if not line_data:
+        flash("Linie nicht gefunden", "error")
+        return redirect(url_for('main.streckenhalteplan'))
+
+    # Erstellen eines neuen Streckenhalteplan-Objekts mit den angepassten Daten
+    _ = create_streckenhalteplan(line_data, plan_name, stations_status)
+
+    return redirect(url_for('main.streckenhalteplaene'))
+
+@main.route('/loesche_streckenhalteplan/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def loesche_streckenhalteplan(id):
+    plan = Streckenhalteplan.query.get_or_404(id)
+    db.session.delete(plan)
+    db.session.commit()
+    return redirect(url_for('main.streckenhalteplaene'))
+
+#USER
+# Users Page
+@main.route('/users/')
+@main.route('/users')
+@login_required
+def users():
+    users = User.query.all()
+
+    return render_template('users.html', page_name='Userverwaltung', user=current_user, users=users)
+
+
+@main.route('/newUser', methods=['GET', 'POST'])
+@login_required
+#@admin_required
+def new_user():
+    form = NewUserForm()
+
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.role = form.role.data
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+
+    return render_template('new_user.html', page_name='Mitarbeiter anlegen', user=current_user, form=form)
+
+
+# User by ID
+@main.route('/users/<int:user_id>')
+def user_by_id(user_id):
+    return f"User with ID {user_id}"
+
+# Login
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('main.login'))
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('main.index')
+        return redirect(next_page)
+
+    return render_template('login.html', page_name='Login', user=current_user, title='Sign In', form=form)
+
+
+# Register - just user - no admin
+@main.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('main.login'))
+
+    return render_template('register.html', page_name='Registrierung', user=current_user, title='Register', form=form)

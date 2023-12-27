@@ -52,7 +52,6 @@
             var planName = document.getElementById('planName').value;
             var checkboxes = document.querySelectorAll('#stopsContainer input[type=checkbox]');
             
-            // Erstellen der stations_status-Liste
             var stations_status = Array.from(checkboxes).map(checkbox => checkbox.checked ? parseInt(checkbox.getAttribute('data-station-id')) : false);
 
             if (!planName || stations_status.filter(status => status !== false).length < 2) {
@@ -60,30 +59,26 @@
                 return;
             }
 
-            var data = {
-                line_id: selectedLineId,
-                name: planName,
-                stations_status: stations_status
-            };
+            // Erstellen eines neuen Formulars
+            var form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/save_streckenhalteplan';
 
-            fetch('/save_streckenhalteplan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert("Erfolgreich hinzugefügt");
-                } else if (data.error) {
-                    alert("Fehler: " + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Fehler beim Speichern des Streckenhalteplans', error);
-            });
+            // Fügen Sie benötigte Daten als versteckte Felder hinzu
+            form.appendChild(createHiddenInput('line_id', selectedLineId));
+            form.appendChild(createHiddenInput('name', planName));
+            form.appendChild(createHiddenInput('stations_status', JSON.stringify(stations_status)));
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function createHiddenInput(name, value) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
         }
 
 
