@@ -4,7 +4,6 @@ from flask import render_template
 from flask import request, redirect, url_for, jsonify
 from .models import Fahrtdurchführung, Streckenhalteplan, User
 from app.db import db
-from datetime import datetime
 from .api_services import *
 import json
 from .forms import LoginForm, NewUserForm, RegistrationForm
@@ -61,7 +60,9 @@ def neue_fahrtdurchfuehrung():
         {
             'datum': serialize_datetime(entry.datum),
             'zeit': serialize_datetime(entry.zeit),
-            'line': entry.line
+            'line': entry.line,
+            'zug_id': entry.zug_id,
+            'mitarbeiter_ids': entry.mitarbeiter_ids
         }
         for entry in all_entries
     ]  
@@ -85,9 +86,9 @@ def neue_fahrtdurchfuehrung():
                 preise, bahnhof_ids = berechne_preise_und_bahnhof_ids(line, percent_profit)
                 arr_zeiten = berechne_zeiten(line, zeit_string)
 
-                datum = datetime.strptime(datum_string, '%Y-%m-%d').date()
-                zeit = datetime.strptime(zeit_string, '%H:%M').time()
-                neue_fahrt = Fahrtdurchführung(datum=datum, zeit=zeit, endzeit= (datetime.strptime(arr_zeiten[-1], '%H:%M:%S')).time(), zug_id=zug_id, line=line_id, mitarbeiter_ids=mitarbeiter_ids, preise=str(preise), bahnhof_ids=str(bahnhof_ids), zeiten=str(arr_zeiten))
+                datum = datetime.datetime.strptime(datum_string, '%Y-%m-%d').date()
+                zeit = datetime.datetime.strptime(zeit_string, '%H:%M').time()
+                neue_fahrt = Fahrtdurchführung(datum=datum, zeit=zeit, endzeit= (datetime.datetime.strptime(arr_zeiten[-1], '%H:%M:%S')).time(), zug_id=zug_id, line=line_id, mitarbeiter_ids=mitarbeiter_ids, preise=str(preise), bahnhof_ids=str(bahnhof_ids), zeiten=str(arr_zeiten))
                 db.session.add(neue_fahrt)
         
         db.session.commit()

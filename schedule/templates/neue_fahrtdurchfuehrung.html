@@ -12,7 +12,7 @@
         var linieTravelDuration = linien.find(linie => linie.id == entry.line).travel_duration
 
         var { endzeit, endDatum } = berechneEndzeitUndDatum(entry["datum"], entry["zeit"], linieTravelDuration);
-        EntriesPrepared.push({ startdatum: entry["datum"], startzeit: entry["zeit"], enddatum: endDatum, endzeit: endzeit });
+        EntriesPrepared.push({ startdatum: entry["datum"], startzeit: entry["zeit"], enddatum: endDatum, endzeit: endzeit, trainid: entry["zug_id"], mitarbeiterids: entry["mitarbeiter_ids"] });
     });
 
     function berechneEndzeitUndDatum(startdatum, startzeit, dauerInStunden) {
@@ -43,6 +43,27 @@
     }
 
     function pruefeZeitlicheUeberschneidungen(kombinationen, EntriesPrepared) {
+        //Check if the entries conflict with each other
+        let laenge = kombinationen.length;
+        for (let i = 0; i < laenge; i++) {
+            for (let j = i + 1; j < laenge; j++) {
+                let startA = new Date(kombinationen[i].startdatum + 'T' + kombinationen[i].startzeit);
+                let endA = new Date(kombinationen[i].enddatum + 'T' + kombinationen[i].endzeit);
+                let startB = new Date(kombinationen[j].startdatum + 'T' + kombinationen[j].startzeit);
+                let endB = new Date(kombinationen[j].enddatum + 'T' + kombinationen[j].endzeit);
+
+                // Überprüfen, ob die Zeiträume sich überschneiden
+                if (startA < endB && endA > startB) {
+                    alert(`Zeitliche Überschneidung innerhalb der Neueingaben (Alle Mitarbeiter und Zug) - Eintrag Geplant [${kombinationen[i].startdatum} ${kombinationen[i].startzeit}] - [${kombinationen[i].enddatum} ${kombinationen[i].endzeit}] mit Eintrag Geplant [${kombinationen[j].startdatum} ${kombinationen[j].startzeit}] - [${kombinationen[j].enddatum} ${kombinationen[j].endzeit}]`)
+                    console.log(`Zeitliche Überschneidung innerhalb der Neueingaben (Alle Mitarbeiter und Zug) - Eintrag Geplant [${kombinationen[i].startdatum} ${kombinationen[i].startzeit}] - [${kombinationen[i].enddatum} ${kombinationen[i].endzeit}] mit Eintrag Geplant [${kombinationen[j].startdatum} ${kombinationen[j].startzeit}] - [${kombinationen[j].enddatum} ${kombinationen[j].endzeit}]`);
+                    resetLetzteEingabe()
+                    return
+                }
+            }
+        }
+        
+        
+        //Check if the entries conflict with existing entries
         kombinationen.forEach(kombination => {
             EntriesPrepared.forEach(entryPrepared => {
                 let startKombination = new Date(kombination.startdatum + 'T' + kombination.startzeit);
@@ -53,28 +74,69 @@
                 // Überprüfen, ob die Endzeit der Kombination nach der Startzeit des vorbereiteten Eintrags liegt und
                 // die Startzeit der Kombination vor der Endzeit des vorbereiteten Eintrags
                 if (startKombination < endEntryPrepared && endKombination > startEntryPrepared) {
-                    console.log(`Überschneidung gefunden: Eintrag Geplant [${entryPrepared.startdatum} ${entryPrepared.startzeit}] - [${entryPrepared.enddatum} ${entryPrepared.endzeit}] mit Kombination [${kombination.startdatum} ${kombination.startzeit}] - [${kombination.enddatum} ${kombination.endzeit}]`);
+                    var errorCode = 0                
+                    // Überprüfung der Zug-IDs auf Gleichheit
+                    if (kombination.trainid === entryPrepared.trainid) {
+                        alert(`Überschneidung mit gleicher Zug-ID gefunden: Zug-ID ${kombination.trainid} - Eintrag Geplant [${entryPrepared.startdatum} ${entryPrepared.startzeit}] - [${entryPrepared.enddatum} ${entryPrepared.endzeit}] mit Kombination [${kombination.startdatum} ${kombination.startzeit}] - [${kombination.enddatum} ${kombination.endzeit}]`)
+                        console.log(`Überschneidung mit gleicher Zug-ID gefunden: Zug-ID ${kombination.trainid} - Eintrag Geplant [${entryPrepared.startdatum} ${entryPrepared.startzeit}] - [${entryPrepared.enddatum} ${entryPrepared.endzeit}] mit Kombination [${kombination.startdatum} ${kombination.startzeit}] - [${kombination.enddatum} ${kombination.endzeit}]`);
+                        errorCode += 1
+                    }
+
+                    // Umwandlung der Mitarbeiter-IDs in Arrays von Zahlen
+                    let mitarbeiterIdsKombination = kombination.mitarbeiterids.split(',').map(Number);
+                    let mitarbeiterIdsEntryPrepared = entryPrepared.mitarbeiterids.split(',').map(Number);
+
+                    // Überprüfung auf gleiche Mitarbeiter-IDs in den Überschneidungen
+                    mitarbeiterIdsKombination.forEach(id => {
+                        if (mitarbeiterIdsEntryPrepared.includes(id)) {
+                            alert(`Überschneidung mit gleicher Mitarbeiter-ID gefunden: Mitarbeiter-ID ${id} - Eintrag Geplant [${entryPrepared.startdatum} ${entryPrepared.startzeit}] - [${entryPrepared.enddatum} ${entryPrepared.endzeit}] mit Kombination [${kombination.startdatum} ${kombination.startzeit}] - [${kombination.enddatum} ${kombination.endzeit}]`)
+                            console.log(`Überschneidung mit gleicher Mitarbeiter-ID gefunden: Mitarbeiter-ID ${id} - Eintrag Geplant [${entryPrepared.startdatum} ${entryPrepared.startzeit}] - [${entryPrepared.enddatum} ${entryPrepared.endzeit}] mit Kombination [${kombination.startdatum} ${kombination.startzeit}] - [${kombination.enddatum} ${kombination.endzeit}]`);
+                            errorCode += 2
+                        }
+                    });
+                    console.log("Error Code Value: ",errorCode)
+                    if (errorCode > 0) {
+                        resetLetzteEingabe();
+                    }
                 }
             });
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // ...
+    var letzteAenderung = {
+        zeitstempel: null,
+        feldID: null,
+        feldTyp: null // 'datum' oder 'zeit'
+    };
 
+    function resetLetzteEingabe() {
+        if (letzteAenderung.feldID) {
+            document.getElementById(letzteAenderung.feldID).value = '';
+            letzteAenderung = {
+                zeitstempel: null,
+                feldID: null,
+                feldTyp: null
+            };
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
         function updateZeitDatumKombinationen() {
             var daten = document.querySelectorAll('input[name="daten[]"]');
             var zeiten = document.querySelectorAll('input[name="zeiten[]"]');
             var kombinationen = [];
             var linieGewaehlt = document.getElementById('hidden_line_id').value;
-            var linieTravelDuration = linien.find(linie => linie.id == linieGewaehlt).travel_duration
+            var trainid = document.getElementById('hidden_zug_id').value;
+            var trainid = parseInt(trainid, 10); // Der zweite Parameter 10 spezifiziert die Basis (dezimal in diesem Fall).
+            var mitarbeiterids = document.getElementById('hidden_mitarbeiter_ids').value;
+            var linieTravelDuration = linien.find(linie => linie.id == linieGewaehlt).travel_duration;
 
             daten.forEach(datum => {
                 if (datum.value) {
                     zeiten.forEach(zeit => {
                         if (zeit.value.length === 5) { // Überprüfen, ob die Zeit vollständig ist (HH:MM)
                             var { endzeit, endDatum } = berechneEndzeitUndDatum(datum.value, zeit.value, linieTravelDuration);
-                            kombinationen.push({ startdatum: datum.value, startzeit: zeit.value, enddatum: endDatum, endzeit: endzeit });
+                            kombinationen.push({ startdatum: datum.value, startzeit: zeit.value, enddatum: endDatum, endzeit: endzeit, trainid: trainid, mitarbeiterids: mitarbeiterids });
                         }
                     });
                 }
@@ -84,21 +146,18 @@
             pruefeZeitlicheUeberschneidungen(kombinationen, EntriesPrepared);
         }
 
-        // Event Delegation für Datumsfelder
+        // Event Delegation für Datumsfelder und Zeitfelder
         document.body.addEventListener('change', function(event) {
-            if (event.target.name === 'daten[]') {
-                updateZeitDatumKombinationen();
-            }
-        });
+            if (event.target.name === 'daten[]' || event.target.name === 'zeiten[]') {
+                // Aktualisiere das Objekt letzteAenderung
+                letzteAenderung.zeitstempel = new Date().getTime();
+                letzteAenderung.feldID = event.target.id;
+                letzteAenderung.feldTyp = event.target.name === 'daten[]' ? 'datum' : 'zeit';
 
-        // Event Delegation für Zeitfelder
-        document.body.addEventListener('change', function(event) {
-            if (event.target.name === 'zeiten[]') {
                 updateZeitDatumKombinationen();
             }
         });
     });
-    //-----------
 
     document.addEventListener('DOMContentLoaded', (event) => {
         function updateOutput() {
