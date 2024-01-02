@@ -22,7 +22,7 @@ from flask import flash
 from app import db
 from app.models import Station
 import requests
-from bs4 import BeautifulSoup
+import socket
 
 @app.before_request
 def before_request():
@@ -211,32 +211,100 @@ def fetch_stations():
 
 
 
+def get_fahrtdurchfuehrungen():
+    conn = http.client.HTTPConnection("127.0.0.1", 5000)
+    conn.request("GET", "/fahrtdurchfuehrungen/")
+    response = conn.getresponse()
+    
+    if response.status != 200:
+        print('Failed to fetch fahrtdurchfuehrungen: HTTP ' + str(response.status))
+        return
+
+    data = json.loads(response.read().decode())
+
+    for fahrtdurchfuehrung_data in data:
+        fahrtdurchfuehrung = Fahrtdurchfuehrung(
+            id=fahrtdurchfuehrung_data['id'],
+            datum=datetime.strptime(fahrtdurchfuehrung_data['datum'], '%Y-%m-%d').date(),
+            zeit=datetime.strptime(fahrtdurchfuehrung_data['zeit'], '%H:%M:%S').time(),
+            endzeit=datetime.strptime(fahrtdurchfuehrung_data['endzeit'], '%H:%M:%S').time(),
+            zug_id=fahrtdurchfuehrung_data['zug_id'],
+            line=fahrtdurchfuehrung_data['line'],
+            mitarbeiter_ids=fahrtdurchfuehrung_data['mitarbeiter_ids'],
+            preise=fahrtdurchfuehrung_data['preise'],
+            bahnhof_ids=fahrtdurchfuehrung_data['bahnhof_ids'],
+            zeiten=fahrtdurchfuehrung_data['zeiten']
+        )
+        db.session.add(fahrtdurchfuehrung)
+
+    db.session.commit()
+    print('Fahrtdurchfuehrungen fetched and saved successfully.')   
 
 
 
-# Routen zum Importieren der Daten Ende
-#neue route shedule
+
+
+""""
 
 def get_fahrtdurchfuehrungen():
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", 5003)
+        conn.request("GET", "/fahrtdurchfuehrungen/")
+    except socket.gaierror as e:
+        print(f'Address-related error connecting to server: {e}')
+        return
+    except ConnectionRefusedError as e:
+        print(f'Connection refused: {e}')
+        return
+    except http.client.HTTPException as e:
+        print(f'HTTP error occurred: {e}')
+        return
 
-    response = requests.get("http://127.0.0.1:5000/fahrtdurchfuehrungen/")
+    try:
+        response = conn.getresponse()
+    except http.client.HTTPException as e:
+        print(f'HTTP response error: {e}')
+        return
 
-    if response.text:
-        try:
-            return response.json()
-        except ValueError:
-            print("Invalid JSON response")
-            return None
-    else:
-        print("Empty response")
-        return None
-    
-   
+    if response.status != 200:
+        print(f'Failed to fetch fahrtdurchfuehrungen: HTTP {response.status}')
+        return
+
+    try:
+        data = json.loads(response.read().decode())
+    except json.JSONDecodeError as e:
+        print(f'Error decoding JSON: {e}')
+        return
+
+    # Continue processing data...
+
+    for fahrtdurchfuehrung_data in data:
+        fahrtdurchfuehrung = Fahrtdurchfuehrung(
+            id=fahrtdurchfuehrung_data['id'],
+            datum=datetime.strptime(fahrtdurchfuehrung_data['datum'], '%Y-%m-%d').date(),
+            zeit=datetime.strptime(fahrtdurchfuehrung_data['zeit'], '%H:%M:%S').time(),
+            endzeit=datetime.strptime(fahrtdurchfuehrung_data['endzeit'], '%H:%M:%S').time(),
+            zug_id=fahrtdurchfuehrung_data['zug_id'],
+            line=fahrtdurchfuehrung_data['line'],
+            mitarbeiter_ids=fahrtdurchfuehrung_data['mitarbeiter_ids'],
+            preise=fahrtdurchfuehrung_data['preise'],
+            bahnhof_ids=fahrtdurchfuehrung_data['bahnhof_ids'],
+            zeiten=fahrtdurchfuehrung_data['zeiten']
+        )
+        db.session.add(fahrtdurchfuehrung)
+
+    db.session.commit()
+    print('Fahrtdurchfuehrungen fetched and saved successfully.')   
+
+"""
 
 
-get_fahrtdurchfuehrungen()  # Call the function here
-
+"""
 
 if __name__ == '__main__':
     print('Starting application with app.run()')
     app.run(port=5003)
+
+"""
+
+#get_fahrtdurchfuehrungen()  # Call the function here

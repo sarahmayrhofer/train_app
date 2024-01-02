@@ -4,7 +4,6 @@ from app import db, login
 from flask_login import UserMixin
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
-from .db import db
 from app import db
 from datetime import datetime
 
@@ -134,6 +133,8 @@ class Line(db.Model):
         return None
 
 #Daten von Shedule
+"""
+
 
 class Fahrtdurchführung(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -149,3 +150,97 @@ class Fahrtdurchführung(db.Model):
 
     def __repr__(self):
         return f'<Fahrtdurchführung {self.id}>'
+    
+
+    
+class Streckenhalteplan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    start_station_id = db.Column(db.Integer)
+    end_station_id = db.Column(db.Integer)
+    original_line_id = db.Column(db.Integer)
+    sections = db.relationship('Section', backref='streckenhalteplan')
+
+#fleet 
+
+class Train(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(50), nullable=False)
+    position = db.Column(db.String(50), nullable=True)
+    price_per_km = db.Column(db.Float, nullable=True)
+
+    wagons = db.relationship('Wagon', backref='train', lazy=True)
+
+    maintenances = db.relationship('Maintenance', backref='train', lazy=True)
+
+    def total_max_weight(self):
+        normal_wagons = NormalWagon.query.filter_by(train_id=self.id).all()
+        total_max_weight = sum([wagon.max_weight for wagon in normal_wagons if wagon.max_weight is not None])
+        return total_max_weight
+
+    def total_number_of_seats(self):
+        normal_wagons = NormalWagon.query.filter_by(train_id=self.id).all()
+        total_number_of_seats = sum(
+            [wagon.number_of_seats for wagon in normal_wagons if wagon.number_of_seats is not None])
+        return total_number_of_seats
+
+    def __repr__(self):
+        return f"<Train(id={self.id}, name={self.name}, wagons={self.wagons}, position={self.position})>"
+
+class Wagon(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    track_width = db.Column(db.Integer, nullable=False)
+    wagon_type = db.Column(db.String(20))
+
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'), nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'wagon',
+        'polymorphic_on': wagon_type
+    }
+
+    def __repr__(self):
+        return f"<Wagon(id={self.id}, track_width={self.track_width}, wagon_type={self.wagon_type})>"
+
+class Locomotive(Wagon):
+    max_traction = db.Column(db.Float, nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'locomotive',
+    }
+
+    def __repr__(self):
+        return f"<Locomotive(id={self.id}, track_width={self.track_width}, max_traction={self.max_traction})>"
+
+class NormalWagon(Wagon):
+    max_weight = db.Column(db.Float, nullable=True)
+    number_of_seats = db.Column(db.Integer, nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'normal_wagon',
+    }
+
+    def __repr__(self):
+        return f"<NormalWagon(id={self.id}, track_width={self.track_width}, max_weight={self.max_weight}, number_of_seats={self.number_of_seats})>"
+
+class Maintenance(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    description = db.Column(db.String(255), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+
+    assigned_employees = db.relationship('User', secondary='maintenance_user_association', backref='maintenance',
+                                         lazy='dynamic')
+
+    train_id = db.Column(db.Integer, db.ForeignKey('train.id'))
+
+    def __repr__(self):
+        return f"<Maintenance(id={self.id}, description={self.description}, start_date={self.start_date}, end_date={self.end_date})>"
+
+maintenance_user_association = db.Table('maintenance_user_association',
+                                        db.Column('maintenance_id', db.Integer, db.ForeignKey('maintenance.id')),
+                                        db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+                                        )
+
+
+"""
