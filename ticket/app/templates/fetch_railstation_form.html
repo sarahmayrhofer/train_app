@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Fetch Rail Station</title>
+    </head>
+    <body>
+        <h1>Fetch Rail Station</h1>
+        <form action="{{ url_for('fetch_railstation') }}" method="post">
+            <label for="station1">Station 1:</label>
+            <input type="text" id="station1" name="station1">
+            <label for="station2">Station 2:</label>
+            <input type="text" id="station2" name="station2">
+            <button type="submit">Fetch Stations</button>
+        </form>
+    </body>
+</html>

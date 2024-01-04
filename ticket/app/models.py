@@ -133,33 +133,6 @@ class Line(db.Model):
         return None
 
 #Daten von Shedule
-"""
-
-
-class Fahrtdurchführung(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    datum = db.Column(db.Date, nullable=False)
-    zeit = db.Column(db.Time)
-    endzeit = db.Column(db.Time)
-    zug_id = db.Column(db.Integer)
-    line = db.Column(db.Integer)
-    mitarbeiter_ids = db.Column(db.String)
-    preise = db.Column(db.String)  # Spalte für Preise
-    bahnhof_ids = db.Column(db.String)  # Spalte für Bahnhof-IDs
-    zeiten = db.Column(db.String)  # Spalte für Zeiten
-
-    def __repr__(self):
-        return f'<Fahrtdurchführung {self.id}>'
-    
-
-    
-class Streckenhalteplan(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    start_station_id = db.Column(db.Integer)
-    end_station_id = db.Column(db.Integer)
-    original_line_id = db.Column(db.Integer)
-    sections = db.relationship('Section', backref='streckenhalteplan')
 
 #fleet 
 
@@ -226,8 +199,8 @@ class NormalWagon(Wagon):
 class Maintenance(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.String(255), nullable=False)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
 
     assigned_employees = db.relationship('User', secondary='maintenance_user_association', backref='maintenance',
                                          lazy='dynamic')
@@ -242,5 +215,18 @@ maintenance_user_association = db.Table('maintenance_user_association',
                                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
                                         )
 
+# Ding von Markus
+class RideBetweenTwoStations(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    start_station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    end_station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.Date, nullable=False)  # new attribute
+    price = db.Column(db.Float, nullable=False)
 
-"""
+    start_station_rel = db.relationship('Station', foreign_keys=[start_station_id])
+    end_station_rel = db.relationship('Station', foreign_keys=[end_station_id])
+
+    def __repr__(self):
+        return f"<RideBetweenTwoStations(start={self.start_station_rel.nameOfStation}, end={self.end_station_rel.nameOfStation}, start_time={self.start_time}, end_time={self.end_time}, date={self.date}, price={self.price})>"
