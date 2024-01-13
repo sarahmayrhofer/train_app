@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import redirect, url_for, flash
 from flask import render_template
 from flask import request
@@ -13,6 +15,14 @@ from fleet.app.models import Locomotive, NormalWagon, Train, User, Wagon, Mainte
 def before_request():
     print("Before Request")
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash("Diese Seite ist nur für Administratoren zugänglich.", "warning")
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Index Page
 @app.route('/')
@@ -33,6 +43,7 @@ def index():
 
 @app.route('/newWagon', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_wagon():
     form = NewWagonForm()
 
@@ -55,6 +66,7 @@ def new_wagon():
 
 @app.route('/wagon/<int:wagon_id>/edit', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_wagon_by_id(wagon_id):
     wagon = Wagon.query.get(wagon_id)
 
@@ -96,6 +108,7 @@ def train_by_id(train_id):
 # Create a new train
 @app.route('/newTrain', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_train():
     # only get wagons that are not already assigned to a train
     wagons = NormalWagon.query.filter_by(train_id=None).all()
@@ -150,6 +163,7 @@ def new_train():
 
 @app.route('/editTrain/<int:train_id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_train(train_id):
     train = Train.query.get(train_id)
 
@@ -216,6 +230,7 @@ def edit_train(train_id):
 
 
 @app.route('/deleteTrain/<int:train_id>', methods=['GET', 'POST'])
+@admin_required
 def delete_train(train_id):
     train = Train.query.get(train_id)
 
@@ -231,6 +246,7 @@ def delete_train(train_id):
 
 
 @app.route('/delete_wagon/<int:wagon_id>', methods=['GET', 'POST'])
+@admin_required
 def delete_wagon(wagon_id):
     wagon = Wagon.query.get(wagon_id)
 
@@ -257,6 +273,7 @@ def users():
 
 @app.route('/newUser', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_user():
     form = NewUserForm()
 
@@ -273,6 +290,7 @@ def new_user():
 # User by ID
 @app.route('/users/<int:user_id>')
 @login_required
+@admin_required
 def user_by_id(user_id):
     return f"User with ID {user_id}"
 
@@ -298,6 +316,7 @@ def maintenance_by_id(maintenance_id):
 # Create a new maintenance task
 @app.route('/newMaintenance', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_maintenance():
     form = NewMaintenanceForm()
 
@@ -352,6 +371,7 @@ def new_maintenance():
 
 @app.route('/editMaintenance/<int:maintenance_id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_maintenance(maintenance_id):
     maintenance = Maintenance.query.get_or_404(maintenance_id)
 
@@ -403,6 +423,7 @@ def edit_maintenance(maintenance_id):
 
 
 @app.route('/deleteMaintenance/<int:maintenance_id>', methods=['GET', 'POST'])
+@admin_required
 def delete_maintenance(maintenance_id):
     maintenance = Maintenance.query.get(maintenance_id)
 
