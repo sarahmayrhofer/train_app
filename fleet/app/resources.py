@@ -9,6 +9,7 @@ class AllTrainsResource(Resource):
         trains = Train.query.all()
         result = []
 
+        # Include train information
         for train in trains:
             train_data = {
                 'id': train.id,

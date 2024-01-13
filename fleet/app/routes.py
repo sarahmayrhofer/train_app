@@ -181,6 +181,7 @@ def edit_train(train_id):
     form.selected_wagons.choices = [(wagon['id'], wagon['name']) for wagon in existing_wagons]
     form.selected_locomotive.choices = [(wagon['id'], wagon['name']) for wagon in existing_locomotives]
 
+    # Validate the form and update the train
     if form.validate_on_submit():
         train.name = form.name.data
         train.price_per_km = form.price_per_km.data
@@ -306,6 +307,7 @@ def new_maintenance():
     existing_trains = []
     existing_users = []
 
+    # loop over trains to get their information
     for train in trains:
         train_info = {
             'id': train.id,
@@ -313,6 +315,7 @@ def new_maintenance():
         }
         existing_trains.append(train_info)
 
+    # loop over users to get their information
     for user in users:
         user_info = {
             'id': user.id,
@@ -321,10 +324,12 @@ def new_maintenance():
         }
         existing_users.append(user_info)
 
+    # set choices for train_id and assigned_employees
     form = NewMaintenanceForm()
     form.train_id.choices = [(train['id'], train['name']) for train in existing_trains]
     form.assigned_employees.choices = [(user['id'], user['name']) for user in existing_users]
 
+    # validate form and create new maintenance
     if form.validate_on_submit():
         tmp = form.assigned_employees.data
         assigned_employees = User.query.filter(User.id.in_(tmp)).all()
@@ -357,7 +362,7 @@ def edit_maintenance(maintenance_id):
 
     existing_trains = []
     existing_users = []
-
+    # loop over trains to get their information
     for train in trains:
         train_info = {
             'id': train.id,
@@ -365,6 +370,7 @@ def edit_maintenance(maintenance_id):
         }
         existing_trains.append(train_info)
 
+    # loop over users to get their information
     for user in users:
         user_info = {
             'id': user.id,
@@ -376,6 +382,7 @@ def edit_maintenance(maintenance_id):
     form.train_id.choices = [(train['id'], train['name']) for train in existing_trains]
     form.assigned_employees.choices = [(user['id'], user['name']) for user in existing_users]
 
+    # validate form and update maintenance
     if form.validate_on_submit():
         tmp = form.assigned_employees.data
         assigned_employees = User.query.filter(User.id.in_(tmp)).all()
@@ -416,6 +423,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
@@ -436,6 +444,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
+
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
