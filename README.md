@@ -22,6 +22,7 @@ Wenn notwendig: Das Modul für venv installieren:
 
 Ausführen des Streckensystems:
 In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Streckensystems muss bereits aktiviert sein, ausführen auf Port 5001)
+flask run -p 5001
  
 Anschließend im Webbrowser die angezeigte URL aufrufen.
 Anmeldedaten für den Admin im Streckensystem:
