@@ -230,3 +230,22 @@ class RideBetweenTwoStations(db.Model):
 
     def __repr__(self):
         return f"<RideBetweenTwoStations(start={self.start_station_rel.nameOfStation}, end={self.end_station_rel.nameOfStation}, start_time={self.start_time}, end_time={self.end_time}, date={self.date}, price={self.price})>"
+    
+
+    ##new model
+class Journey(db.Model):
+    __tablename__ = 'journeys'
+    id = db.Column(db.Integer, primary_key=True)
+    start_station_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
+    end_station_id = db.Column(db.Integer, db.ForeignKey('stations.id'))
+    date = db.Column(db.Date)
+    available_seats = db.Column(db.Integer)
+    price = db.Column(db.Float)
+
+class Trainstation(db.Model):
+    __tablename__ = 'stations'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    arrival_time = db.Column(db.DateTime)
+    departure_time = db.Column(db.DateTime)
+    journey_id = db.Column(db.Integer, db.ForeignKey('journeys.id'))

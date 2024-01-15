@@ -26,7 +26,14 @@ import socket
 
 from flask import request, jsonify
 from . import app
+from app import db
+from datetime import datetime
+from flask import request
 
+#new
+from app.models import Journey, Trainstation
+
+from flask import request, jsonify
 
 @app.before_request
 def before_request():
@@ -67,6 +74,7 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
+        #
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
@@ -74,6 +82,183 @@ def login():
     return render_template('login.html', title='Sign In', form=form)
 
 
+journeys = [
+    {
+        "id": 1,
+        "start_station_id": 1,
+        "end_station_id": 4,
+        "date": "2022-12-01",
+        "available_seats": 50,
+        "price": 25.50
+    },
+    {
+        "id": 2,
+        "start_station_id": 5,
+        "end_station_id": 8,
+        "date": "2022-12-02",
+        "available_seats": 60,
+        "price": 30.00
+    },
+    {
+        "id": 3,
+        "start_station_id": 9,
+        "end_station_id": 12,
+        "date": "2022-12-01",
+        "available_seats": 70,
+        "price": 35.00
+    }
+]
+
+bahnhoefe = [
+    {"name": "Linz", "id": 1},
+    {"name": "Wien", "id": 2}
+]
+
+stations = [
+    {
+        "id": 1,
+        "name": "L",
+        "arrival_time": "2022-12-01T08:00:00",
+        "departure_time": "2022-12-01T08:30:00",
+        "journey_id": 1
+    },
+    {
+        "id": 2,
+        "name": "S",
+        "arrival_time": "2022-12-01T09:00:00",
+        "departure_time": "2022-12-01T09:30:00",
+        "journey_id": 1
+    },
+    {
+        "id": 3,
+        "name": "Y",
+        "arrival_time": "2022-12-01T10:00:00",
+        "departure_time": "2022-12-01T10:30:00",
+        "journey_id": 1
+    },
+    {
+        "id": 4,
+        "name": "Wien",
+        "arrival_time": "2022-12-01T11:00:00",
+        "departure_time": "2022-12-01T11:30:00",
+        "journey_id": 1
+    },
+    {
+        "id": 5,
+        "name": "Linz",
+        "arrival_time": "2022-12-02T08:00:00",
+        "departure_time": "2022-12-02T08:30:00",
+        "journey_id": 2
+    },
+    {
+        "id": 6,
+        "name": "Z",
+        "arrival_time": "2022-12-02T09:00:00",
+        "departure_time": "2022-12-02T09:30:00",
+        "journey_id": 2
+    },
+    {
+        "id": 7,
+        "name": "K",
+        "arrival_time": "2022-12-02T10:00:00",
+        "departure_time": "2022-12-02T10:30:00",
+        "journey_id": 2
+    },
+    {
+        "id": 8,
+        "name": "Wien",
+        "arrival_time": "2022-12-02T11:00:00",
+        "departure_time": "2022-12-02T11:30:00",
+        "journey_id": 2
+    },
+    {
+        "id": 9,
+        "name": "Linz",
+        "arrival_time": "2022-12-01T12:00:00",
+        "departure_time": "2022-12-01T12:30:00",
+        "journey_id": 3
+    },
+    {
+        "id": 10,
+        "name": "X",
+        "arrival_time": "2022-12-01T13:00:00",
+        "departure_time": "2022-12-01T13:30:00",
+        "journey_id": 3
+    },
+    {
+        "id": 11,
+        "name": "Y",
+        "arrival_time": "2022-12-01T14:00:00",
+        "departure_time": "2022-12-01T14:30:00",
+        "journey_id": 3
+    },
+    {
+        "id": 12,
+        "name": "Wien",
+        "arrival_time": "2022-12-01T15:00:00",
+        "departure_time": "2022-12-01T15:30:00",
+        "journey_id": 3
+    }
+]
+
+
+@app.route('/journeys', methods=['GET'])
+def get_all_journeys():
+    return jsonify(journeys)    
+
+
+
+@app.route('/journey', methods=['GET'])
+def get_journey():
+    start_station = request.args.get('start_station')
+    end_station = request.args.get('end_station')
+    date = request.args.get('date')
+    time = request.args.get('time')
+
+    # Convert date and time to datetime object for comparison
+    datetime_str = date + 'T' + time
+    datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S')
+
+    # Filter stations based on start_station, end_station, date and time
+    start_stations = [station for station in stations if station['name'] == start_station and datetime.strptime(station['departure_time'], '%Y-%m-%dT%H:%M:%S') >= datetime_obj]
+    end_stations = [station for station in stations if station['name'] == end_station and datetime.strptime(station['arrival_time'], '%Y-%m-%dT%H:%M:%S') <= datetime_obj]
+
+    # Find journeys that match the filtered stations
+    matching_journeys = [journey for journey in journeys if any(station['journey_id'] == journey['id'] for station in start_stations) and any(station['journey_id'] == journey['id'] for station in end_stations)]
+
+    return jsonify(matching_journeys)
+
+
+
+@app.route('/test', methods=['GET'])
+def get_test():
+    test = "dasisteintest"
+    print(test)
+    return jsonify(test)
+
+"""
+@app.route('/search', methods=['GET'])
+def search_journey():
+    start_station = request.args.get('start_station')
+    end_station = request.args.get('end_station')
+    time = request.args.get('time')
+    print(f'die Daten {time}, {start_station} und{end_station} stimmen noch') #damit siehst du wie die daten daherkommen aus dem request
+
+    # Filter journeys and stations based on the query parameters
+    filtered_journeys = []
+    for journey in data['journeys']:
+        print('hier kommt man noch rein 1')
+        stations_in_journey = [station for station in data['stations'] if station['journey_id'] == journey['id']]
+        print(f'hier kommt man auch noch rein  mit {stations_in_journey}')
+        if any(station['name'] == start_station and station['departure_time'] <= time for station in stations_in_journey) and \
+           any(station['name'] == end_station and station['arrival_time'] >= time for station in stations_in_journey):
+            print('hier kommt man noch rein 2')
+            filtered_journeys.append(journey)
+            print('hier kommt man noch rein 3')
+
+    return jsonify(filtered_journeys)
+
+"""    
 @app.route('/logout')
 def logout():
     logout_user()
@@ -340,6 +525,7 @@ def fetch_and_save_trains():
             maintenance.train = train
 
     db.session.commit()
+    flash('Trains fetched and saved successfully.')
 
 
 
@@ -351,9 +537,20 @@ import requests
 from datetime import datetime
 import json
 
+def get_timetable():
+    print("get_timetable")
+    response = requests.get("http://127.0.0.1:5000/timetable")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return []
+    
+""""""
 @app.route('/fetch_schedule', methods=['POST'])
 def fetch_schedule():
     url = request.data.decode('utf-8')  # Get the URL of the API from the request body
+    data = get_timetable()
+    print(data)
 
     # Check if the URL is empty
     if not url:
@@ -387,12 +584,13 @@ def fetch_schedule():
 
     # Commit the session to save the changes to the database
     db.session.commit()
-
     return 'Schedule fetched and imported successfully', 200
 
 
 
+
 # Routen zum Importieren der Daten Ende
+#get oder post??? 
 @app.route('/fetch_stations', methods=['POST'])
 def fetch_stations():
     fetch_and_save_stations()
@@ -404,8 +602,10 @@ def fetch_stations():
     return redirect(url_for('index'))
 
 
+#ticket, wer, was, wohin - nur requests zu schicken, application design, nicht mehr änderbar, arbeiten, was sie schicken, nicht kompatibel, dummy daten
 
-"""
+
+#vorher auskommentiert
 def get_fahrtdurchfuehrungen():
     conn = http.client.HTTPConnection("127.0.0.1", 5000)
     conn.request("GET", "/fahrtdurchfuehrungen/")
@@ -491,16 +691,16 @@ def get_fahrtdurchfuehrungen():
     db.session.commit()
     print('Fahrtdurchfuehrungen fetched and saved successfully.')   
 
-"""
 
 
-"""
+
+
 
 if __name__ == '__main__':
     print('Starting application with app.run()')
-    app.run(port=5003)
+    app.run(port=5003, debug=True)
 
-"""
+
 
 #get_fahrtdurchfuehrungen()  # Call the function here
 
@@ -594,3 +794,91 @@ def fetch_stations():
     return redirect(url_for('index'))
 
 """
+
+
+
+###new start
+
+"""
+def populate_db():
+    # Your test data
+    data = {
+      "journeys": [
+        {
+          "id": 1,
+          "start_station_id": 1,
+          "end_station_id": 2,
+          "date": "2022-12-01",
+          "available_seats": 50,
+          "price": 25.50
+        },
+        {
+          "id": 2,
+          "start_station_id": 3,
+          "end_station_id": 4,
+          "date": "2022-12-02",
+          "available_seats": 60,
+          "price": 30.00
+        }
+      ],
+      "stations": [
+        {
+          "id": 1,
+          "name": "Station A",
+          "arrival_time": "2022-12-01T08:00:00",
+          "departure_time": "2022-12-01T08:30:00",
+          "journey_id": 1
+        },
+        {
+          "id": 2,
+          "name": "Station B",
+          "arrival_time": "2022-12-01T10:00:00",
+          "departure_time": "2022-12-01T10:30:00",
+          "journey_id": 1
+        },
+        {
+          "id": 3,
+          "name": "Station C",
+          "arrival_time": "2022-12-02T08:00:00",
+          "departure_time": "2022-12-02T08:30:00",
+          "journey_id": 2
+        },
+        {
+          "id": 4,
+          "name": "Station D",
+          "arrival_time": "2022-12-02T10:00:00",
+          "departure_time": "2022-12-02T10:30:00",
+          "journey_id": 2
+        }
+      ]
+    }
+
+    # Populate the database
+       # Populate the database
+    for journey_data in data['journeys']:
+        journey_data['date'] = datetime.strptime(journey_data['date'], '%Y-%m-%d').date()
+        journey = Journey(**journey_data)
+        db.session.add(journey)
+        
+    for station_data in data['stations']:
+        station_data['arrival_time'] = datetime.strptime(station_data['arrival_time'], '%Y-%m-%dT%H:%M:%S')
+        station_data['departure_time'] = datetime.strptime(station_data['departure_time'], '%Y-%m-%dT%H:%M:%S')
+        station = Trainstation(**station_data)
+        db.session.add(station)
+    db.session.commit()
+
+@app.route('/populate_db', methods=['POST'])
+def route_populate_db():
+    populate_db()
+    return "Database populated successfully", 200
+    """
+
+#new new new 
+
+from flask import Flask, request, jsonify
+from datetime import datetime
+
+app = Flask(__name__)
+
+
+
