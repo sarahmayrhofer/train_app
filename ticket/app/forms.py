@@ -5,6 +5,12 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, \
     Length
 from app.models import User
 
+from flask_wtf import FlaskForm
+from wtforms import FloatField, SubmitField
+from wtforms.validators import DataRequired
+from wtforms import SelectField
+
+
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -52,12 +58,18 @@ class EmptyForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-from flask_wtf import FlaskForm
-from wtforms import FloatField, SubmitField
-from wtforms.validators import DataRequired
-from wtforms import SelectField
+
 
 class SaleForm(FlaskForm):
     discount = FloatField('Discount', validators=[DataRequired()])
     line = SelectField('Line', coerce=int)
     submit = SubmitField('Create Sale')
+
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+class SearchTicketForm(FlaskForm):
+    #start_station = StringField('Start Station', validators=[DataRequired()])
+    #end_station = StringField('End Station', validators=[DataRequired()])
+    date = StringField('Date', validators=[DataRequired()])
+    submit = SubmitField('Search')

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Search for Trips</h2>
+
+<form method="post">
+    {{ form.csrf_token }}
+    <label for="date">Date:</label><br>
+    <input type="date" id="date" name="date"><br>
+    <p>{{ form.submit() }}</p>
+</form> 
+
+</body>
+</html>
+    
+       
