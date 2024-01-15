@@ -1,3 +1,5 @@
+from functools import wraps
+
 from flask import redirect, url_for, flash
 from flask import render_template
 from flask import request
@@ -13,6 +15,14 @@ from fleet.app.models import Locomotive, NormalWagon, Train, User, Wagon, Mainte
 def before_request():
     print("Before Request")
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash("Diese Seite ist nur für Administratoren zugänglich.", "warning")
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Index Page
 @app.route('/')
@@ -33,6 +43,7 @@ def index():
 
 @app.route('/newWagon', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_wagon():
     form = NewWagonForm()
 
@@ -55,6 +66,7 @@ def new_wagon():
 
 @app.route('/wagon/<int:wagon_id>/edit', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_wagon_by_id(wagon_id):
     wagon = Wagon.query.get(wagon_id)
 
@@ -96,6 +108,7 @@ def train_by_id(train_id):
 # Create a new train
 @app.route('/newTrain', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_train():
     # only get wagons that are not already assigned to a train
     wagons = NormalWagon.query.filter_by(train_id=None).all()
@@ -150,6 +163,7 @@ def new_train():
 
 @app.route('/editTrain/<int:train_id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_train(train_id):
     train = Train.query.get(train_id)
 
@@ -181,6 +195,7 @@ def edit_train(train_id):
     form.selected_wagons.choices = [(wagon['id'], wagon['name']) for wagon in existing_wagons]
     form.selected_locomotive.choices = [(wagon['id'], wagon['name']) for wagon in existing_locomotives]
 
+    # Validate the form and update the train
     if form.validate_on_submit():
         train.name = form.name.data
         train.price_per_km = form.price_per_km.data
@@ -215,6 +230,7 @@ def edit_train(train_id):
 
 
 @app.route('/deleteTrain/<int:train_id>', methods=['GET', 'POST'])
+@admin_required
 def delete_train(train_id):
     train = Train.query.get(train_id)
 
@@ -230,6 +246,7 @@ def delete_train(train_id):
 
 
 @app.route('/delete_wagon/<int:wagon_id>', methods=['GET', 'POST'])
+@admin_required
 def delete_wagon(wagon_id):
     wagon = Wagon.query.get(wagon_id)
 
@@ -256,6 +273,7 @@ def users():
 
 @app.route('/newUser', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_user():
     form = NewUserForm()
 
@@ -272,6 +290,7 @@ def new_user():
 # User by ID
 @app.route('/users/<int:user_id>')
 @login_required
+@admin_required
 def user_by_id(user_id):
     return f"User with ID {user_id}"
 
@@ -297,6 +316,7 @@ def maintenance_by_id(maintenance_id):
 # Create a new maintenance task
 @app.route('/newMaintenance', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def new_maintenance():
     form = NewMaintenanceForm()
 
@@ -306,6 +326,7 @@ def new_maintenance():
     existing_trains = []
     existing_users = []
 
+    # loop over trains to get their information
     for train in trains:
         train_info = {
             'id': train.id,
@@ -313,6 +334,7 @@ def new_maintenance():
         }
         existing_trains.append(train_info)
 
+    # loop over users to get their information
     for user in users:
         user_info = {
             'id': user.id,
@@ -321,10 +343,12 @@ def new_maintenance():
         }
         existing_users.append(user_info)
 
+    # set choices for train_id and assigned_employees
     form = NewMaintenanceForm()
     form.train_id.choices = [(train['id'], train['name']) for train in existing_trains]
     form.assigned_employees.choices = [(user['id'], user['name']) for user in existing_users]
 
+    # validate form and create new maintenance
     if form.validate_on_submit():
         tmp = form.assigned_employees.data
         assigned_employees = User.query.filter(User.id.in_(tmp)).all()
@@ -347,6 +371,7 @@ def new_maintenance():
 
 @app.route('/editMaintenance/<int:maintenance_id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_maintenance(maintenance_id):
     maintenance = Maintenance.query.get_or_404(maintenance_id)
 
@@ -357,7 +382,7 @@ def edit_maintenance(maintenance_id):
 
     existing_trains = []
     existing_users = []
-
+    # loop over trains to get their information
     for train in trains:
         train_info = {
             'id': train.id,
@@ -365,6 +390,7 @@ def edit_maintenance(maintenance_id):
         }
         existing_trains.append(train_info)
 
+    # loop over users to get their information
     for user in users:
         user_info = {
             'id': user.id,
@@ -376,6 +402,7 @@ def edit_maintenance(maintenance_id):
     form.train_id.choices = [(train['id'], train['name']) for train in existing_trains]
     form.assigned_employees.choices = [(user['id'], user['name']) for user in existing_users]
 
+    # validate form and update maintenance
     if form.validate_on_submit():
         tmp = form.assigned_employees.data
         assigned_employees = User.query.filter(User.id.in_(tmp)).all()
@@ -396,6 +423,7 @@ def edit_maintenance(maintenance_id):
 
 
 @app.route('/deleteMaintenance/<int:maintenance_id>', methods=['GET', 'POST'])
+@admin_required
 def delete_maintenance(maintenance_id):
     maintenance = Maintenance.query.get(maintenance_id)
 
@@ -416,6 +444,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
@@ -436,6 +465,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
+
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
