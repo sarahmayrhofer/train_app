@@ -1,4 +1,59 @@
 # PR-DKE
+## ANLEITUNG ZUM AUSFÜHREN
+Grundsätzliches:
+Im abgegebenen ZIP-Ordner ist auch eine Anleitung zum Ausführen vorhanden. (mit Bildern) 
+
+Im Git Repo ist für jede Applikation ein eigener Unterordner angelegt. („route“ für das Streckensystem, etc.)
+Jede Applikation hat auch einen eigenen venv-Ordner.
+Wichtig: Jede Applikation muss auf einem anderen, genau festgelegten Port laufen. Das wird später noch genauer beschrieben.
+Zum Ausführen der Applikationen muss zuerst das Git Repo lokal heruntergeladen und z. B. in einem Ordner auf C:\ abgespeichert werden: (Anleitung für Windows)
+ 
+ 
+
+Im Unterordner des jeweiligen Systems einen Ordner „venv“ erstellen:
+ 
+
+In der Kommandozeile in den Unterordner des jeweiligen Systems wechseln und auf Basis der mitgelieferten requirements.txt das venv erstellen: (die requirements.txt befindet sich im Unterordner von jeder Applikation)
+Wenn notwendig: Das Modul für venv installieren:
+ 
+ 
+
+### Ausführen des Streckensystems:
+In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Streckensystems muss bereits aktiviert sein, ausführen auf Port 5001)
+`flask run -p 5001`
+ 
+Anschließend im Webbrowser die angezeigte URL aufrufen.
+Anmeldedaten für den Admin im Streckensystem:
+Benutzername: admin_test
+Passwort: admin_test
+
+Anmeldedaten für den Employee im Streckensystem:
+Benutzername: employee_test
+Passwort: employee_test
+
+### Ausführen des Flottensystems:
+In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Flottensystems muss bereits aktiviert sein, ausführen auf Port 5002)
+`flask run -p 5002`
+ 
+Anschließend im Webbrowser die angezeigte URL aufrufen.
+Anmeldedaten für den Admin:
+Benutzername: tobi_schwap
+Passwort: 123
+
+### Ausführen des Fahrplansystem:
+In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Fahrplansystems muss bereits aktiviert sein)
+`python run.py`
+ 
+Anschließend im Webbrowser die angezeigte URL aufrufen.
+Anmeldedaten für den Admin im Fahrplansystem:
+Benutzername: BigBoss
+Passwort: admin
+
+Anmeldedaten für den Employee im Streckensystem:
+Benutzername: Susi
+Passwort: user
+
+
 ## Protokolle:
 - [Protokoll LVA am 2023-11-03](https://jkulinz-my.sharepoint.com/:w:/r/personal/k12043350_students_jku_at/_layouts/15/Doc.aspx?sourcedoc=%7B5B114373-C146-44DA-BEBF-F56F17647E81%7D&file=Protokoll%20LVA%20am%202023-11-03.docx&action=default&mobileredirect=true)
 - [Protokoll LVA am 2023-11-24](https://jkulinz-my.sharepoint.com/:w:/r/personal/k12043350_students_jku_at/_layouts/15/Doc.aspx?sourcedoc=%7B9D29063B-9DE0-4758-90DA-2F09541D9204%7D&file=Protokoll%20LVA%20am%202023-11-24.docx&action=default&mobileredirect=true)

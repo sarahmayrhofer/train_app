@@ -26,6 +26,24 @@ import socket
 
 from flask import request, jsonify
 from . import app
+from app import db
+
+from flask import request
+
+#new
+from app.models import Journey, Trainstation
+
+from flask import request, jsonify
+
+from .forms import SearchTicketForm
+from flask import render_template, request
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+from app.models import Ticket
+
 
 
 @app.before_request
@@ -67,13 +85,456 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
+        #
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
+#eine Fahrtstrecke, Fahrtverbindungen, errechne Preis, Aktion, 
+#daten erweitern, zweite Strecke, Rabatt auf alle, 
 
+#current user setzen, 
+
+#Wien Hbf -> St. Pölten Hbf -> Linz Hbf -> Wels Hbf
+#direkten
+
+travelroutes = {
+    "travel_id": 1,
+    "name": "Westbahnstrecke", 
+    "sections": [
+        {
+            "id": 1,
+            "start_station_id": 1,
+            "end_station_id": 2,
+            "price": 10,
+            "duration": 100,
+        },
+        {
+            "id": 2,
+            "start_station_id": 2,
+            "end_station_id": 3,
+            "fee": 10,
+            "distance": 100,
+        },
+        {
+            "id": 3,
+            "start_station_id": 3,
+            "end_station_id": 4,
+            "fee": 10,
+            "distance": 100,
+        },
+     
+    ]
+}
+
+"""
+Wien Hbf -> St. Pölten Hbf
+Wien Hbf -> Linz Hbf
+Wien Hbf -> Wels Hbf
+St. Pölten Hbf -> Linz Hbf
+St. Pölten Hbf -> Wels Hbf
+Linz Hbf -> Wels Hbf
+"""
+
+#lassen sich von routes ableiten
+connections = [
+    {
+        "id": 1,
+        "start_station_id": 1,
+        "start_station_name": "Wien Hbf",
+        "end_station_id": 2,
+        "end_station_name": "St. Pölten Hbf",
+        "route_id": 1,
+    },
+    {
+        "id": 2,
+        "start_station_id": 1,
+        "start_station_name": "Wien Hbf",
+        "end_station_id": 3,
+        "end_station_name": "Linz Hbf",
+        "route_id": 1,
+    },
+    {
+        "id": 3,
+        "start_station_id": 1,
+        "start_station_name": "Wien Hbf",
+        "end_station_id": 4,
+        "end_station_name": "Wels Hbf",
+        "route_id": 1,
+    },
+    {
+        "id": 4,
+        "start_station_id": 2,
+        "start_station_name": "St. Pölten Hbf",
+        "end_station_id": 3,
+        "end_station_name": "Linz Hbf",
+        "route_id": 1,
+    },
+    {
+        "id": 5,
+        "start_station_id": 2,
+        "start_station_name": "St. Pölten Hbf",
+        "end_station_id": 4,
+        "end_station_name": "Wels Hbf",
+        "route_id": 1,
+    },
+    {
+        "id": 6,
+        "start_station_id": 3,
+        "start_station_name": "Linz Hbf",
+        "end_station_id": 4,
+        "end_station_name": "Wels Hbf",
+        "route_id": 1,
+    }
+]
+
+#generelle Strecke, Connection - örtliche Abfrage, von bis, gibt es das?, bestimmte Zeit Durchführung, Trips, 
+
+trips = [
+    {
+        "id": 1,
+        "name": "L",
+        "arrival_time": "2022-12-02T08:00:00",
+        "departure_time": "2022-12-01T08:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 2,
+        "name": "S",
+        "arrival_time": "2022-12-01T09:00:00",
+        "departure_time": "2022-12-01T09:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 3,
+        "name": "Y",
+        "arrival_time": "2022-12-01T10:00:00",
+        "departure_time": "2022-12-01T10:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 4,
+        "name": "Wien",
+        "arrival_time": "2022-12-01T11:00:00",
+        "departure_time": "2022-12-01T11:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 5,
+        "name": "Linz",
+        "arrival_time": "2022-12-02T08:00:00",
+        "departure_time": "2022-12-02T08:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 6,
+        "name": "Z",
+        "arrival_time": "2022-12-02T09:00:00",
+        "departure_time": "2022-12-02T09:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 7,
+        "name": "K",
+        "arrival_time": "2022-12-02T10:00:00",
+        "departure_time": "2022-12-02T10:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 8,
+        "name": "Wien",
+        "arrival_time": "2022-12-02T11:00:00",
+        "departure_time": "2022-12-02T11:30:00",
+        "route_id": 1
+    },
+    {
+        "id": 9,
+        "name": "Linz",
+        "arrival_time": "2022-12-01T12:00:00",
+        "departure_time": "2022-12-01T12:30:00",
+        "route_id": 1
+    }
+]
+
+
+"""
+bahnhoefe = [
+    {"name": "Linz", "id": 1},
+    {"name": "Wien", "id": 2}
+]
+"""
+
+
+
+def get_trips_by_date_and_time(trips, date, time):
+    # Combine date and time into a datetime string
+    datetime_str = f"{date}T{time}"
+    
+    # Convert the datetime string into a datetime object
+    datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%S")
+
+    # Filter the trips that have an arrival time greater than or equal to the given datetime
+    filtered_trips = [trip for trip in trips if datetime.strptime(trip['arrival_time'], "%Y-%m-%dT%H:%M:%S") >= datetime_obj]
+
+    return filtered_trips
+
+
+
+@app.route('/journeys', methods=['GET'])
+def get_all_journeys():
+    return jsonify(journeys)    
+
+
+
+@app.route('/journey', methods=['GET'])
+def get_journey():
+    start_station_name = request.args.get('start_station')
+    end_station_name = request.args.get('end_station')
+    date = request.args.get('date')
+    time = request.args.get('time')
+
+    # Check if all parameters are provided
+    if not all([start_station_name, end_station_name, date, time]):
+        return jsonify({'error': 'Missing parameters'}), 400
+
+    # Convert date and time to datetime object for comparison
+    datetime_str = date + 'T' + time
+    datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S')
+
+    print(f"Searching for journeys from {start_station_name} to {end_station_name} on {date} after {time}")
+
+    # Filter stations based on start_station, end_station, date and time
+    start_stations = [station for station in stations if station['name'] == start_station_name and station.get('departure_time') and datetime.strptime(station['departure_time'], '%Y-%m-%dT%H:%M:%S') >= datetime_obj]
+    end_stations = [station for station in stations if station['name'] == end_station_name and datetime.strptime(station['arrival_time'], '%Y-%m-%dT%H:%M:%S') >= datetime_obj]
+
+    print(f"Found {len(start_stations)} start stations and {len(end_stations)} end stations")
+
+    # Find journeys that match the filtered stations and the requested date
+    matching_journeys = [journey for journey in journeys if journey['date'] == date and any(station['journey_id'] == journey['id'] for station in start_stations) and any(station['journey_id'] == journey['id'] for station in end_stations)]
+
+    # For each matching journey, find the stations that are between the start and end stations
+    for journey in matching_journeys:
+        journey_stations = [station for station in stations if station['journey_id'] == journey['id'] and datetime.strptime(station['departure_time'], '%Y-%m-%dT%H:%M:%S') >= datetime_obj and datetime.strptime(station['arrival_time'], '%Y-%m-%dT%H:%M:%S') <= datetime_obj]
+        journey['stations'] = journey_stations
+
+    print(f"Found {len(matching_journeys)} matching journeys")
+
+    return jsonify(matching_journeys)
+
+
+#route markus extra!! 
+@app.route('/test', methods=['GET'])
+def get_test():
+    url = "http://127.0.0.1:5000/timetable"
+    response = requests.get(url)
+
+    # Get the station data
+    station_data = requests.get("http://127.0.0.1:5001/route/stations").json()
+    # Create a mapping from station IDs to station names
+    station_names = {station['id']: station['nameOfStation'] for station in station_data}
+
+    return render_template('test.html', title='Test', data=response.json(), station_names=station_names)
+
+
+
+from datetime import datetime
+
+from flask import request
+
+from flask import request
+
+
+@app.route('/search_ticket', methods=['POST','GET'])
+def search_ticket():
+    print('Inside search_ticket route')
+    form = SearchTicketForm(request.form)
+    if form.validate_on_submit():
+        # Get the form data
+        date_string = form.date.data
+        start_station = form.start_station.data
+        end_station = form.end_station.data
+        print(f'Date: {date_string}, Start Station: {start_station}, End Station: {end_station}')
+
+        # Convert the date string to a date object
+        date = datetime.strptime(date_string, '%Y-%m-%d')
+
+        # Get the station IDs
+        answer = requests.get('http://127.0.0.1:5001/route/stations')
+        stations = answer.json()
+        station_map = {station['nameOfStation']: station['id'] for station in stations}
+        start_station_id = station_map.get(start_station)
+        end_station_id = station_map.get(end_station)
+
+        # Perform the search
+        url = f"http://127.0.0.1:5000/timetable?date={date}"
+        print(f'Request URL: {url}')
+        answer = requests.get(url)
+
+        if answer.status_code != 200:
+            # The request to the timetable service failed
+            print(f'Response status code: {answer.status_code}')
+            return render_template('error.html', message='Failed to retrieve timetable data')
+
+        search_results = answer.json()
+        print(f'Search results: {search_results}')
+
+        # Filter the results based on the date and stations
+        filtered_results = []
+        for result in search_results:
+            if result['datum'] == date_string and start_station_id in result['bahnhof_ids'] and end_station_id in result['bahnhof_ids']:
+                # Get the index of the start station and end station
+                start_station_index = result['bahnhof_ids'].index(start_station_id)
+                end_station_index = result['bahnhof_ids'].index(end_station_id)
+
+                # Extract the departure time from the start station
+                departure_time = result['zeiten'][start_station_index]
+
+                # Add the departure time to the result
+                result['departure_time'] = departure_time
+
+                # Add the start station and end station to the result
+                result['start_station'] = start_station
+                result['end_station'] = end_station
+
+                # Calculate the price from the start station to the end station
+                if start_station_index < end_station_index:
+                    price = sum(result['preise'][start_station_index:end_station_index])
+                else:
+                    price = sum(result['preise'][end_station_index:start_station_index])
+
+                # Fetch all Sale objects for the original_line and sort them by discount in descending order
+                sales = Sale.query.filter_by(lineForTheSale=result['original_line']).order_by(Sale.discount.desc()).all()
+
+                # Apply the highest discount if any Sale objects exist for the line
+                if sales:
+                    price = price * (1 - sales[0].discount / 100)
+                
+                # Add the price to the result
+                result['price'] = price
+
+                filtered_results.append(result)
+
+        print(f'Filtered results: {filtered_results}')
+
+        if not filtered_results:
+            # The search results are empty
+            return render_template('error.html', message='No results found for the given criteria')
+
+        # Render a new template with the search results
+        return render_template('search_results.html', results=filtered_results)
+
+    # Render the search form when the form is not validated
+    return render_template('search_ticket.html', form=form)
+
+    
+
+@app.route('/buy_ticket')
+def buy_ticket():
+    zug_id = request.args.get('zug_id')
+    date = request.args.get('date')
+    start_station = request.args.get('start_station')
+    end_station = request.args.get('end_station')
+    price = request.args.get('price')
+
+    # Convert the date string to a date object
+    date = datetime.strptime(date, '%Y-%m-%d')
+
+    # Handle the ticket buying process here
+    ticket = Ticket(user_id=current_user.id, zug_id=zug_id, date=date, start_station=start_station, end_station=end_station, price=price, status='active')
+    db.session.add(ticket)
+    db.session.commit()
+    return render_template('confirmation.html', zug_id=zug_id)
+
+@app.route('/my_tickets')
+@login_required
+def my_tickets():
+    tickets = Ticket.query.filter_by(user_id=current_user.id).all()
+    return render_template('my_tickets.html', tickets=tickets)
+
+@app.route('/delete_ticket/<int:ticket_id>', methods=['POST'])
+@login_required
+def delete_ticket(ticket_id):
+    ticket = Ticket.query.get(ticket_id)
+    if ticket and ticket.user_id == current_user.id:
+        ticket.status = 'deleted'
+        db.session.commit()
+        flash('Ticket marked as deleted.')
+    else:
+        flash('Ticket not found.')
+    return redirect(url_for('my_tickets'))
+
+
+#!pip install wtformspip install wtformspip install wtforms
+#not actual, old!!!!
+def fetch_data_from_url():
+    url = "http://127.0.0.1:5000/timetable"
+    response = requests.get(url)
+    #print(response.json().get('preise'))
+    #json and python 
+
+    if response.status_code != 200:
+        print('Failed to fetch data: HTTP ' + str(response.status_code))
+        return
+
+    data = json.loads(response.text)
+    return data
+
+# Search for journeys on a specific date
+def search_journeys_by_date(data, date):
+    return [journey for journey in data if journey['datum'] == date]
+
+# Use the functions
+data = fetch_data_from_url()
+if data is not None:
+    print("Fetched data successfully")
+    journeys = search_journeys_by_date(data, "2023-12-28")
+    print(f"Found {len(journeys)} journeys on 2023-12-28")
+else:
+    print("Failed to fetch data")
+
+
+
+
+
+#a dictionary mapping station IDs to station names
+station_ids_to_names = {12: "Station1", 11: "Station2", 10: "Station3", 9: "Station4", 4: "Station5", 5: "Station6", 6: "Station7", 8: "Station8", 7: "Station9", 14: "Station10", 13: "Station11"}
+
+#a function to search for journeys between two stations at a specific time
+def search_journeys_by_stations_and_time(data, start_station, end_station, time):
+    return [journey for journey in data if start_station in journey['bahnhof_ids'] and end_station in journey['bahnhof_ids'] and journey['zeit'] <= time and journey['endzeit'] >= time]
+
+#a function to calculate the total price for a journey between two stations
+def calculate_price(journey, start_station, end_station):
+    start_index = journey['bahnhof_ids'].index(start_station)
+    end_index = journey['bahnhof_ids'].index(end_station)
+    return sum(journey['preise'][start_index:end_index])
+
+
+"""
+@app.route('/search', methods=['GET'])
+def search_journey():
+    start_station = request.args.get('start_station')
+    end_station = request.args.get('end_station')
+    time = request.args.get('time')
+    print(f'die Daten {time}, {start_station} und{end_station} stimmen noch') #damit siehst du wie die daten daherkommen aus dem request
+
+    # Filter journeys and stations based on the query parameters
+    filtered_journeys = []
+    for journey in data['journeys']:
+        print('hier kommt man noch rein 1')
+        stations_in_journey = [station for station in data['stations'] if station['journey_id'] == journey['id']]
+        print(f'hier kommt man auch noch rein  mit {stations_in_journey}')
+        if any(station['name'] == start_station and station['departure_time'] <= time for station in stations_in_journey) and \
+           any(station['name'] == end_station and station['arrival_time'] >= time for station in stations_in_journey):
+            print('hier kommt man noch rein 2')
+            filtered_journeys.append(journey)
+            print('hier kommt man noch rein 3')
+
+    return jsonify(filtered_journeys)
+
+"""    
 @app.route('/logout')
 def logout():
     logout_user()
@@ -122,9 +583,6 @@ def edit_profile():
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
-
-
-
 
 
 @app.route('/create_sale', methods=['GET', 'POST'])
@@ -340,6 +798,7 @@ def fetch_and_save_trains():
             maintenance.train = train
 
     db.session.commit()
+    flash('Trains fetched and saved successfully.')
 
 
 
@@ -351,9 +810,20 @@ import requests
 from datetime import datetime
 import json
 
+def get_timetable():
+    print("get_timetable")
+    response = requests.get("http://127.0.0.1:5000/timetable")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return []
+    
+"""
 @app.route('/fetch_schedule', methods=['POST'])
 def fetch_schedule():
     url = request.data.decode('utf-8')  # Get the URL of the API from the request body
+    data = get_timetable()
+    print(data)
 
     # Check if the URL is empty
     if not url:
@@ -387,12 +857,13 @@ def fetch_schedule():
 
     # Commit the session to save the changes to the database
     db.session.commit()
-
     return 'Schedule fetched and imported successfully', 200
+"""
 
 
 
 # Routen zum Importieren der Daten Ende
+#get oder post??? 
 @app.route('/fetch_stations', methods=['POST'])
 def fetch_stations():
     fetch_and_save_stations()
@@ -400,12 +871,14 @@ def fetch_stations():
     fetch_and_save_lines()
     fetch_and_save_events()
     fetch_and_save_trains()
-    fetch_schedule()
+    #fetch_schedule()
     return redirect(url_for('index'))
 
 
+#ticket, wer, was, wohin - nur requests zu schicken, application design, nicht mehr änderbar, arbeiten, was sie schicken, nicht kompatibel, dummy daten
 
-"""
+
+#vorher auskommentiert
 def get_fahrtdurchfuehrungen():
     conn = http.client.HTTPConnection("127.0.0.1", 5000)
     conn.request("GET", "/fahrtdurchfuehrungen/")
@@ -491,16 +964,16 @@ def get_fahrtdurchfuehrungen():
     db.session.commit()
     print('Fahrtdurchfuehrungen fetched and saved successfully.')   
 
-"""
 
 
-"""
+
+
 
 if __name__ == '__main__':
     print('Starting application with app.run()')
-    app.run(port=5003)
+    app.run(port=5003, debug=True)
 
-"""
+
 
 #get_fahrtdurchfuehrungen()  # Call the function here
 
@@ -508,7 +981,7 @@ if __name__ == '__main__':
 #neu suchen
 
 
-
+"""
 @app.route('/search', methods=['GET'])
 def search():
     start_id = request.args.get('start_id', type=int)
@@ -529,6 +1002,7 @@ def search():
     result = [d for d in data if start_id in d['bahnhof_ids'] and end_id in d['bahnhof_ids']]
 
     return jsonify(result)
+    """
 
 
 def fetch_specific_stations(station1, station2):
@@ -594,3 +1068,91 @@ def fetch_stations():
     return redirect(url_for('index'))
 
 """
+
+
+
+###new start
+
+"""
+def populate_db():
+    # Your test data
+    data = {
+      "journeys": [
+        {
+          "id": 1,
+          "start_station_id": 1,
+          "end_station_id": 2,
+          "date": "2022-12-01",
+          "available_seats": 50,
+          "price": 25.50
+        },
+        {
+          "id": 2,
+          "start_station_id": 3,
+          "end_station_id": 4,
+          "date": "2022-12-02",
+          "available_seats": 60,
+          "price": 30.00
+        }
+      ],
+      "stations": [
+        {
+          "id": 1,
+          "name": "Station A",
+          "arrival_time": "2022-12-01T08:00:00",
+          "departure_time": "2022-12-01T08:30:00",
+          "journey_id": 1
+        },
+        {
+          "id": 2,
+          "name": "Station B",
+          "arrival_time": "2022-12-01T10:00:00",
+          "departure_time": "2022-12-01T10:30:00",
+          "journey_id": 1
+        },
+        {
+          "id": 3,
+          "name": "Station C",
+          "arrival_time": "2022-12-02T08:00:00",
+          "departure_time": "2022-12-02T08:30:00",
+          "journey_id": 2
+        },
+        {
+          "id": 4,
+          "name": "Station D",
+          "arrival_time": "2022-12-02T10:00:00",
+          "departure_time": "2022-12-02T10:30:00",
+          "journey_id": 2
+        }
+      ]
+    }
+
+    # Populate the database
+       # Populate the database
+    for journey_data in data['journeys']:
+        journey_data['date'] = datetime.strptime(journey_data['date'], '%Y-%m-%d').date()
+        journey = Journey(**journey_data)
+        db.session.add(journey)
+        
+    for station_data in data['stations']:
+        station_data['arrival_time'] = datetime.strptime(station_data['arrival_time'], '%Y-%m-%dT%H:%M:%S')
+        station_data['departure_time'] = datetime.strptime(station_data['departure_time'], '%Y-%m-%dT%H:%M:%S')
+        station = Trainstation(**station_data)
+        db.session.add(station)
+    db.session.commit()
+
+@app.route('/populate_db', methods=['POST'])
+def route_populate_db():
+    populate_db()
+    return "Database populated successfully", 200
+    """
+
+#new new new 
+
+from flask import Flask, request, jsonify
+from datetime import datetime
+
+app = Flask(__name__)
+
+
+

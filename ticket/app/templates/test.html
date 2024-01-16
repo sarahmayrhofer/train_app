@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html> 
+    <body>
+        <h1>All Sales</h1>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Zeit</th>
+                <th>Preise</th>
+                <th>Datum</th>
+                <th>Bahnhof IDs</th>
+                <th>Bahnhof Names</th> <!-- New column for station names -->
+                <th>Zeiten</th>
+            </tr>
+            {% for connection in data %}
+            <tr>
+                <td>{{ connection.original_line }}</td>
+                <td>{{ connection.zeit }}</td>
+                <td>{{ connection.preise }}</td>
+                <td>{{ connection.datum }}</td>
+                <td>{{ connection.bahnhof_ids }}</td>
+                <td>
+                    {% for id in connection.bahnhof_ids %}
+                        {{ station_names[id] if id in station_names else 'Unknown' }}<br> <!-- Display the station name for each id -->
+                    {% endfor %}
+                </td>
+                <td>{{ connection.zeiten }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
+    
+       
