@@ -4,6 +4,9 @@
 
 <h2>Search Results</h2>
 
+{% set with_seat_ = 1 %}
+{% set without_seat = 0 %}
+
 {% for result in results %}
     <h3>Zug ID: {{ result.zug_id }}</h3>
     <p>Datum: {{ result.datum }}</p>
@@ -12,7 +15,9 @@
     <p>End Zeit: {{ result.endzeit }}</p>
     <p>Price: {{ result.price }}</p>
     <!-- Add the date to the Buy Ticket link -->
-    <a href="{{ url_for('buy_ticket', zug_id=result.zug_id, date=result.datum, start_station=result.start_station, end_station=result.end_station, price=result.price) }}" class="button">Buy Ticket</a>
+    <a href="{{ url_for('buy_ticket', with_seat= with_seat_, zug_id=result.zug_id, date=result.datum, start_station=result.start_station, end_station=result.end_station, price=result.price) }}" class="button">Buy with seat reservation</a>
+    <a href="{{ url_for('buy_ticket', with_seat= without_seat, zug_id=result.zug_id, date=result.datum, start_station=result.start_station, end_station=result.end_station, price=result.price) }}" class="button">Buy without seat reservation</a>
+
     <hr>
 {% endfor %}
 

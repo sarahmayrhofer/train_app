@@ -13,6 +13,20 @@
     <p>Price: {{ ticket.price }}</p>
     <p>Status: {{ ticket.status }}</p>
 
+    <!-- Display if the ticket is reserved or not -->
+    {% if ticket.seat_reserved %}
+        <p>This ticket is reserved.</p>
+    {% else %}
+        <p>This ticket is not reserved.</p>
+    {% endif %}
+
+    <!-- Check if the ticket date is in the past -->
+    {% if ticket.date < now() %}
+    <p>Status: passed</p>
+    {% else %}
+    <p>Status: {{ ticket.status }}</p>
+    {% endif %}
+
     <!-- Delete ticket form -->
     {% if ticket.status != 'deleted' %}
     <form action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" method="post">
