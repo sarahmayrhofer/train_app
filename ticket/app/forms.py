@@ -68,8 +68,19 @@ class SaleForm(FlaskForm):
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
+"""
+#funtioniert
 class SearchTicketForm(FlaskForm):
     #start_station = StringField('Start Station', validators=[DataRequired()])
     #end_station = StringField('End Station', validators=[DataRequired()])
     date = StringField('Date', validators=[DataRequired()])
+    submit = SubmitField('Search')
+
+"""
+
+# Update the form to include start and end stations
+class SearchTicketForm(FlaskForm):
+    date = StringField('Date', validators=[DataRequired()])
+    start_station = StringField('Start Station', validators=[DataRequired()])
+    end_station = StringField('End Station', validators=[DataRequired()])
     submit = SubmitField('Search')

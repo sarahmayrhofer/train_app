@@ -4,6 +4,16 @@
 
 <h2>Search Results</h2>
 
+{% for result in results %}
+    <h3>Zug ID: {{ result.zug_id }}</h3>
+    <p>Datum: {{ result.datum }}</p>
+    <p>Departure Time from Start Station: {{ result.departure_time }}</p>
+    <p>Start Zeit: {{ result.zeit }}</p>
+    <p>End Zeit: {{ result.endzeit }}</p>
+    <p>Price: {{ result.price }}</p>
+    <a href="/buy_ticket?zug_id={{ result.zug_id }}" class="button">Buy Ticket</a>
+    <hr>
+{% endfor %}
 
 </body>
 </html>

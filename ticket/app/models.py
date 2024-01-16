@@ -117,7 +117,6 @@ line_sections = db.Table('line_sections',
 class Line(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nameOfLine = db.Column(db.String(64))
-
     sections = db.relationship('Section', secondary=line_sections, order_by="line_sections.c.order", backref=db.backref('lines', lazy='dynamic'))
 
     @property
