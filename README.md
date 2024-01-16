@@ -41,8 +41,8 @@ Benutzername: tobi_schwap
 Passwort: 123
 
 ### Ausführen des Fahrplansystem:
-In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Fahrplansystems muss bereits aktiviert sein, ausführen auf Port 5001)
-flask run -p 5000
+In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Fahrplansystems muss bereits aktiviert sein)
+python run.py
  
 Anschließend im Webbrowser die angezeigte URL aufrufen.
 Anmeldedaten für den Admin im Fahrplansystem:
