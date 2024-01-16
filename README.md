@@ -20,7 +20,7 @@ Wenn notwendig: Das Modul für venv installieren:
 
 ### Ausführen des Streckensystems:
 In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Streckensystems muss bereits aktiviert sein, ausführen auf Port 5001)
-flask run -p 5001
+`flask run -p 5001`
  
 Anschließend im Webbrowser die angezeigte URL aufrufen.
 Anmeldedaten für den Admin im Streckensystem:
@@ -33,7 +33,7 @@ Passwort: employee_test
 
 ### Ausführen des Flottensystems:
 In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Flottensystems muss bereits aktiviert sein, ausführen auf Port 5002)
-flask run -p 5002
+`flask run -p 5002`
  
 Anschließend im Webbrowser die angezeigte URL aufrufen.
 Anmeldedaten für den Admin:
@@ -42,7 +42,7 @@ Passwort: 123
 
 ### Ausführen des Fahrplansystem:
 In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv des Fahrplansystems muss bereits aktiviert sein)
-python run.py
+`python run.py`
  
 Anschließend im Webbrowser die angezeigte URL aufrufen.
 Anmeldedaten für den Admin im Fahrplansystem:
@@ -51,7 +51,7 @@ Passwort: admin
 
 Anmeldedaten für den Employee im Streckensystem:
 Benutzername: Susi
-Passwort: test
+Passwort: user
 
 
 ## Protokolle:
