@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Sign In</h1>
+    <h1>Hallo Sarah</h1>
+    
+    <a href="{{ url_for('get_journey') }}?start_station=Linz&end_station=Wien&date=2022-12-01&time=12:00:00">Search Journey</a>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>

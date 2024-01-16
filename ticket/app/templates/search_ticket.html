@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Search for Trips</h2>
+
+<form method="post">
+    {{ form.csrf_token }}
+    <label for="date">Date:</label><br>
+    <input type="date" id="date" name="date"><br>
+    <label for="start_station">Start Station:</label><br>
+    <input type="text" id="start_station" name="start_station"><br>
+    <label for="end_station">End Station:</label><br>
+    <input type="text" id="end_station" name="end_station"><br>
+    <p>{{ form.submit() }}</p>
+</form> 
+
+</body>
+</html>
+    
+       
