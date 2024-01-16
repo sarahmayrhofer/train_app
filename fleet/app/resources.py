@@ -21,13 +21,17 @@ class AllTrainsResource(Resource):
             }
 
             # Include wagon information
-            for wagon in train.wagons:
-                wagon_data = {
-                    'id': wagon.id,
-                    'track_width': wagon.track_width,
-                    'wagon_type': wagon.wagon_type
-                }
-                train_data['wagons'].append(wagon_data)
+        for wagon in train.wagons:
+            wagon_data = {
+                'id': wagon.id,
+                'track_width': wagon.track_width,
+                'wagon_type': wagon.wagon_type
+            }
+            # Add number_of_seats only if wagon_type is not 'locomotive'
+            if wagon.wagon_type != 'locomotive':
+                wagon_data['number_of_seats'] = wagon.number_of_seats
+
+            train_data['wagons'].append(wagon_data)
 
             # Include maintenance information
             for maintenance in train.maintenances:
