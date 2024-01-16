@@ -11,7 +11,8 @@
     <p>Start Zeit: {{ result.zeit }}</p>
     <p>End Zeit: {{ result.endzeit }}</p>
     <p>Price: {{ result.price }}</p>
-    <a href="/buy_ticket?zug_id={{ result.zug_id }}" class="button">Buy Ticket</a>
+    <!-- Add the date to the Buy Ticket link -->
+    <a href="{{ url_for('buy_ticket', zug_id=result.zug_id, date=result.datum, start_station=result.start_station, end_station=result.end_station, price=result.price) }}" class="button">Buy Ticket</a>
     <hr>
 {% endfor %}
 

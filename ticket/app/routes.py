@@ -42,6 +42,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
+from app.models import Ticket
+
 
 
 @app.before_request
@@ -343,173 +345,6 @@ from flask import request
 
 from flask import request
 
-"""
-@app.route('/search_ticket', methods=['POST','GET'])
-def search_ticket():
-    print('Inside search_ticket route')
-    form = SearchTicketForm()
-    if form.validate_on_submit():
-        # Get the form data
-        start_station = form.start_station.data
-        print(f'Start station: {start_station}')
-        end_station = form.end_station.data
-        print(f'End station: {end_station}')
-        date_string = form.date.data
-        print(f'Date: {date_string}')
-
-        # Convert the date string to a date object
-        date = datetime.strptime(date_string, '%Y-%m-%d')
-
-        # Get the station IDs
-        answer = requests.get('http://127.0.0.1:5001/route/stations')
-        stations = answer.json()
-        print(f'Stations: {stations}')
-        station_map = {station['nameOfStation']: station['id'] for station in stations}
-
-        start_station_id = station_map.get(start_station)
-        end_station_id = station_map.get(end_station)
-        print(f'Start station ID: {start_station_id}')
-        print(f'End station ID: {end_station_id}')
-
-        if start_station_id is None or end_station_id is None:
-            # One of the stations was not found in the station map
-            return render_template('error.html', message='One or more stations not found')
-
-        # Perform the search (replace this with your actual search logic)
-        url = f"http://127.0.0.1:5000/timetable?start_station={start_station_id}&end_station={end_station_id}&date={date}"
-        print(f'Request URL: {url}')
-        answer = requests.get(url)
-
-        if answer.status_code != 200:
-            # The request to the timetable service failed
-            print(f'Response status code: {answer.status_code}')
-            return render_template('error.html', message='Failed to retrieve timetable data')
-
-        search_results = answer.json()
-        print(f'Search results: {search_results}')
-        print('hi')
-
-        if not search_results:
-            # The search results are empty
-            return render_template('error.html', message='No results found for the given criteria')
-
-        print('hello')
-        # Render a new template with the search results
-        return render_template('search_results.html')
-
-    return render_template('search_ticket.html', form=form)
-"""
-
-#search ticket, ist schon da, funktioniert!!!!!!
-"""
-@app.route('/search_ticket', methods=['POST','GET'])
-def search_ticket():
-    print('Inside search_ticket route')
-    form = SearchTicketForm(request.form)
-    if form.validate_on_submit():
-        # Get the form data
-        date_string = form.date.data
-        print(f'Date: {date_string}')
-
-        # Convert the date string to a date object
-        date = datetime.strptime(date_string, '%Y-%m-%d')
-
-        # Perform the search (replace this with your actual search logic)
-        url = f"http://127.0.0.1:5000/timetable?date={date}"
-        print(f'Request URL: {url}')
-        answer = requests.get(url)
-
-        if answer.status_code != 200:
-            # The request to the timetable service failed
-            print(f'Response status code: {answer.status_code}')
-            return render_template('error.html', message='Failed to retrieve timetable data')
-
-        search_results = answer.json()
-        print(f'Search results: {search_results}')
-
-        # Filter the results based on the date
-        filtered_results = [result for result in search_results if result['datum'] == date_string]
-        print(f'Filtered results: {filtered_results}')
-
-        if not filtered_results:
-            # The search results are empty
-            return render_template('error.html', message='No results found for the given criteria')
-
-        # Render a new template with the search results
-        return render_template('search_results.html', results=filtered_results)
-
-    # Render the search form when the form is not validated
-    return render_template('search_ticket.html', form=form)
-
-"""
-
-
-
-
-
-@app.route('/search_ticket', methods=['POST','GET'])
-def search_ticket():
-    print('Inside search_ticket route')
-    form = SearchTicketForm(request.form)
-    if form.validate_on_submit():
-        # Get the form data
-        date_string = form.date.data
-        start_station = form.start_station.data
-        end_station = form.end_station.data
-        print(f'Date: {date_string}, Start Station: {start_station}, End Station: {end_station}')
-
-        # Convert the date string to a date object
-        date = datetime.strptime(date_string, '%Y-%m-%d')
-
-        # Get the station IDs
-        answer = requests.get('http://127.0.0.1:5001/route/stations')
-        stations = answer.json()
-        station_map = {station['nameOfStation']: station['id'] for station in stations}
-        start_station_id = station_map.get(start_station)
-        end_station_id = station_map.get(end_station)
-
-        # Perform the search
-        url = f"http://127.0.0.1:5000/timetable?date={date}"
-        print(f'Request URL: {url}')
-        answer = requests.get(url)
-
-        if answer.status_code != 200:
-            # The request to the timetable service failed
-            print(f'Response status code: {answer.status_code}')
-            return render_template('error.html', message='Failed to retrieve timetable data')
-
-        search_results = answer.json()
-        print(f'Search results: {search_results}')
-
-        # Filter the results based on the date and stations
-        filtered_results = []
-        for result in search_results:
-            if result['datum'] == date_string and start_station_id in result['bahnhof_ids'] and end_station_id in result['bahnhof_ids']:
-                # Get the index of the start station
-                start_station_index = result['bahnhof_ids'].index(start_station_id)
-                
-                # Extract the departure time from the start station
-                departure_time = result['zeiten'][start_station_index]
-                
-                # Add the departure time to the result
-                result['departure_time'] = departure_time
-                
-                filtered_results.append(result)
-
-        print(f'Filtered results: {filtered_results}')
-
-        if not filtered_results:
-            # The search results are empty
-            return render_template('error.html', message='No results found for the given criteria')
-
-        # Render a new template with the search results
-        return render_template('search_results.html', results=filtered_results)
-
-    # Render the search form when the form is not validated
-    return render_template('search_ticket.html', form=form)
-
-
-"""
 
 @app.route('/search_ticket', methods=['POST','GET'])
 def search_ticket():
@@ -559,12 +394,23 @@ def search_ticket():
                 # Add the departure time to the result
                 result['departure_time'] = departure_time
 
+                # Add the start station and end station to the result
+                result['start_station'] = start_station
+                result['end_station'] = end_station
+
                 # Calculate the price from the start station to the end station
                 if start_station_index < end_station_index:
                     price = sum(result['preise'][start_station_index:end_station_index])
                 else:
                     price = sum(result['preise'][end_station_index:start_station_index])
 
+                # Fetch all Sale objects for the original_line and sort them by discount in descending order
+                sales = Sale.query.filter_by(lineForTheSale=result['original_line']).order_by(Sale.discount.desc()).all()
+
+                # Apply the highest discount if any Sale objects exist for the line
+                if sales:
+                    price = price * (1 - sales[0].discount / 100)
+                
                 # Add the price to the result
                 result['price'] = price
 
@@ -582,15 +428,46 @@ def search_ticket():
     # Render the search form when the form is not validated
     return render_template('search_ticket.html', form=form)
 
-    """
+    
 
 @app.route('/buy_ticket')
 def buy_ticket():
     zug_id = request.args.get('zug_id')
+    date = request.args.get('date')
+    start_station = request.args.get('start_station')
+    end_station = request.args.get('end_station')
+    price = request.args.get('price')
+
+    # Convert the date string to a date object
+    date = datetime.strptime(date, '%Y-%m-%d')
+
     # Handle the ticket buying process here
+    ticket = Ticket(user_id=current_user.id, zug_id=zug_id, date=date, start_station=start_station, end_station=end_station, price=price, status='active')
+    db.session.add(ticket)
+    db.session.commit()
     return render_template('confirmation.html', zug_id=zug_id)
 
-#real data - try !!!!!!!pip install wtformspip install wtformspip install wtforms
+@app.route('/my_tickets')
+@login_required
+def my_tickets():
+    tickets = Ticket.query.filter_by(user_id=current_user.id).all()
+    return render_template('my_tickets.html', tickets=tickets)
+
+@app.route('/delete_ticket/<int:ticket_id>', methods=['POST'])
+@login_required
+def delete_ticket(ticket_id):
+    ticket = Ticket.query.get(ticket_id)
+    if ticket and ticket.user_id == current_user.id:
+        ticket.status = 'deleted'
+        db.session.commit()
+        flash('Ticket marked as deleted.')
+    else:
+        flash('Ticket not found.')
+    return redirect(url_for('my_tickets'))
+
+
+#!pip install wtformspip install wtformspip install wtforms
+#not actual, old!!!!
 def fetch_data_from_url():
     url = "http://127.0.0.1:5000/timetable"
     response = requests.get(url)
@@ -623,7 +500,6 @@ else:
 
 #a dictionary mapping station IDs to station names
 station_ids_to_names = {12: "Station1", 11: "Station2", 10: "Station3", 9: "Station4", 4: "Station5", 5: "Station6", 6: "Station7", 8: "Station8", 7: "Station9", 14: "Station10", 13: "Station11"}
-
 
 #a function to search for journeys between two stations at a specific time
 def search_journeys_by_stations_and_time(data, start_station, end_station, time):
@@ -707,9 +583,6 @@ def edit_profile():
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
-
-
-
 
 
 @app.route('/create_sale', methods=['GET', 'POST'])

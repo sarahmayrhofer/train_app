@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from datetime import datetime
 
+
 followers = db.Table(
     'followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
@@ -27,6 +28,8 @@ class User(UserMixin, db.Model):
         primaryjoin=(followers.c.follower_id == id),
         secondaryjoin=(followers.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+    
+    tickets = db.relationship('Ticket', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -214,6 +217,63 @@ maintenance_user_association = db.Table('maintenance_user_association',
                                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
                                         )
 
+
+
+
+
+class Ticket(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    zug_id = db.Column(db.String(64))
+    date = db.Column(db.DateTime)
+    start_station = db.Column(db.String(64))
+    end_station = db.Column(db.String(64))
+    price = db.Column(db.Float)
+    status = db.Column(db.String(64))  # can be 'active', 'deleted', 'passed'
+
+    def __repr__(self):
+        return '<Ticket {}>'.format(self.id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Ding von Markus
 class RideBetweenTwoStations(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -231,7 +291,7 @@ class RideBetweenTwoStations(db.Model):
         return f"<RideBetweenTwoStations(start={self.start_station_rel.nameOfStation}, end={self.end_station_rel.nameOfStation}, start_time={self.start_time}, end_time={self.end_time}, date={self.date}, price={self.price})>"
     
 
-    ##new model
+    ##new model - not anymore
 class Journey(db.Model):
     __tablename__ = 'journeys'
     id = db.Column(db.Integer, primary_key=True)
