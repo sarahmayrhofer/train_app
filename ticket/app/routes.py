@@ -1,5 +1,6 @@
 
 from datetime import datetime
+import random
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
@@ -44,7 +45,10 @@ from wtforms.validators import DataRequired
 
 from app.models import Ticket
 
+from datetime import datetime
+from flask import Flask, render_template
 
+from flask import flash, redirect, url_for
 
 @app.before_request
 def before_request():
@@ -91,6 +95,10 @@ def login():
             next_page = url_for('index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
+
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow}
 
 #eine Fahrtstrecke, Fahrtverbindungen, errechne Preis, Aktion, 
 #daten erweitern, zweite Strecke, Rabatt auf alle, 
@@ -343,32 +351,31 @@ from datetime import datetime
 
 from flask import request
 
-from flask import request
-
-
 @app.route('/search_ticket', methods=['POST','GET'])
 def search_ticket():
     print('Inside search_ticket route')
     form = SearchTicketForm(request.form)
     if form.validate_on_submit():
         # Get the form data
-        date_string = form.date.data
-        start_station = form.start_station.data
-        end_station = form.end_station.data
+        date_string = form.date.data if form.date.data else None
+        start_station = form.start_station.data if form.start_station.data else None
+        end_station = form.end_station.data if form.end_station.data else None
         print(f'Date: {date_string}, Start Station: {start_station}, End Station: {end_station}')
 
-        # Convert the date string to a date object
-        date = datetime.strptime(date_string, '%Y-%m-%d')
+        # Convert the date string to a date object if date_string is not None
+        date = datetime.strptime(date_string, '%Y-%m-%d') if date_string else None
 
         # Get the station IDs
         answer = requests.get('http://127.0.0.1:5001/route/stations')
         stations = answer.json()
         station_map = {station['nameOfStation']: station['id'] for station in stations}
-        start_station_id = station_map.get(start_station)
-        end_station_id = station_map.get(end_station)
+        start_station_id = station_map.get(start_station) if start_station else None
+        end_station_id = station_map.get(end_station) if end_station else None
 
         # Perform the search
-        url = f"http://127.0.0.1:5000/timetable?date={date}"
+        url = f"http://127.0.0.1:5000/timetable"
+        if date:
+            url += f"?date={date}"
         print(f'Request URL: {url}')
         answer = requests.get(url)
 
@@ -383,36 +390,42 @@ def search_ticket():
         # Filter the results based on the date and stations
         filtered_results = []
         for result in search_results:
-            if result['datum'] == date_string and start_station_id in result['bahnhof_ids'] and end_station_id in result['bahnhof_ids']:
-                # Get the index of the start station and end station
-                start_station_index = result['bahnhof_ids'].index(start_station_id)
-                end_station_index = result['bahnhof_ids'].index(end_station_id)
+            if (not date_string or result['datum'] == date_string) and \
+               (not start_station_id or start_station_id in result['bahnhof_ids']) and \
+               (not end_station_id or end_station_id in result['bahnhof_ids']):
+                # Get the index of the start station and end station if they exist
+                start_station_index = result['bahnhof_ids'].index(start_station_id) if start_station_id else None
+                end_station_index = result['bahnhof_ids'].index(end_station_id) if end_station_id else None
 
-                # Extract the departure time from the start station
-                departure_time = result['zeiten'][start_station_index]
+                # Extract the departure time from the start station if it exists
+                departure_time = result['zeiten'][start_station_index] if start_station_index else None
 
-                # Add the departure time to the result
-                result['departure_time'] = departure_time
+                # Add the departure time to the result if it exists
+                if departure_time:
+                    result['departure_time'] = departure_time
 
-                # Add the start station and end station to the result
-                result['start_station'] = start_station
-                result['end_station'] = end_station
+                # Add the start station and end station to the result if they exist
+                if start_station:
+                    result['start_station'] = start_station
+                if end_station:
+                    result['end_station'] = end_station
 
-                # Calculate the price from the start station to the end station
-                if start_station_index < end_station_index:
-                    price = sum(result['preise'][start_station_index:end_station_index])
-                else:
-                    price = sum(result['preise'][end_station_index:start_station_index])
+                # Calculate the price from the start station to the end station if they exist
+                if start_station_index is not None and end_station_index is not None:
+                    if start_station_index < end_station_index:
+                        price = sum(result['preise'][start_station_index:end_station_index])
+                    else:
+                        price = sum(result['preise'][end_station_index:start_station_index])
 
-                # Fetch all Sale objects for the original_line and sort them by discount in descending order
-                sales = Sale.query.filter_by(lineForTheSale=result['original_line']).order_by(Sale.discount.desc()).all()
+                    # Fetch all Sale objects for the original_line and sort them by discount in descending order
+                    sales = Sale.query.filter_by(lineForTheSale=result['original_line']).order_by(Sale.discount.desc()).all()
 
-                # Apply the highest discount if any Sale objects exist for the line
-                if sales:
-                    price = price * (1 - sales[0].discount / 100)
-                
-                # Add the price to the result
-                result['price'] = price
+                    # Apply the highest discount if any Sale objects exist for the line
+                    if sales:
+                        price = price * (1 - sales[0].discount / 100)
+                    
+                    # Add the price to the result
+                    result['price'] = price
 
                 filtered_results.append(result)
 
@@ -427,11 +440,11 @@ def search_ticket():
 
     # Render the search form when the form is not validated
     return render_template('search_ticket.html', form=form)
-
     
 
 @app.route('/buy_ticket')
 def buy_ticket():
+    with_seat = request.args.get('with_seat')
     zug_id = request.args.get('zug_id')
     date = request.args.get('date')
     start_station = request.args.get('start_station')
@@ -441,10 +454,27 @@ def buy_ticket():
     # Convert the date string to a date object
     date = datetime.strptime(date, '%Y-%m-%d')
 
+    # Check if the date is in the future
+    if date < datetime.utcnow():
+        flash('Cannot buy a ticket for a past date.')
+        error_message = "An error occurred, the date has already passed."
+        return render_template('fehler_date.html', error_message=error_message)
+        #return redirect(url_for('fehler_date'))  # replace 'previous_page' with the actual route name
+
+    seat_number= None
+
+    if(with_seat):
+        seat_number = random.randint(1, 100)
+
     # Handle the ticket buying process here
-    ticket = Ticket(user_id=current_user.id, zug_id=zug_id, date=date, start_station=start_station, end_station=end_station, price=price, status='active')
+    seat_state = False
+    if(with_seat):
+        seat_state = True
+    ticket = Ticket(user_id=current_user.id, zug_id=zug_id, date=date, start_station=start_station, end_station=end_station, price=price, seat_reserved= seat_state, seat_number= seat_number, status='active')
     db.session.add(ticket)
     db.session.commit()
+    if(with_seat):
+        return render_template('confirmation_with_seat_reserved.html', zug_id=zug_id, seat_number=seat_number)
     return render_template('confirmation.html', zug_id=zug_id)
 
 @app.route('/my_tickets')
@@ -458,9 +488,12 @@ def my_tickets():
 def delete_ticket(ticket_id):
     ticket = Ticket.query.get(ticket_id)
     if ticket and ticket.user_id == current_user.id:
-        ticket.status = 'deleted'
-        db.session.commit()
-        flash('Ticket marked as deleted.')
+        if ticket.status == 'passed':
+            flash('Cannot delete a ticket with status passed.')
+        else:
+            ticket.status = 'deleted'
+            db.session.commit()
+            flash('Ticket marked as deleted.')
     else:
         flash('Ticket not found.')
     return redirect(url_for('my_tickets'))
@@ -777,17 +810,22 @@ def fetch_and_save_trains():
         train.name = train_data['name']
         train.position = train_data['position']
         train.price_per_km = train_data['price_per_km']
+        train.total_number_of_seats = 0
 
         for wagon_data in train_data['wagons']:
             wagon = Wagon.query.get(wagon_data['id'])
+            print(wagon)
             if wagon is None:
                 if wagon_data['wagon_type'] == 'locomotive':
                     wagon = Locomotive(id=wagon_data['id'])
+
                 else:
                     wagon = NormalWagon(id=wagon_data['id'])
+                train.total_number_of_seats += wagon.number_of_seats
                 db.session.add(wagon)
             wagon.track_width = wagon_data['track_width']
             wagon.train = train
+
 
         for maintenance_data in train_data['maintenances']:
             maintenance = Maintenance.query.get(maintenance_data['id'])

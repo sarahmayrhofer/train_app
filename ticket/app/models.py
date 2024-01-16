@@ -143,7 +143,7 @@ class Train(db.Model):
     name = db.Column(db.String(50), nullable=False)
     position = db.Column(db.String(50), nullable=True)
     price_per_km = db.Column(db.Float, nullable=True)
-
+    total_number_of_seats = db.Column(db.Integer, nullable=True, default=100)
     wagons = db.relationship('Wagon', backref='train', lazy=True)
 
     maintenances = db.relationship('Maintenance', backref='train', lazy=True)
@@ -166,6 +166,7 @@ class Wagon(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     track_width = db.Column(db.Integer, nullable=False)
     wagon_type = db.Column(db.String(20))
+    number_of_seats = db.Column(db.Integer, nullable=True, default=20)
 
     train_id = db.Column(db.Integer, db.ForeignKey('train.id'), nullable=True)
 
@@ -179,6 +180,7 @@ class Wagon(db.Model):
 
 class Locomotive(Wagon):
     max_traction = db.Column(db.Float, nullable=True)
+    #number_of_seats = db.Column(db.Integer, nullable=True, default=20)
 
     __mapper_args__ = {
         'polymorphic_identity': 'locomotive',
@@ -189,7 +191,7 @@ class Locomotive(Wagon):
 
 class NormalWagon(Wagon):
     max_weight = db.Column(db.Float, nullable=True)
-    number_of_seats = db.Column(db.Integer, nullable=True)
+    #number_of_seats = db.Column(db.Integer, nullable=True, default=40)
 
     __mapper_args__ = {
         'polymorphic_identity': 'normal_wagon',
@@ -229,6 +231,8 @@ class Ticket(db.Model):
     start_station = db.Column(db.String(64))
     end_station = db.Column(db.String(64))
     price = db.Column(db.Float)
+    seat_reserved = db.Column(db.Boolean)
+    seat_number = db.Column(db.Integer, default= None)
     status = db.Column(db.String(64))  # can be 'active', 'deleted', 'passed'
 
     def __repr__(self):
