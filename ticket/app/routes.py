@@ -351,6 +351,7 @@ from datetime import datetime
 
 from flask import request
 
+
 @app.route('/search_ticket', methods=['POST','GET'])
 def search_ticket():
     print('Inside search_ticket route')
