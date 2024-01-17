@@ -50,6 +50,8 @@ from flask import Flask, render_template
 
 from flask import flash, redirect, url_for
 
+from app.models import Timetable
+
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -352,6 +354,38 @@ from datetime import datetime
 from flask import request
 
 
+#try the search of fleet:
+
+import requests
+
+
+
+def get_train_data():
+    response = requests.get('http://127.0.0.1:5002/fleet/trains')
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+def get_total_seats(train_data, train_id):
+    total_seats = 0
+    for train in train_data:
+        print(f"Checking train with id {train['id']} against train_id {train_id}")
+        if train['id'] == train_id:
+            for wagon in train['wagons']:
+                if 'number_of_seats' in wagon:
+                    total_seats += wagon['number_of_seats']
+    return total_seats
+
+train_data = get_train_data()
+if train_data is not None:
+    train_id = 1  # replace with the id of the train you're interested in
+    total_seats = get_total_seats(train_data, train_id)
+    print(f'Total seats in train {train_id}: {total_seats}')
+else:
+    print('Failed to get train data')
+
+
 @app.route('/search_ticket', methods=['POST','GET'])
 def search_ticket():
     print('Inside search_ticket route')
@@ -428,6 +462,26 @@ def search_ticket():
                     # Add the price to the result
                     result['price'] = price
 
+                # Get the total number of seats for the train
+                # Get the total number of seats for the train
+                if 'zug_id' in result:
+                    print(f"Getting total seats for train_id {result['zug_id']}")
+                    total_seats = get_total_seats(train_data, result['zug_id'])
+                    result['total_seats'] = total_seats
+
+                    # Save the timetable data to the database
+                    timetable = Timetable.query.get(result['id'])
+                    if timetable is None:
+                        timetable = Timetable(id=result['id'], zug_id=result['zug_id'], datum=date, available_seats=total_seats)
+                        db.session.add(timetable)
+                    else:
+                        timetable.zug_id = result['zug_id']
+                        timetable.datum = date
+                        timetable.available_seats = total_seats
+                    db.session.commit()
+                else:
+                    print(f"train_id not found in result: {result}")
+
                 filtered_results.append(result)
 
         print(f'Filtered results: {filtered_results}')
@@ -441,7 +495,6 @@ def search_ticket():
 
     # Render the search form when the form is not validated
     return render_template('search_ticket.html', form=form)
-    
 
 @app.route('/buy_ticket')
 def buy_ticket():
@@ -819,14 +872,13 @@ def fetch_and_save_trains():
             if wagon is None:
                 if wagon_data['wagon_type'] == 'locomotive':
                     wagon = Locomotive(id=wagon_data['id'])
-
                 else:
-                    wagon = NormalWagon(id=wagon_data['id'])
-                train.total_number_of_seats += wagon.number_of_seats
+                    wagon = NormalWagon(id=wagon_data['id'], number_of_seats=wagon_data.get('number_of_seats', 0))
                 db.session.add(wagon)
             wagon.track_width = wagon_data['track_width']
             wagon.train = train
-
+            if wagon.number_of_seats is not None:
+                train.total_number_of_seats += wagon.number_of_seats
 
         for maintenance_data in train_data['maintenances']:
             maintenance = Maintenance.query.get(maintenance_data['id'])

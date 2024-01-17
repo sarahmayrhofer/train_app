@@ -241,7 +241,11 @@ class Ticket(db.Model):
 
 
 
-
+class Timetable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    zug_id = db.Column(db.Integer, nullable=False)
+    datum = db.Column(db.Date, nullable=False)
+    available_seats = db.Column(db.Integer, nullable=False)
 
 
 
