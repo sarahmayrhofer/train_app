@@ -13,8 +13,14 @@
             {{ form.discount.label }}<br>
             {{ form.discount(size=32) }}<br>
         </p>
-        <p>{{ form.submit() }}</p>
+        <p>
+            {{ form.start_date.label }}<br>
+            <input type="date" name="start_date" id="start_date" required><br>
+        </p>
+        <p>
+            {{ form.end_date.label }}<br>
+            <input type="date" name="end_date" id="end_date" required><br>
+        </p>
+        <p>{{ form.submit() }}</p>  <!-- Add this line back in -->
     </form>
 {% endblock %}
-
-

@@ -3,16 +3,32 @@
 
 {% block content %}
     <h1>All Sales</h1>
+    <h2>All Lines Sales</h2>
     <ul>
     {% for sale in sales %}
-        <li>
-            Sale ID: {{ sale.id }}, Discount: {{ sale.discount }}, Line: {{ sale.sale_line_rel.nameOfLine }}
-            <a href="{{ url_for('edit_sale', id=sale.id) }}">Edit</a>
-            <form action="{{ url_for('delete_sale', id=sale.id) }}" method="post">
-                <input type="submit" value="Delete">
-            </form>
-        </li>
+        {% if sale.all_lines %}
+            <li>
+                <strong>Sale ID: {{ sale.id }}, Discount: {{ sale.discount }}, Start Date: {{ sale.start_date.date() }}, End Date: {{ sale.end_date.date() }}</strong>
+                <a href="{{ url_for('edit_sale', id=sale.id) }}">Edit</a>
+                <form action="{{ url_for('delete_sale', id=sale.id) }}" method="post">
+                    <input type="submit" value="Delete">
+                </form>
+            </li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+    <h2>Specific Line Sales</h2>
+    <ul>
+    {% for sale in sales %}
+        {% if not sale.all_lines %}
+            <li>
+                Sale ID: {{ sale.id }}, Discount: {{ sale.discount }}, Line: {{ sale.sale_line_rel.nameOfLine }}, Start Date: {{ sale.start_date.date() }}, End Date: {{ sale.end_date.date() }}
+                <a href="{{ url_for('edit_sale', id=sale.id) }}">Edit</a>
+                <form action="{{ url_for('delete_sale', id=sale.id) }}" method="post">
+                    <input type="submit" value="Delete">
+                </form>
+            </li>
+        {% endif %}
     {% endfor %}
     </ul>
 {% endblock %}
-

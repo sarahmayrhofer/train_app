@@ -30,7 +30,7 @@
     <!-- Delete ticket form -->
     {% if ticket.status != 'deleted' %}
     <form action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" method="post">
-        <input type="submit" value="Delete Ticket">
+        <input type="submit" value="Cancel Ticket">
     </form>
     {% endif %}
 

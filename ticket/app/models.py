@@ -70,6 +70,9 @@ class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lineForTheSale = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
     discount = db.Column(db.Float)
+    all_lines = db.Column(db.Boolean, default=False)  # Add this line
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)  # Add this line
+    end_date = db.Column(db.DateTime)  # And this line
 
     sale_line_rel = db.relationship('Line', foreign_keys=[lineForTheSale])
 
