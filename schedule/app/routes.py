@@ -83,12 +83,12 @@ def neue_fahrtdurchfuehrung():
 
         for datum_string in daten:
             for zeit_string in zeiten:
-                preise, bahnhof_ids = berechne_preise_und_bahnhof_ids(line, percent_profit)
+                preise, bahnhof_ids, bahnhof_names = berechne_preise_und_bahnhof_ids(line, percent_profit)
                 arr_zeiten = berechne_zeiten(line, zeit_string)
 
                 datum = datetime.datetime.strptime(datum_string, '%Y-%m-%d').date()
                 zeit = datetime.datetime.strptime(zeit_string, '%H:%M').time()
-                neue_fahrt = Fahrtdurchführung(datum=datum, zeit=zeit, endzeit= (datetime.datetime.strptime(arr_zeiten[-1], '%H:%M:%S')).time(), zug_id=zug_id, line=line_id, mitarbeiter_ids=mitarbeiter_ids, preise=str(preise), bahnhof_ids=str(bahnhof_ids), zeiten=str(arr_zeiten))
+                neue_fahrt = Fahrtdurchführung(datum=datum, zeit=zeit, endzeit= (datetime.datetime.strptime(arr_zeiten[-1], '%H:%M:%S')).time(), zug_id=zug_id, line=line_id, mitarbeiter_ids=mitarbeiter_ids, preise=str(preise), bahnhof_ids=str(bahnhof_ids), bahnhof_names=str(bahnhof_names), zeiten=str(arr_zeiten))
                 db.session.add(neue_fahrt)
         
         db.session.commit()
@@ -113,7 +113,6 @@ def api_fahrtdurchfuehrungen():
     fahrtdurchfuehrungen_liste = []
 
     for fahrt in alle_fahrtdurchfuehrungen:
-        #Link the original Route id to simplify the Application of discounts
         streckenhalteplan = Streckenhalteplan.query.filter_by(id=fahrt.line).first()
         original_line_id = streckenhalteplan.original_line_id if streckenhalteplan else None
     
@@ -197,7 +196,7 @@ def users():
 
 @main.route('/newUser', methods=['GET', 'POST'])
 @login_required
-#@admin_required
+#@admin_required i commented it to make it easy to get a new admin even without the permission (initial admin problem)
 def new_user():
     form = NewUserForm()
 
