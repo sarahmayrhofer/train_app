@@ -53,6 +53,18 @@ Anmeldedaten für den Employee im Streckensystem:
 Benutzername: Susi
 Passwort: user
 
+### Ausführen des Ticketsystems:
+Venv aktivieren (sollte automatisch gehen). Danach in den "ticket" unterordner navigieren. Danach mit dem Befehl: `flask run -p 5003`ausführen.
+Anschließend im Webbrowser die angezeigte URL aufrufen
+
+Es gibt eine unterschiedliche Ansicht für normale UserInnen (einfach registrieren) und Admin.
+Anmeldedaten für Admin:
+Benutzername: admin
+Passwort: admin
+
+Ein bereits angelegter Testuser:
+Benutzername: 1
+Passowrt: 1
 
 ## Protokolle:
 - [Protokoll LVA am 2023-11-03](https://jkulinz-my.sharepoint.com/:w:/r/personal/k12043350_students_jku_at/_layouts/15/Doc.aspx?sourcedoc=%7B5B114373-C146-44DA-BEBF-F56F17647E81%7D&file=Protokoll%20LVA%20am%202023-11-03.docx&action=default&mobileredirect=true)
