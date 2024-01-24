@@ -495,10 +495,19 @@ def editSingleLineChangeName(line_id):
 
         # Clear the current sections of the line
         line.sections = []
-
+        db.session.commit()
+        
         # Add the chosen sections to the line
         for i, chosen_section in enumerate(chosen_sections):
-            line.sections.append(chosen_section.section_rel)
+            # Create a new entry for the line_sections table
+            new_line_section = {
+                'line_id': line.id,
+                'section_id': chosen_section.section_rel.id,
+                'order': i  # Use the index from enumerate as the order
+            }
+
+            # Insert the new entry into the line_sections table
+            db.session.execute(line_sections.insert().values(**new_line_section))
 
         db.session.commit()
         return redirect(url_for('index'))  
