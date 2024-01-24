@@ -489,6 +489,17 @@ def editSingleLineChangeName(line_id):
     if request.method == 'POST':
         name_of_line = request.form['nameOfLine']
         line.nameOfLine = name_of_line
+        
+        # Get the chosen sections
+        chosen_sections = ChosenSectionsForNewLine.query.order_by(ChosenSectionsForNewLine.order).all()
+
+        # Clear the current sections of the line
+        line.sections = []
+
+        # Add the chosen sections to the line
+        for i, chosen_section in enumerate(chosen_sections):
+            line.sections.append(chosen_section.section_rel)
+
         db.session.commit()
         return redirect(url_for('index'))  
     else:
@@ -537,6 +548,7 @@ def register():
 def editUsersAdmin():
     users = User.query.all()
     return render_template('editUsersAdmin.html', users=users)
+
 from werkzeug.security import generate_password_hash
 
 
