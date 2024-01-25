@@ -73,7 +73,7 @@
         </tr>
         {% for locomotive in locomotives %}
         <tr>
-            <td><a href="/wagon/{{ locomotive.id }}/edit">Wagen {{ locomotive.id }}</a> <small>({{ locomotive.track_width }}mm)</small></td>
+            <td><a href="/editWagon/{{ locomotive.id }}">Wagen {{ locomotive.id }}</a> <small>({{ locomotive.track_width }}mm)</small></td>
 
             <td>{{ locomotive.max_traction }} t.</td>
             <td>
@@ -104,7 +104,7 @@
         </tr>
         {% for wagon in wagons %}
         <tr>
-            <td><a href="/wagon/{{ wagon.id }}/edit">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
+            <td><a href="/editWagon/{{ wagon.id }}">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
             <td>{{ wagon.max_weight }} t.</td>
             <td>{{ wagon.number_of_seats }}</td>
             <td>

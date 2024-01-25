@@ -14,9 +14,11 @@
     maxWeightField.style.display = 'none';
     numberOfSeatsField.style.display = 'none';
 
+
     // Show fields based on the selected wagon type
     if (wagonType === 'locomotive') {
       maxTractionField.style.display = 'block';
+      numberOfSeatsField.style.display = 'block';
     } else if (wagonType === 'normal_wagon') {
       maxWeightField.style.display = 'block';
       numberOfSeatsField.style.display = 'block';
@@ -26,21 +28,14 @@
   toggleFields();
 </script>
 <body>
-<h1>Neuen Wagen erstellen</h1>
+<h1>Wagen bearbeiten</h1>
 
 <form method="POST" oninput="toggleFields()">
     {{ form.hidden_tag() }}
 
     <p>
-        <label for="{{ form.track_width.id }}">{{form.track_width.label}}:</label><br>
-        {{ form.track_width(id="track_width") }}
-        <br>
-    </p>
-
-
-    <p>
-        <label for="{{ form.wagon_type.id }}">{{ form.wagon_type.label }}:</label><br>
-        {{ form.wagon_type(id="wagon_type", disabled="disabled") }}
+        <label for="{{ form.wagon_type.id }}">{{form.wagon_type.label}}:</label><br>
+        {{ form.wagon_type(id="wagon_type") }}
         <br>
     </p>
 
