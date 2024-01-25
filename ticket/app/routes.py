@@ -701,14 +701,22 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
 
-
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
     form = SaleForm()
-    form.line.choices = [(line.id, line.nameOfLine) for line in Line.query.order_by('nameOfLine')]
+    form.line.choices = [('all', 'All Lines')] + [(line.id, line.nameOfLine) for line in Line.query.order_by('nameOfLine')]
     if form.validate_on_submit():
-        sale = Sale(discount=form.discount.data, lineForTheSale=form.line.data)
-        db.session.add(sale)
+        start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
+        # Check if the discount should be applied to all lines
+        if form.line.data == 'all':
+            lines = Line.query.all()
+            for line in lines:
+                sale = Sale(discount=form.discount.data, lineForTheSale=line.id, all_lines=True, start_date=start_date, end_date=end_date)  # Set start_date and end_date
+                db.session.add(sale)
+        else:
+            sale = Sale(discount=form.discount.data, lineForTheSale=form.line.data, all_lines=False, start_date=start_date, end_date=end_date)  # Set start_date and end_date
+            db.session.add(sale)
         db.session.commit()
         print(form.errors)
         return redirect(url_for('index'))
@@ -723,7 +731,6 @@ def sales():
     return render_template('sales.html', sales=sales, lines=lines)
 
 
-
 @app.route('/edit_sale/<int:id>', methods=['GET', 'POST'])
 def edit_sale(id):
     sale = Sale.query.get_or_404(id)
@@ -733,12 +740,16 @@ def edit_sale(id):
     if form.validate_on_submit():
         sale.discount = form.discount.data
         sale.lineForTheSale = form.line.data
+        sale.start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+        sale.end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
         db.session.commit()
         return redirect(url_for('sales'))
 
     elif request.method == 'GET':
         form.discount.data = sale.discount
         form.line.data = sale.lineForTheSale
+        form.start_date.data = sale.start_date.strftime('%Y-%m-%d')
+        form.end_date.data = sale.end_date.strftime('%Y-%m-%d')
 
     print(form.errors)  # print form errors
 

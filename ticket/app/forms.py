@@ -69,9 +69,9 @@ class EmptyForm(FlaskForm):
 
 class SaleForm(FlaskForm):
     discount = FloatField('Discount', validators=[DataRequired()])
-    line = SelectField('Line', coerce=int)
-    start_date = StringField('Start Date')  # Change this line
-    end_date = StringField('End Date')  # And this line
+    line = SelectField('Line')  # Removed coerce=int
+    start_date = StringField('Start Date')
+    end_date = StringField('End Date')
     submit = SubmitField('Create Sale')
 
 from wtforms import StringField, SubmitField

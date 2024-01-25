@@ -7,7 +7,8 @@
         {{ form.hidden_tag() }}
         <p>
             {{ form.line.label }}<br>
-            {{ form.line() }}<br>
+            {{ form.line() }}  <!-- Removed the static option -->
+            <br>
         </p>
         <p>
             {{ form.discount.label }}<br>
@@ -21,6 +22,6 @@
             {{ form.end_date.label }}<br>
             <input type="date" name="end_date" id="end_date" required><br>
         </p>
-        <p>{{ form.submit() }}</p>  <!-- Add this line back in -->
+        <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}
