@@ -37,7 +37,7 @@ In der Kommandozeile im Unterordner routes folgenden Befehl eingeben: (das venv 
  
 Anschließend im Webbrowser die angezeigte URL aufrufen.
 Anmeldedaten für den Admin:
-Benutzername: tobi_schwap
+Benutzername: TobiasSchwap
 Passwort: 123
 
 ### Ausführen des Fahrplansystem:
