@@ -4,38 +4,50 @@
 
 <h2>My Tickets</h2>
 
-{% for ticket in tickets %}
-    <h3>Ticket ID: {{ ticket.id }}</h3>
-    <p>Zug ID: {{ ticket.zug_id }}</p>
-    <p>Date: {{ ticket.date }}</p>
-    <p>Start Station: {{ ticket.start_station }}</p>
-    <p>End Station: {{ ticket.end_station }}</p>
-    <p>Price: {{ ticket.price }}</p>
-    <p>Status: {{ ticket.status }}</p>
-
-    <!-- Display if the ticket is reserved or not -->
-    {% if ticket.seat_reserved %}
-        <p>This ticket is reserved.</p>
-    {% else %}
-        <p>This ticket is not reserved.</p>
-    {% endif %}
-
-    <!-- Check if the ticket date is in the past -->
-    {% if ticket.date < now() %}
-    <p>Status: passed</p>
-    {% else %}
-    <p>Status: {{ ticket.status }}</p>
-    {% endif %}
-
-    <!-- Delete ticket form -->
-    {% if ticket.status != 'deleted' %}
-    <form action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" method="post">
-        <input type="submit" value="Delete Ticket">
-    </form>
-    {% endif %}
-
-    <hr>
-{% endfor %}
+<table>
+    <tr>
+        <th>Ticket ID</th>
+        <th>Zug ID</th>
+        <th>Date</th>
+        <th>Start Station</th>
+        <th>End Station</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Reserved</th>
+        <th>Actions</th>
+    </tr>
+    {% for ticket in tickets %}
+    <tr>
+        <td>{{ ticket.id }}</td>
+        <td>{{ ticket.zug_id }}</td>
+        <td>{{ ticket.date }}</td>
+        <td>{{ ticket.start_station }}</td>
+        <td>{{ ticket.end_station }}</td>
+        <td>{{ ticket.price }}</td>
+        <td>
+            {% if ticket.date < now() %}
+            passed
+            {% else %}
+            {{ ticket.status }}
+            {% endif %}
+        </td>
+        <td>
+            {% if ticket.seat_reserved %}
+            This ticket is reserved.
+            {% else %}
+            This ticket is not reserved.
+            {% endif %}
+        </td>
+        <td>
+            {% if ticket.status != 'deleted' %}
+            <form action="{{ url_for('delete_ticket', ticket_id=ticket.id) }}" method="post">
+                <input type="submit" value="Cancel Ticket">
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 
 </body>
 </html>

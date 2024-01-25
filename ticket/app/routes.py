@@ -50,6 +50,8 @@ from flask import Flask, render_template
 
 from flask import flash, redirect, url_for
 
+from app.models import Timetable
+
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -352,6 +354,48 @@ from datetime import datetime
 from flask import request
 
 
+#try the search of fleet:
+
+import requests
+
+
+
+def get_train_data():
+    response = requests.get('http://127.0.0.1:5002/fleet/trains')
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+
+def get_total_seats(train_data, train_id):
+    # First, try to get the available seats from the Timetable model
+    timetable = Timetable.query.filter_by(zug_id=train_id).first()
+    if timetable is not None:
+        return timetable.available_seats
+
+    # If the timetable does not exist, calculate the total seats from the train data
+    total_seats = 0
+    for train in train_data:
+        print(f"Checking train with id {train['id']} against train_id {train_id}")
+        if train['id'] == train_id:
+            for wagon in train['wagons']:
+                if 'number_of_seats' in wagon:
+                    total_seats += wagon['number_of_seats']
+    return total_seats
+
+
+"""
+train_data = get_train_data()
+if train_data is not None:
+    train_id = 1  # replace with the id of the train you're interested in
+    total_seats = get_total_seats(train_data, train_id)
+    print(f'Total seats in train {train_id}: {total_seats}')
+else:
+    print('Failed to get train data'
+"""
+
+
 @app.route('/search_ticket', methods=['POST','GET'])
 def search_ticket():
     print('Inside search_ticket route')
@@ -426,8 +470,34 @@ def search_ticket():
                         price = price * (1 - sales[0].discount / 100)
                     
                     # Add the price to the result
-                    result['price'] = price
+                    #result['price'] = price
 
+                # Get the total number of seats for the train
+                # Get the total number of seats for the train
+                if 'zug_id' in result:
+                    print(f"Getting total seats for train_id {result['zug_id']}")
+                    train_data = get_train_data()
+                    total_seats = get_total_seats(train_data, result['zug_id'])
+                    result['total_seats'] = total_seats
+
+                    if total_seats > 0:
+                        price /= total_seats
+                        result['price'] = price
+            
+                    # Save the timetable data to the database
+                    timetable = Timetable.query.get(result['id'])
+                    if timetable is None:
+                        timetable = Timetable(id=result['id'], zug_id=result['zug_id'], datum=date, available_seats=total_seats)
+                        db.session.add(timetable)
+                    else:
+                        timetable.zug_id = result['zug_id']
+                        timetable.datum = date
+                        timetable.available_seats = total_seats
+                    db.session.commit()
+                else:
+                    print(f"train_id not found in result: {result}")
+                    result['price'] = price
+                
                 filtered_results.append(result)
 
         print(f'Filtered results: {filtered_results}')
@@ -441,7 +511,7 @@ def search_ticket():
 
     # Render the search form when the form is not validated
     return render_template('search_ticket.html', form=form)
-    
+
 
 @app.route('/buy_ticket')
 def buy_ticket():
@@ -460,23 +530,41 @@ def buy_ticket():
         flash('Cannot buy a ticket for a past date.')
         error_message = "An error occurred, the date has already passed."
         return render_template('fehler_date.html', error_message=error_message)
-        #return redirect(url_for('fehler_date'))  # replace 'previous_page' with the actual route name
 
-    seat_number= None
+    seat_number = None
 
-    if(with_seat):
-        seat_number = random.randint(1, 100)
+    if with_seat:
+        # Fetch the timetable for the train
+        timetable = Timetable.query.filter_by(zug_id=zug_id).first()
+
+        if timetable is not None:
+            # Get the number of available seats
+            available_seats = timetable.available_seats
+
+            # Reserve a seat if available
+            if available_seats > 0:
+                seat_number = available_seats - 1
+
+                # Update the number of available seats
+                timetable.available_seats -= 1
+                db.session.commit()
+            else:
+                flash('No seats available.')
+                return redirect(url_for('search_ticket'))  # replace with the actual route name
+        else:
+            flash('Timetable not found.')
+            return redirect(url_for('search_ticket'))  # replace with the actual route name
 
     # Handle the ticket buying process here
     seat_state = False
-    if(with_seat):
+    if with_seat:
         seat_state = True
-    ticket = Ticket(user_id=current_user.id, zug_id=zug_id, date=date, start_station=start_station, end_station=end_station, price=price, seat_reserved= seat_state, seat_number= seat_number, status='active')
+    ticket = Ticket(user_id=current_user.id, zug_id=zug_id, date=date, start_station=start_station, end_station=end_station, price=price, seat_reserved=seat_state, seat_number=seat_number, status='active')
     db.session.add(ticket)
     db.session.commit()
-    if(with_seat):
-        return render_template('confirmation_with_seat_reserved.html', zug_id=zug_id, seat_number=seat_number)
+
     return render_template('confirmation.html', zug_id=zug_id)
+    #return redirect(url_for('confirmation'))  # replace with the actual route name
 
 @app.route('/my_tickets')
 @login_required
@@ -499,7 +587,7 @@ def delete_ticket(ticket_id):
         flash('Ticket not found.')
     return redirect(url_for('my_tickets'))
 
-
+"""
 #!pip install wtformspip install wtformspip install wtforms
 #not actual, old!!!!
 def fetch_data_from_url():
@@ -529,9 +617,6 @@ else:
     print("Failed to fetch data")
 
 
-
-
-
 #a dictionary mapping station IDs to station names
 station_ids_to_names = {12: "Station1", 11: "Station2", 10: "Station3", 9: "Station4", 4: "Station5", 5: "Station6", 6: "Station7", 8: "Station8", 7: "Station9", 14: "Station10", 13: "Station11"}
 
@@ -545,8 +630,6 @@ def calculate_price(journey, start_station, end_station):
     end_index = journey['bahnhof_ids'].index(end_station)
     return sum(journey['preise'][start_index:end_index])
 
-
-"""
 @app.route('/search', methods=['GET'])
 def search_journey():
     start_station = request.args.get('start_station')
@@ -618,14 +701,22 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form)
 
-
 @app.route('/create_sale', methods=['GET', 'POST'])
 def create_sale():
     form = SaleForm()
-    form.line.choices = [(line.id, line.nameOfLine) for line in Line.query.order_by('nameOfLine')]
+    form.line.choices = [('all', 'All Lines')] + [(line.id, line.nameOfLine) for line in Line.query.order_by('nameOfLine')]
     if form.validate_on_submit():
-        sale = Sale(discount=form.discount.data, lineForTheSale=form.line.data)
-        db.session.add(sale)
+        start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
+        # Check if the discount should be applied to all lines
+        if form.line.data == 'all':
+            lines = Line.query.all()
+            for line in lines:
+                sale = Sale(discount=form.discount.data, lineForTheSale=line.id, all_lines=True, start_date=start_date, end_date=end_date)  # Set start_date and end_date
+                db.session.add(sale)
+        else:
+            sale = Sale(discount=form.discount.data, lineForTheSale=form.line.data, all_lines=False, start_date=start_date, end_date=end_date)  # Set start_date and end_date
+            db.session.add(sale)
         db.session.commit()
         print(form.errors)
         return redirect(url_for('index'))
@@ -640,7 +731,6 @@ def sales():
     return render_template('sales.html', sales=sales, lines=lines)
 
 
-
 @app.route('/edit_sale/<int:id>', methods=['GET', 'POST'])
 def edit_sale(id):
     sale = Sale.query.get_or_404(id)
@@ -650,12 +740,16 @@ def edit_sale(id):
     if form.validate_on_submit():
         sale.discount = form.discount.data
         sale.lineForTheSale = form.line.data
+        sale.start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
+        sale.end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
         db.session.commit()
         return redirect(url_for('sales'))
 
     elif request.method == 'GET':
         form.discount.data = sale.discount
         form.line.data = sale.lineForTheSale
+        form.start_date.data = sale.start_date.strftime('%Y-%m-%d')
+        form.end_date.data = sale.end_date.strftime('%Y-%m-%d')
 
     print(form.errors)  # print form errors
 
@@ -819,14 +913,13 @@ def fetch_and_save_trains():
             if wagon is None:
                 if wagon_data['wagon_type'] == 'locomotive':
                     wagon = Locomotive(id=wagon_data['id'])
-
                 else:
-                    wagon = NormalWagon(id=wagon_data['id'])
-                train.total_number_of_seats += wagon.number_of_seats
+                    wagon = NormalWagon(id=wagon_data['id'], number_of_seats=wagon_data.get('number_of_seats', 0))
                 db.session.add(wagon)
             wagon.track_width = wagon_data['track_width']
             wagon.train = train
-
+            if wagon.number_of_seats is not None:
+                train.total_number_of_seats += wagon.number_of_seats
 
         for maintenance_data in train_data['maintenances']:
             maintenance = Maintenance.query.get(maintenance_data['id'])

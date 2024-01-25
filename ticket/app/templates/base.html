@@ -10,29 +10,22 @@
     <body>
         <div>
             Microblog:
+            {% if current_user.is_authenticated and current_user.username == 'admin' %}
             <a href="{{ url_for('create_sale') }}">Create a new sale</a>
+            {% endif %}
+
+            {% if current_user.is_authenticated and current_user.username == 'admin' %}
             <a href="{{ url_for('sales') }}">View all sales</a>
+            {% endif %}
+
             <a href="{{ url_for('my_tickets') }}">My Tickets</a>
-            <a href="/test">test</a>
+            
 
 
             <a href="/search_ticket">search_ticket</a>
 
             <form action="{{ url_for('fetch_stations') }}" method="post">
                 <button type="submit">Fetch Stations</button>
-            </form>
-
-            <form action="{{ url_for('get_all_journeys') }}" method="get">
-                <button type="submit">Get All Journeys</button>
-            </form>
-
-
-            <form action="{{ url_for('get_journey') }}" method="get">
-                <input type="hidden" name="start_station" value="Linz">
-                <input type="hidden" name="end_station" value="Wien">
-                <input type="hidden" name="date" value="2022-12-01">
-                <input type="hidden" name="time" value="12:00:00">
-                <button type="submit">Get Journeys</button>
             </form>
 
             <a href="{{ url_for('index') }}">Home</a>

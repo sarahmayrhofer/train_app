@@ -9,6 +9,13 @@ from flask_wtf import FlaskForm
 from wtforms import FloatField, SubmitField
 from wtforms.validators import DataRequired
 from wtforms import SelectField
+from wtforms import DateTimeField
+from flask_wtf import FlaskForm
+from wtforms import FloatField, SubmitField, SelectField, DateTimeField
+from wtforms.validators import DataRequired
+
+from wtforms import StringField  # Add this import
+
 
 
 
@@ -62,7 +69,9 @@ class EmptyForm(FlaskForm):
 
 class SaleForm(FlaskForm):
     discount = FloatField('Discount', validators=[DataRequired()])
-    line = SelectField('Line', coerce=int)
+    line = SelectField('Line')  # Removed coerce=int
+    start_date = StringField('Start Date')
+    end_date = StringField('End Date')
     submit = SubmitField('Create Sale')
 
 from wtforms import StringField, SubmitField
