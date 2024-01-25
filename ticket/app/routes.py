@@ -587,7 +587,7 @@ def delete_ticket(ticket_id):
         flash('Ticket not found.')
     return redirect(url_for('my_tickets'))
 
-
+"""
 #!pip install wtformspip install wtformspip install wtforms
 #not actual, old!!!!
 def fetch_data_from_url():
@@ -617,9 +617,6 @@ else:
     print("Failed to fetch data")
 
 
-
-
-
 #a dictionary mapping station IDs to station names
 station_ids_to_names = {12: "Station1", 11: "Station2", 10: "Station3", 9: "Station4", 4: "Station5", 5: "Station6", 6: "Station7", 8: "Station8", 7: "Station9", 14: "Station10", 13: "Station11"}
 
@@ -633,8 +630,6 @@ def calculate_price(journey, start_station, end_station):
     end_index = journey['bahnhof_ids'].index(end_station)
     return sum(journey['preise'][start_index:end_index])
 
-
-"""
 @app.route('/search', methods=['GET'])
 def search_journey():
     start_station = request.args.get('start_station')
