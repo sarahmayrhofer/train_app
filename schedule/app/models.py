@@ -12,6 +12,7 @@ class Fahrtdurchführung(db.Model):
     mitarbeiter_ids = db.Column(db.String)
     preise = db.Column(db.String)  
     bahnhof_ids = db.Column(db.String)  
+    bahnhof_names = db.Column(db.String) 
     zeiten = db.Column(db.String)  
     def __repr__(self):
         return f'<Fahrtdurchführung {self.id}>'

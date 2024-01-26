@@ -11,7 +11,7 @@ def get_lines():
         return []
 
 def get_prepared_lines(streckenhalteplaene):
-    # Formatieren Sie die Streckenhaltepläne in das benötigte Format
+    # Formatieren der Streckenhaltepläne in das benötigte Format
     lines = []
     for plan in streckenhalteplaene:
         line = {
@@ -27,7 +27,7 @@ def get_prepared_lines(streckenhalteplaene):
     return lines
 
 def format_sections(sections):
-    # Formatieren Sie die Sektionen entsprechend
+    # Formatieren der Sektionen
     formatted_sections = []
     for section in sections:
         formatted_section = {
@@ -64,15 +64,18 @@ def get_trains():
 def berechne_preise_und_bahnhof_ids(line,percent_profit = 0, price_per_km = 100):
     preise = []
     bahnhof_ids = [line['startStationId']]
+    all_stations = get_all_stations()
+    bahnhof_names = [next(station['nameOfStation'] for station in all_stations if station['id'] == line['startStationId'])]
     #print(line['sections'])
     for section in line['sections']:
         preis = (round(section['distance'] * price_per_km, 2) + section['fee'])*(1+percent_profit/100) #Presikalkulation kostendeckend + Profitaufschlag
         preise.append(round(preis,2))
         bahnhof_ids.append(section['endStationId'])
-    return preise, bahnhof_ids
+        bahnhof_names.append(next(station['nameOfStation'] for station in all_stations if station['id'] == section['endStationId']))
+    return preise, bahnhof_ids, bahnhof_names
 
 def berechne_zeiten(line, startzeit_string):
-    # Konvertieren Sie den Startzeit-String in ein datetime-Objekt, das nur die Zeit beinhaltet
+    # Startzeit-String in ein datetime-Objekt
     startzeit = datetime.strptime(startzeit_string, '%H:%M')
 
     zeiten = [startzeit]
@@ -84,7 +87,7 @@ def berechne_zeiten(line, startzeit_string):
         neue_zeit = zeiten[-1] + timedelta(seconds=dauer_in_sekunden)
         zeiten.append(neue_zeit)
 
-    # Konvertieren Sie die datetime-Objekte zurück in Strings, wenn nötig
+    # Konvertieren datetime-Objekte zurück in Strings
     return [zeit.strftime('%H:%M:%S') for zeit in zeiten]
 
 def hole_line(line_id):
@@ -92,7 +95,7 @@ def hole_line(line_id):
         response = requests.get("http://127.0.0.1:5001/route/lines")
         if response.status_code == 200:
             lines = response.json()
-            # Wählen Sie die Linie mit der passenden ID
+            #  Linie mit der passenden ID
             for line in lines:
                 if line["id"] == line_id:
                     return line

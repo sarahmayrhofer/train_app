@@ -7,13 +7,15 @@ from flask_login import login_user, current_user, login_required
 from werkzeug.urls import url_parse
 
 from fleet.app import app, db
-from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm, NewUserForm
+from fleet.app.forms import NewWagonForm, NewMaintenanceForm, NewTrainForm, LoginForm, RegistrationForm, NewUserForm, \
+    EditWagonForm
 from fleet.app.models import Locomotive, NormalWagon, Train, User, Wagon, Maintenance
 
 
 @app.before_request
 def before_request():
     print("Before Request")
+
 
 def admin_required(f):
     @wraps(f)
@@ -22,7 +24,9 @@ def admin_required(f):
             flash("Diese Seite ist nur für Administratoren zugänglich.", "warning")
             return redirect(url_for('index'))
         return f(*args, **kwargs)
+
     return decorated_function
+
 
 # Index Page
 @app.route('/')
@@ -64,18 +68,17 @@ def new_wagon():
     return render_template('new_wagon.html', page_name='Neuer Wagen', user=current_user, form=form)
 
 
-@app.route('/wagon/<int:wagon_id>/edit', methods=['GET', 'POST'])
+@app.route('/editWagon/<int:wagon_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_wagon_by_id(wagon_id):
     wagon = Wagon.query.get(wagon_id)
 
-    form = NewWagonForm()
+    form = EditWagonForm()
 
     if form.validate_on_submit():
-        wagon.wagon_type = form.wagon_type.data
-        wagon.track_width = form.track_width.data
-        wagon.train_id = form.train_id.data
+
+        print(form)
         setattr(wagon, 'max_traction', form.max_traction.data)
         setattr(wagon, 'max_weight', form.max_weight.data)
         setattr(wagon, 'number_of_seats', form.number_of_seats.data)
@@ -85,13 +88,11 @@ def edit_wagon_by_id(wagon_id):
         return redirect(url_for('index'))
 
     # Set form field values with wagon data
-    form.wagon_type.data = wagon.wagon_type
-    form.track_width.data = wagon.track_width
-    form.train_id.data = wagon.train_id
+    print(wagon.wagon_type)
+    form.wagon_type.data = getattr(wagon, 'wagon_type', None)
     form.max_traction.data = getattr(wagon, 'max_traction', None)
     form.max_weight.data = getattr(wagon, 'max_weight', None)
     form.number_of_seats.data = getattr(wagon, 'number_of_seats', None)
-    form.wagon_id.data = wagon.id
 
     return render_template('edit_wagon.html', page_name=f'Wagon: {wagon_id} bearbeiten', user=current_user,
                            form=form, wagon=wagon)

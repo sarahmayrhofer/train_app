@@ -47,7 +47,7 @@
         </tr>
         {% for wagon in train.wagons if wagon.wagon_type == 'locomotive' %}
         <tr>
-            <td><a href="/wagon/{{ wagon.id }}/edit">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
+            <td><a href="/editWagon/{{ wagon.id }}">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
 
             <td>{{ wagon.max_traction }} t.</td>
         </tr>
@@ -63,7 +63,7 @@
         </tr>
         {% for wagon in train.wagons if wagon.wagon_type == 'normal_wagon' %}
         <tr>
-            <td><a href="/wagon/{{ wagon.id }}/edit">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
+            <td><a href="/editWagon/{{ wagon.id }}">Wagen {{ wagon.id }}</a> <small>({{ wagon.track_width }}mm)</small></td>
             <td>{{ wagon.max_weight }} t.</td>
             <td>{{ wagon.number_of_seats }}</td>
         </tr>

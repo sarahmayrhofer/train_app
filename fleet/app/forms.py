@@ -40,6 +40,17 @@ class NewWagonForm(FlaskForm):
     submit = SubmitField('Bestätigen')
 
 
+class EditWagonForm(FlaskForm):
+    wagon_type = SelectField('Wagon Typ', choices=[('locomotive', 'Triebwagen'),
+                                                   ('normal_wagon', 'Wagon')],
+                             validators=[Optional()], render_kw={"disabled": True})
+    max_traction = FloatField('Max. Zugkraft', validators=[Optional()])
+    max_weight = FloatField('Max. Gewicht', validators=[Optional()])
+    number_of_seats = IntegerField('Anz. an Sitzplätzen', validators=[Optional()])
+    submit = SubmitField('Bestätigen')
+
+
+
 class NewTrainForm(FlaskForm):
     name = StringField('Zug Name', validators=[DataRequired()])
     position = StringField('Zug Position (optional)')
