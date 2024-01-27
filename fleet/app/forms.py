@@ -24,7 +24,8 @@ class NewMaintenanceForm(FlaskForm):
         ).first()
 
         if conflicting_maintenance:
-            raise ValidationError('Ein oder mehrere Mitarbeiter sind bereits für eine andere Wartung eingeplant.')
+            message = 'Ein oder mehrere Mitarbeiter sind bereits für eine andere Wartung eingeplant.'
+            self.assigned_employees.errors.append(message)
 
 
 class NewWagonForm(FlaskForm):
@@ -48,7 +49,6 @@ class EditWagonForm(FlaskForm):
     max_weight = FloatField('Max. Gewicht', validators=[Optional()])
     number_of_seats = IntegerField('Anz. an Sitzplätzen', validators=[Optional()])
     submit = SubmitField('Bestätigen')
-
 
 
 class NewTrainForm(FlaskForm):

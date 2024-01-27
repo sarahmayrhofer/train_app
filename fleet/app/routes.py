@@ -366,6 +366,10 @@ def new_maintenance():
         db.session.add(new_maintenance)
         db.session.commit()
         return redirect(url_for('index'))
+    else:
+        for fieldName, errorMessages in form.errors.items():
+            for err in errorMessages:
+                flash(err)
 
     return render_template('new_maintenance.html', page_name='Neue Wartung', user=current_user, form=form)
 
@@ -418,6 +422,10 @@ def edit_maintenance(maintenance_id):
 
         db.session.commit()
         return redirect(url_for('index'))
+    else:
+        for fieldName, errorMessages in form.errors.items():
+            for err in errorMessages:
+                flash(err)
 
     return render_template('edit_maintenance.html', page_name='Wartung bearbeiten', user=current_user, form=form,
                            maintenance=maintenance)
