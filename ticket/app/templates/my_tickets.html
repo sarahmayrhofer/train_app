@@ -14,6 +14,7 @@
         <th>Price</th>
         <th>Status</th>
         <th>Reserved</th>
+        <th>Seat Number</th>
         <th>Actions</th>
     </tr>
     {% for ticket in tickets %}
@@ -36,6 +37,13 @@
             This ticket is reserved.
             {% else %}
             This ticket is not reserved.
+            {% endif %}
+        </td>
+        <td>
+            {% if ticket.seat_number %}
+            {{ ticket.seat_number }}
+            {% else %}
+            No seat number
             {% endif %}
         </td>
         <td>

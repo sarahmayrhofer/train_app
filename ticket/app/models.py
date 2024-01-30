@@ -137,7 +137,6 @@ class Line(db.Model):
             return self.sections[-1].end_station_rel
         return None
 
-#Daten von Shedule
 
 #fleet 
 
@@ -203,6 +202,8 @@ class NormalWagon(Wagon):
     def __repr__(self):
         return f"<NormalWagon(id={self.id}, track_width={self.track_width}, max_weight={self.max_weight}, number_of_seats={self.number_of_seats})>"
 
+
+#nicht wichtig, wird nicht mehr verwendet
 class Maintenance(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.String(255), nullable=False)
@@ -254,38 +255,7 @@ class Timetable(db.Model):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Ding von Markus
+#nicht mehr verwendet
 class RideBetweenTwoStations(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     start_station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
@@ -302,7 +272,7 @@ class RideBetweenTwoStations(db.Model):
         return f"<RideBetweenTwoStations(start={self.start_station_rel.nameOfStation}, end={self.end_station_rel.nameOfStation}, start_time={self.start_time}, end_time={self.end_time}, date={self.date}, price={self.price})>"
     
 
-    ##new model - not anymore
+    ##nicht mehr verwendet
 class Journey(db.Model):
     __tablename__ = 'journeys'
     id = db.Column(db.Integer, primary_key=True)
