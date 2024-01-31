@@ -54,6 +54,7 @@ Benutzername: Susi
 Passwort: user
 
 ### Ausführen des Ticketsystems:
+Zuerst die anderen Applikation auf unterschiedlichen Ports ausführen. 
 Venv aktivieren (sollte automatisch gehen). Danach in den "ticket" unterordner navigieren. Danach mit dem Befehl: `flask run -p 5003`ausführen.
 Anschließend im Webbrowser die angezeigte URL aufrufen
 
